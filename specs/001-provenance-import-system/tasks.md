@@ -171,6 +171,22 @@ Explicitly prohibited:
 
 Dependency: `S1-T021`.
 
+### Grain C dependency-provenance authority clarification
+
+`S1-T024` requires strict typed JSON deserialization and Grain C may therefore need a minimal JSON serialization/deserialization dependency set. Grain C is authorized to introduce only the minimum direct/transitive Rust dependencies that are strictly necessary to satisfy `S1-T022` through `S1-T030`.
+
+Every dependency introduced by Grain C must, in the same Grain C candidate:
+
+- be exactly pinned by the manifest/lockfile and included in the exact resolved dependency graph;
+- receive a component-provenance entry under `provenance/components/**` with exact package version/checksum/source-origin evidence and license classification/evidence;
+- remain within the existing Rust `1.85.0` MSRV unless a separately reviewed normative amendment explicitly changes that contract;
+- be reconciled against `Cargo.lock` and the component registry before `S1-T030` may pass;
+- be rejected from the grain if it is unrelated to the bounded schema/loading/validation work.
+
+For Grain C only, this task-ledger clarification supersedes the narrower Grain C path list in `plan.md` solely by adding `provenance/components/**` for the exact direct/transitive dependency records introduced by Grain C. It does not widen any other Grain C path or capability authority and does not authorize product/application source, upstream source import, network/runtime integration, credentials, paid services, legal/compliance claims, or Specification 002.
+
+This clarification becomes effective only after its exact head receives independent substantive review, expected-head merge protection, and canonical post-merge verification.
+
 - [ ] `S1-T022` Create v1 source-import JSON Schema with closed object shapes and required semantic fields, including review status/PR/evidence and import date.
 - [ ] `S1-T023` Create v1 policy JSON Schema and align component schema with the canonical Rust models.
 - [ ] `S1-T024` Implement strict source-import/component/policy typed deserialization with unknown-field rejection.
@@ -184,7 +200,7 @@ Dependency: `S1-T021`.
 - [ ] `S1-T027` Reject absolute paths, traversal, backslash aliases, malformed normalization and duplicate semantic identities/destination claims.
 - [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output, including `DATE_*` and record-local `REVIEW_*` families.
 - [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C record-local failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, valid canonical evidence kinds, arbitrary free text, generic URLs, unsupported evidence kinds, zero/negative/signed/leading-zero/mutable/non-ASCII evidence ids, missing/non-positive PR identity, and pending/rejected/unknown review states.
-- [ ] `S1-T030` Run focused/full tests and change-surface proof.
+- [ ] `S1-T030` Run focused/full tests, exact dependency-graph/component-registry reconciliation, and change-surface proof.
 - [ ] `S1-T031` Independent exact-head review, reconciliation, qualification, expected-head merge and post-merge verification for Grain C.
 
 ### Grain C path allowlist
@@ -192,7 +208,15 @@ Dependency: `S1-T021`.
 - `tools/provenance/**`
 - `provenance/schema/v1/**`
 - `provenance/fixtures/**`
+- `provenance/components/**` only for exact direct/transitive dependency provenance introduced by Grain C
 - Spec 001 evidence bookkeeping only where required
+
+Explicitly prohibited in Grain C:
+
+- unrelated dependency expansion;
+- product/application source or upstream source-import records;
+- network/runtime integration, credentials or paid-service configuration;
+- legal/compliance claims or Specification 002 work.
 
 ## S1-D — SPDX and license policy
 
