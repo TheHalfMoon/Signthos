@@ -3,7 +3,7 @@
 Status: PROPOSED FOUNDATION
 Date: 2026-09-02
 
-This roadmap uses SpecGrain recursive refinement and Diffciplane evidence gates. Specification numbers define dependency order; they do not authorize implementation by themselves.
+This roadmap uses SpecGrain recursive refinement and Diffciplane evidence gates. Specification numbers describe canonical dependency order; they do **not** authorize implementation by themselves.
 
 ## Dependency spine
 
@@ -13,14 +13,22 @@ This roadmap uses SpecGrain recursive refinement and Diffciplane evidence gates.
       -> 002 Brownfield Documenso Baseline
           -> 003 Signthos Domain Boundary
               -> 004 Local PDF Core
-              -> 005 Signing + Evidence Core
-                  -> 006 Web Product Convergence
-                  -> 007 Desktop Local-First
-                      -> 008 Mobile + Handoff
-                  -> 009 API / SDK / Embed
-              -> 010 Automation + Heavy PDF Providers
-          -> 011 Self-Hosted Operations + Security
-              -> 012 v0.1 Qualification + Release
+                  -> 005 Signing + Evidence Core
+                      -> 006 Web Product Convergence
+                      -> 007 Desktop Local-First
+                          -> 008 Mobile + Secure Handoff
+                      -> 009 API / SDK / Embed
+                  -> 010 Automation + Heavy PDF Providers
+
+011 Self-Hosted Operations + Security
+  requires: 003 Signthos Domain Boundary
+            009 API / SDK / Embed
+            all server/runtime contracts it operationalizes
+
+012 v0.1 Qualification + Release
+  requires canonical completion of every release-critical v0.1 branch:
+  001, 002, 003, 004, 005, 006, 007, 008 where included in the release scope,
+  009, 010 where included in the advertised v0.1 capability set, and 011.
 
 Post-v0.1 candidates:
 013 Advanced Identity / Trust Providers
@@ -30,7 +38,18 @@ Post-v0.1 candidates:
 017 Enterprise Operations / Compliance Integrations
 ```
 
-Parallelism is permitted only when specifications are dependency-independent and do not share an unsafe change surface.
+### Dependency rules
+
+- `004 Local PDF Core` is a prerequisite for PDF-dependent signing, web, desktop and heavyweight-provider work.
+- `005 Signing + Evidence Core` consumes the immutable PDF revision/provider semantics established by 004.
+- `006` and `007` consume both the Signthos domain boundary and qualified PDF/signing contracts.
+- `008` consumes the desktop/mobile/native security and signing contracts needed for handoff.
+- `009` depends on stable domain/signing semantics before exposing them as public contracts.
+- `010` depends on the PDF capability/revision contract from 004.
+- `011` must not operationalize an API/auth model before 003 and 009 establish those contracts.
+- `012` is a convergence gate, not a shortcut: it waits for every specification whose behavior is advertised in the candidate v0.1 release.
+
+Parallelism is permitted only when specifications are genuinely dependency-independent and do not share an unsafe change surface or unresolved contract.
 
 ---
 
@@ -40,14 +59,31 @@ Purpose: establish the product thesis, architecture, provenance/licensing bounda
 
 Required outputs:
 
-- founding research,
+- canonical foundation index,
+- founding research and external-source evidence policy,
+- product strategy,
 - competitor matrix,
 - Stirling-to-Signthos capability map,
 - master architecture,
 - licensing architecture,
 - PDF engine strategy,
 - signing standards/evidence strategy,
-- cross-platform quality attributes,
+- UX/product experience plan,
+- desktop/mobile plan,
+- data/sync lifecycle plan,
+- API/SDK/embed plan,
+- self-host/cloud operations plan,
+- automation/integration plan,
+- threat model,
+- migration/import plan,
+- testing/qualification strategy,
+- release/distribution plan,
+- business/pricing hypothesis,
+- community/growth plan,
+- brand/product language,
+- success metrics,
+- capability catalog,
+- GitHub-first operating model,
 - provenance register,
 - constitution,
 - canonical roadmap,
@@ -55,7 +91,7 @@ Required outputs:
 - explicit unresolved rights/distribution gates,
 - independent substantive foundation review.
 
-Exit condition: Foundation 000 is independently reviewed, reconciled, exact-head qualified, merged and post-merge verified. No upstream application source may be imported before this.
+Exit condition: Foundation 000 is independently reviewed, every substantive finding is reconciled, exact-head qualified, merged using expected-head protection where available, and post-merge verified. No upstream application source may be imported before this.
 
 ---
 
@@ -65,14 +101,15 @@ Purpose: make source reuse and component licensing auditable before importing pr
 
 Scope:
 
-- machine-readable provenance manifest schema,
+- versioned machine-readable provenance manifest schema,
 - validator CLI/CI,
 - component/package license registry,
-- SPDX metadata validation,
+- SPDX expression validation,
 - exact-upstream-SHA pinning,
 - deterministic NOTICE generation,
 - restricted-path deny rules,
 - permission-artifact references without publishing confidential evidence,
+- explicit permission-scope validation,
 - derived-code reclassification guard,
 - license-boundary examples/tests,
 - mobile distribution review gate,
@@ -86,7 +123,9 @@ Acceptance examples:
 - generated NOTICE output is deterministic,
 - a package without declared/allowed license metadata fails validation,
 - an AGPL-derived file cannot be relabeled permissive without explicit relicensing evidence,
-- import metadata identifies source path, destination path and exact transformation class.
+- ambiguous SPDX shorthand fails closed,
+- import metadata identifies source path, destination path, import date and exact transformation class,
+- permission scope includes every right required for the intended transformation/distribution.
 
 Specification 001 creates the machinery for later imports; it does not itself authorize any source path whose rights remain blocked.
 
@@ -96,7 +135,7 @@ Specification 001 creates the machinery for later imports; it does not itself au
 
 Purpose: establish an exact, tested behavioral baseline for the authorized Documenso import surface before Signthos transformations.
 
-Scope should be recursively partitioned by subsystem instead of one giant fork-import PR.
+Scope must be recursively partitioned by subsystem instead of one giant fork-import PR.
 
 Candidate grains:
 
@@ -107,7 +146,7 @@ Candidate grains:
 - 002E editor/signing baseline,
 - 002F API/webhook baseline,
 - 002G mail/storage/job baseline,
-- 002H EE-permission-authorized paths if and only if provenance/rights gates permit.
+- 002H EE-permission-authorized paths **only** if provenance/rights gates explicitly permit them.
 
 Required technique:
 
@@ -116,6 +155,7 @@ Required technique:
 - path allowlist,
 - provenance manifest per import grain,
 - no redesign during import,
+- no global rename mixed with behavioral migration,
 - no mechanical relicense of derived code.
 
 ---
@@ -128,6 +168,7 @@ Scope:
 
 - canonical Signthos domain contracts,
 - `Document` / `DocumentRevision` / `Envelope` separation,
+- content-addressed signable PDF revision semantics,
 - event taxonomy,
 - provider interfaces,
 - stable error model,
@@ -141,6 +182,7 @@ Quality gates:
 - authentication is separate from resource authorization,
 - tenant scope is enforced server-side,
 - mutable document revisions cannot silently mutate signed inputs,
+- non-PDF imports become explicit conversion revisions before signing,
 - errors have stable machine-readable classes.
 
 Exit condition: new development can target Signthos contracts while imported behavior remains characterized behind adapters.
@@ -153,7 +195,7 @@ Purpose: create the shared document-workspace foundation using fit-for-purpose e
 
 Foundation engine direction to validate rather than blindly adopt:
 
-- EmbedPDF/PDFium for interactive render/editor behavior,
+- stable/pinned EmbedPDF + PDFium for interactive render/editor behavior,
 - `@libpdf/core` for proven TypeScript structural operations,
 - PDFium via Rust bindings for native render/inspection/selected operations,
 - bounded Rust structural tooling such as `lopdf` only where revision/signature semantics remain safe,
@@ -173,25 +215,28 @@ Initial capability order:
 10. compression/repair,
 11. OCR/conversion through optional providers.
 
-Do not implement all capabilities in one specification. Each item or tightly coupled cluster becomes its own grain with corpus tests and resource-limit cases.
+Do not implement all capabilities in one unit. Each item or tightly coupled cluster becomes its own grain with corpus tests and resource-limit cases.
 
 Required architectural/proof gates:
 
-- exact dependency versions and licenses are pinned/classified,
+- exact dependency versions, upstream commits, binary origins and licenses are pinned/classified,
+- fixture baseline is versioned,
 - browser and native/server providers implement the same typed capability semantics where both claim support,
 - heavyweight dependencies remain optional provider concerns,
 - malformed/untrusted PDF fixtures fail safely,
 - file/page/object/memory/time limits are explicit,
 - operations are classified as read-only vs revision-creating,
 - full-document rewrites cannot silently overwrite a signed revision,
-- redaction is proven by extraction/object checks and not only visual appearance,
+- redaction is proven as an independent file-level safety invariant using an independent parser/toolchain and not only visual appearance,
 - representative performance baselines exist for supported platforms/corpus classes.
 
 ---
 
 ## Specification 005 — Signing and evidence core
 
-Purpose: establish Signthos signing semantics, standards posture and public evidence/verification contracts.
+Prerequisite: Specification 004.
+
+Purpose: establish Signthos signing semantics, standards posture and public evidence/verification contracts on top of qualified immutable PDF revision semantics.
 
 Initial grains:
 
@@ -230,6 +275,8 @@ Critical gates:
 
 ## Specification 006 — Web product convergence
 
+Prerequisites: Specifications 003, 004 and 005 for the workflows exposed by the web product.
+
 Purpose: produce a coherent Signthos browser product rather than separate PDF and signing applications.
 
 Key user journey:
@@ -259,6 +306,8 @@ Quality gates:
 ---
 
 ## Specification 007 — Desktop local-first
+
+Prerequisites: Specifications 003, 004 and 005.
 
 Purpose: ship macOS, Windows and Linux as first-class applications.
 
@@ -297,6 +346,8 @@ A fresh user can install Signthos Desktop, open a local PDF, perform supported e
 
 ## Specification 008 — Mobile and secure handoff
 
+Prerequisites: Specifications 004, 005 and the applicable native contracts from 007.
+
 Purpose: make iOS and Android genuine document products.
 
 Grains:
@@ -314,7 +365,11 @@ Grains:
 
 Security gates:
 
-- QR handoff has a threat model, replay protection, expiration and credential invalidation,
+- QR handoff has a threat model,
+- bootstrap pairing credentials are one-time, short-lived and non-replayable,
+- pairing is bound to the intended session/device/audience or equivalent authenticated context,
+- redemption is atomic,
+- confirmation/revocation/expiry semantics are explicit,
 - QR data does not expose raw documents or long-lived bearer credentials,
 - local-only mobile actions do not silently use remote processors,
 - camera/files/network/key-store privileges are least-privilege.
@@ -328,6 +383,8 @@ Distribution gates:
 ---
 
 ## Specification 009 — API, SDK and Embed
+
+Prerequisites: Specification 003 and the stable signing/document contracts it exposes, including applicable 004/005 outputs.
 
 Purpose: make Signthos a developer platform.
 
@@ -359,6 +416,8 @@ Open-product rule: API/embed/authoring capability must not exist only as closed-
 ---
 
 ## Specification 010 — Automation and heavyweight document providers
+
+Prerequisite: Specification 004 and the domain/workflow contracts from 003.
 
 Purpose: add Stirling-class processing breadth without turning the core into an unbounded runtime.
 
@@ -392,6 +451,8 @@ Producing PDF/A-looking output without independent conformance validation is not
 
 ## Specification 011 — Self-hosted operations and security
 
+Prerequisites: Specifications 003 and 009, plus every server/runtime contract included in the supported self-hosted product.
+
 Purpose: make production self-hosting credible.
 
 Scope:
@@ -424,14 +485,16 @@ Backup/recovery claims must include required key material without violating the 
 
 ## Specification 012 — v0.1 qualification and release
 
+Prerequisite: canonical completion of **every release-critical specification whose behavior is included or advertised in v0.1**. At minimum, the core v0.1 convergence path requires 001–007, 009 and 011; 008 and 010 are also mandatory whenever mobile or heavyweight/automation capabilities are part of the v0.1 release claim.
+
 Purpose: prove the first public Signthos release as a coherent product.
 
-Minimum v0.1 product story:
+Minimum intended v0.1 product story, subject to final release scope:
 
 - self-hostable web signing workflow,
 - useful local PDF editing subset,
 - desktop local-first self-sign/edit/verify,
-- initial mobile signing/scanning path or explicitly scoped beta,
+- initial mobile signing/scanning path or explicitly scoped beta if included,
 - API/webhooks,
 - independent verifier,
 - complete provenance/license records,
@@ -441,12 +504,13 @@ Minimum v0.1 product story:
 Release gates:
 
 - exact-head CI/check evidence,
+- all release-critical predecessors `CLOSED_CANONICAL`,
 - clean licensing/provenance audit,
 - no unresolved mobile distribution license gate for released app-store artifacts,
 - security checks,
 - end-to-end fixture suite,
 - PDF/signature conformance evidence for every advertised level,
-- platform/browser/mobile compatibility matrix,
+- platform/browser/mobile compatibility matrix for shipped surfaces,
 - accessibility qualification for core workflows,
 - RTL/Arabic qualification for the promised locale surface,
 - representative performance/resource baselines,
@@ -466,7 +530,7 @@ Purpose: extend identity/signature assurance without making Signthos itself a pr
 
 Candidate scope:
 
-- Cloud Signature Consortium CSC API V2.2 evaluation/adapter,
+- Cloud Signature Consortium CSC API evaluation/adapter,
 - remote-signing authorization,
 - qualified/advanced certificate/provider metadata,
 - trusted-list/status integration,
@@ -534,7 +598,7 @@ These are not implementation authority for pre-v0.1 work.
 - contributor-friendly `good first issue` grains,
 - public design/RFC process,
 - reproducible development environment,
-- benchmark corpus that contributors can extend,
+- benchmark corpus contributors can extend,
 - transparent roadmap and provenance,
 - excellent screenshots/demos once real behavior exists.
 
@@ -570,3 +634,5 @@ Commercial value should come from managed operation rather than closed core capa
 - compliance assistance,
 - enterprise procurement,
 - dedicated/air-gapped operations support.
+
+Pricing remains a hypothesis until validated with reproducible market evidence and operating-cost models.
