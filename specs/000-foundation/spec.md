@@ -1,6 +1,6 @@
 # Specification 000 — Foundation
 
-Status: DRAFT
+Status: CLOSED_CANONICAL
 
 ## Problem
 
