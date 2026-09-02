@@ -73,6 +73,9 @@ fn schema_relative_path(value: &str) -> bool {
         || value.starts_with('/')
         || value.ends_with('/')
         || value.contains('\\')
+        || value
+            .chars()
+            .any(|character| matches!(character, '\n' | '\r' | '\u{2028}' | '\u{2029}'))
         || drive_qualified(value)
     {
         return false;
@@ -119,9 +122,17 @@ mod tests {
     }
 
     #[test]
-    fn traversal_remains_invalid() {
-        assert!(!schema_relative_path("src/../ملف.rs"));
-        assert!(!schema_relative_path("C:/ملف.rs"));
-        assert!(!schema_relative_path("/src/ملف.rs"));
+    fn traversal_and_line_terminators_remain_invalid() {
+        for value in [
+            "src/../ملف.rs",
+            "C:/ملف.rs",
+            "/src/ملف.rs",
+            "src/\nrecord.rs",
+            "src/\rrecord.rs",
+            "src/\u{2028}record.rs",
+            "src/\u{2029}record.rs",
+        ] {
+            assert!(!schema_relative_path(value), "{value:?}");
+        }
     }
 }
