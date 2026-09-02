@@ -38,14 +38,17 @@ Relevant architecture observed at the snapshot:
 - Dedicated packages for API, auth, database, signing, email, UI, tests, and enterprise functionality.
 - Existing REST API, webhooks, embedding, templates/envelopes, recipient workflows, signing, audit and team concepts.
 
-Current hosted pricing snapshot on 2026-09-02:
+Hosted pricing values observed on 2026-09-02:
 
 - Free: $0, 5 documents/month.
 - Individual: $25/month billed yearly.
 - Teams: $40/month billed yearly, 5 users included.
 - Platform: $250/month billed yearly.
 
-Official pricing source: https://documenso.com/pricing
+Mutable source: https://documenso.com/pricing
+Evidence status: `UNVERIFIED_MUTABLE_SOURCE`.
+
+No immutable page capture, content digest, or vendor revision identifier was preserved for this pricing observation. These values are therefore contextual market observations, not reproducible/auditable pricing evidence, and must not be used as a release or business decision gate without a fresh evidence-backed pricing specification.
 
 ### 2.2 Documenso licensing boundary
 
@@ -62,7 +65,7 @@ The observed enterprise feature list includes:
 - Embed authoring white label
 - Enterprise support / licensing behavior
 
-Source paths:
+Source paths at the observed Documenso snapshot:
 
 - `LICENSE`
 - `apps/docs/content/docs/policies/community-edition.mdx`
@@ -77,7 +80,7 @@ Repository: https://github.com/Stirling-Tools/Stirling-PDF
 Observed main snapshot: `42bdce155c4bc1954a1e3c8ad10a108f2578ad8f`
 Observed version family in Gradle: `2.14.3`
 
-Stirling positions itself as an open-source PDF platform with desktop, browser, self-hosted server and API surfaces. Its current documentation advertises 55+ tools, including:
+Stirling positions itself as an open-source PDF platform with desktop, browser, self-hosted server and API surfaces. Its documentation observed on 2026-09-02 advertised 55+ tools, including:
 
 - text/image editing,
 - merge/split/reorder/rotate,
@@ -96,7 +99,10 @@ Stirling positions itself as an open-source PDF platform with desktop, browser, 
 - workflows/automation,
 - API processing.
 
-Official functionality source: https://docs.stirlingpdf.com/functionality/
+Mutable functionality source: https://docs.stirlingpdf.com/functionality/
+Evidence status for the mutable webpage wording/count: `UNVERIFIED_MUTABLE_SOURCE`.
+
+Repository/source-code architecture and license observations are instead bound to the exact Stirling commit above.
 
 Architecture observations:
 
@@ -134,9 +140,9 @@ The observed `engine/LICENSE` and `frontend/editor/src/desktop/LICENSE` prohibit
 ### DocuSeal
 
 Repository: https://github.com/docusealco/docuseal
-License: AGPL-3.0 with Section 7(b) attribution requirement for interactive UI.
+License observation: AGPL-3.0 with Section 7(b) attribution requirement for interactive UI.
 
-Current product strengths include:
+Observed product strengths include:
 
 - WYSIWYG PDF form builder,
 - multiple signers,
@@ -151,18 +157,21 @@ Current product strengths include:
 - payments,
 - API/embedding.
 
-Pricing snapshot on 2026-09-02:
+Pricing values observed on 2026-09-02:
 
 - Cloud Basic: free.
 - Pro: $20/user/month.
 - API/embedding production: $0.20 per completed document in addition to Pro eligibility.
 
-Official source: https://www.docuseal.com/pricing
+Mutable source: https://www.docuseal.com/pricing
+Evidence status: `UNVERIFIED_MUTABLE_SOURCE`.
+
+No immutable page capture, content digest, or vendor revision identifier was preserved for this pricing observation. The values are contextual only until refreshed under a reproducible market/pricing evidence procedure.
 
 ### OpenSign
 
 Repository: https://github.com/OpenSignLabs/OpenSign
-License: AGPL-3.0.
+License observation: AGPL-3.0 according to observed repository documentation.
 
 Observed strengths include:
 
@@ -201,7 +210,7 @@ Mobile should be more than a responsive signing page. First-class workflows incl
 - share-sheet import/export,
 - touch/stylus signature capture,
 - biometric/passkey unlock,
-- QR handoff from desktop,
+- secure QR handoff from desktop,
 - push notifications,
 - offline queue,
 - tablet kiosk/in-person mode.
@@ -322,7 +331,7 @@ Self-hosted software should remain fully functional without artificial feature g
 
 Managed cloud pricing should charge for infrastructure, delivery, storage, managed identity/compliance integrations, support and SLA rather than source-code capability unlocks.
 
-Initial hypothesis, to be validated before launch:
+Initial hypothesis, to be validated under a future reproducible pricing/market specification before launch:
 
 - Free Cloud: $0 with bounded monthly managed usage.
 - Personal Cloud: approximately $8-$10/month.
@@ -332,7 +341,22 @@ Initial hypothesis, to be validated before launch:
 
 This is a product hypothesis, not a committed price list.
 
-## 8. Research conclusion
+## 8. Evidence rule for external research
+
+Repository-derived claims must bind the repository name, exact commit SHA and path used as evidence.
+
+Mutable webpages must record:
+
+- exact URL,
+- retrieval date,
+- immutable revision/archive/content digest when available,
+- otherwise explicit `UNVERIFIED_MUTABLE_SOURCE` status.
+
+Mutable unarchived pages may inform exploration, but they may not be presented as reproducible evidence or satisfy evidence-dependent release/legal/pricing gates.
+
+The canonical source register is `docs/foundation/EXTERNAL-SOURCES.md`.
+
+## 9. Research conclusion
 
 The strongest architecture is not to merge Documenso and Stirling source trees.
 
