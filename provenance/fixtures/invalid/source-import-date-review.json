@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-import-invalid-review",
+  "classification": "oss_permitted",
+  "upstream": {"repository":"example/signthos-fixture","commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","path":"src/example.txt","sha256":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb","copyright_holder":"Synthetic Fixture"},
+  "license": {"spdx":"MIT","evidence":["fixture:license:mit"]},
+  "permission": null,
+  "import": {"destination":"fixtures/output-invalid-review.txt","sha256":"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc","date":"2025-02-29"},
+  "transformation": {"kind":"copied","notes":"Synthetic invalid fixture","derives_from":[]},
+  "review": {
+    "status":"pending",
+    "pull_request":0,
+    "evidence":["approved","https://github.com/TheHalfMoon/Signthos/pull/27","github:issue:27","github:issue-comment:0","github:issue-comment:001","github:issue-comment:-1","github:issue-comment:+1","github:issue-comment:latest","github:unknown:123","github:issue-comment:１２３"]
+  }
+}

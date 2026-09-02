@@ -1,0 +1,8 @@
+{
+  "schema_version":1,"kind":"source_import","id":"fixture-duplicate-b","classification":"oss_permitted",
+  "upstream":{"repository":"example/signthos-fixture","commit":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","path":"src/b.txt","sha256":"dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd","copyright_holder":"Synthetic Fixture"},
+  "license":{"spdx":"MIT","evidence":["fixture:license:mit"]},"permission":null,
+  "import":{"destination":"fixtures/shared-destination.txt","sha256":"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee","date":"2026-09-02"},
+  "transformation":{"kind":"copied","notes":"Synthetic duplicate destination fixture B","derives_from":[]},
+  "review":{"status":"qualified_exact_head","pull_request":1,"evidence":["github:issue-comment:1"]}
+}
