@@ -1,7 +1,6 @@
 mod alignment;
 mod claims;
 mod component_review_alignment;
-mod path_alignment;
 mod validation;
 
 use std::io::Read;
@@ -34,7 +33,6 @@ pub fn dependency_sanity() -> bool {
 pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
     let mut report = validation::validate_bytes(path, bytes);
     if bytes.len() as u64 <= MAX_RECORD_BYTES {
-        path_alignment::reconcile_bytes(path, bytes, &mut report);
         alignment::augment_bytes(path, bytes, &mut report);
         component_review_alignment::augment_bytes(path, bytes, &mut report);
     }
@@ -55,6 +53,8 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
     for path in &canonical_paths {
         let bytes = read_record_bounded(path)?;
         let size = bytes.len() as u64;
+        total = total.saturating_add(size);
+
         if size > MAX_RECORD_BYTES {
             report.diagnostics.push(Diagnostic {
                 path: path.to_owned(),
@@ -62,10 +62,8 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
                 field: "$".to_owned(),
                 message: format!("record exceeds {MAX_RECORD_BYTES} byte limit"),
             });
-            continue;
         }
 
-        total = total.saturating_add(size);
         if total > MAX_TOTAL_BYTES {
             report.diagnostics.push(Diagnostic {
                 path: path.to_owned(),
@@ -74,6 +72,10 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
                 message: format!("run exceeds {MAX_TOTAL_BYTES} bytes"),
             });
             break;
+        }
+
+        if size > MAX_RECORD_BYTES {
+            continue;
         }
 
         let mut current = validate_bytes(path, &bytes);
@@ -291,7 +293,20 @@ fn io_error(message: &str) -> CliResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     use std::path::PathBuf;
+    use std::time::{SystemTime, UNIX_EPOCH};
+
+    fn temp_root(label: &str) -> PathBuf {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock must be after Unix epoch")
+            .as_nanos();
+        std::env::temp_dir().join(format!(
+            "signthos-{label}-{}-{nonce}",
+            std::process::id()
+        ))
+    }
 
     #[test]
     fn exit_code_contract_is_stable() {
@@ -337,5 +352,36 @@ mod tests {
         let forward = validate_paths(&[first.clone(), second.clone()]).unwrap();
         let reverse = validate_paths(&[second, first]).unwrap();
         assert_eq!(forward, reverse);
+    }
+
+    #[test]
+    fn oversized_records_contribute_to_total_limit() {
+        let root = temp_root("oversized-total");
+        fs::create_dir_all(&root).expect("temporary directory is created");
+        let bytes = vec![b'x'; (MAX_RECORD_BYTES + 1) as usize];
+        let mut paths = Vec::new();
+        for index in 0..4 {
+            let path = root.join(format!("oversized-{index}.json"));
+            fs::write(&path, &bytes).expect("temporary oversized fixture is written");
+            paths.push(path.to_string_lossy().into_owned());
+        }
+
+        let report = validate_paths(&paths).expect("temporary fixtures are readable");
+        let _ = fs::remove_dir_all(&root);
+
+        assert_eq!(
+            report
+                .diagnostics
+                .iter()
+                .filter(|diagnostic| diagnostic.code == "SIZE_RECORD")
+                .count(),
+            4
+        );
+        assert!(
+            report
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "SIZE_TOTAL")
+        );
     }
 }
