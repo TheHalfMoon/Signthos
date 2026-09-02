@@ -148,7 +148,6 @@ fn canonical_id(value: &str, lowercase: bool) -> bool {
 
 fn canonical_relative_path(value: &str) -> bool {
     if value.is_empty()
-        || !value.is_ascii()
         || value.starts_with('/')
         || value.ends_with('/')
         || value.contains('\\')
@@ -194,5 +193,11 @@ mod tests {
             .diagnostics
             .iter()
             .any(|diagnostic| diagnostic.code == "SCHEMA_DUPLICATE_ID"));
+    }
+
+    #[test]
+    fn utf8_relative_paths_are_canonical_claims() {
+        assert!(canonical_relative_path("src/ملف.rs"));
+        assert!(!canonical_relative_path("../ملف.rs"));
     }
 }
