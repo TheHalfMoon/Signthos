@@ -1,4 +1,5 @@
 mod alignment;
+mod claims;
 mod validation;
 
 pub use validation::{
@@ -48,6 +49,7 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
 
     let mut report = validation::validate_paths(paths)?;
     let mut total = 0_u64;
+    let mut claim_tracker = claims::ClaimTracker::default();
     for path in paths {
         let metadata = std::fs::symlink_metadata(path)
             .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
@@ -61,6 +63,7 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
         }
         let bytes = std::fs::read(path).map_err(|error| format!("IO_READ: {path}: {error}"))?;
         alignment::augment_bytes(path, &bytes, &mut report);
+        claim_tracker.observe(path, &bytes, &mut report);
     }
     sort_report(&mut report);
     Ok(report)
@@ -201,6 +204,7 @@ fn sort_report(report: &mut ValidationReport) {
             &right.message,
         ))
     });
+    report.diagnostics.dedup();
 }
 
 fn success(message: &str) -> CliResult {
