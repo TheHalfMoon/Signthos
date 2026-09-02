@@ -41,7 +41,10 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
 }
 
 pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
-    for path in paths {
+    let mut canonical_paths = paths.to_vec();
+    canonical_paths.sort();
+
+    for path in &canonical_paths {
         let metadata = std::fs::symlink_metadata(path)
             .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
         if metadata.file_type().is_symlink() {
@@ -51,10 +54,10 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
         }
     }
 
-    let mut report = validation::validate_paths(paths)?;
+    let mut report = validation::validate_paths(&canonical_paths)?;
     let mut total = 0_u64;
     let mut claim_tracker = claims::ClaimTracker::default();
-    for path in paths {
+    for path in &canonical_paths {
         let metadata = std::fs::symlink_metadata(path)
             .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
         let size = metadata.len();
@@ -240,6 +243,7 @@ fn io_error(message: &str) -> CliResult {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn exit_code_contract_is_stable() {
@@ -267,5 +271,17 @@ mod tests {
         let result = run(&["verify-source"]);
         assert_eq!(result.code, EXIT_USAGE_ERROR);
         assert!(result.stderr.contains("CLI_BOOTSTRAP_UNAVAILABLE"));
+    }
+
+    #[test]
+    fn explicit_duplicate_path_order_is_deterministic() {
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../provenance/fixtures/multi");
+        let first = fixtures.join("duplicate-destination-a.json").to_string_lossy().into_owned();
+        let second = fixtures.join("duplicate-destination-b.json").to_string_lossy().into_owned();
+
+        let forward = validate_paths(&[first.clone(), second.clone()]).unwrap();
+        let reverse = validate_paths(&[second, first]).unwrap();
+        assert_eq!(forward, reverse);
     }
 }
