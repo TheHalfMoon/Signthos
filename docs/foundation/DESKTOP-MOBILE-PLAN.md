@@ -201,14 +201,16 @@ Desktop
 
 Security requirements:
 
-- short lifetime,
-- single use,
-- replay resistance,
-- session binding,
-- explicit target document/revision binding,
-- no long-lived bearer credential in QR,
+- the QR bootstrap credential is unpredictable, very short-lived and single-use,
+- bind the handoff to the intended session, target document/revision, and intended device or audience (or an equivalent authenticated-pairing property),
+- display and explicitly confirm target document/session context where required by the threat model,
+- redemption is atomic: concurrent or repeated scans cannot both establish a valid handoff,
+- first-scanner/race behavior is explicitly tested and fails closed rather than silently transferring authority,
+- destroy or rotate the bootstrap credential immediately after successful redemption,
+- pending handoffs expire and can be cancelled/revoked before completion,
+- no long-lived bearer credential or raw document is exposed in the QR payload,
 - no raw private key transfer,
-- audit event for handoff initiation/completion.
+- audit events cover initiation, confirmation, redemption, cancellation/revocation, expiry and completion.
 
 A later specification must decide whether direct peer-to-peer transport is supported in addition to relay/server transport.
 
@@ -293,7 +295,7 @@ Prove:
 
 ### QR handoff spike
 
-Threat-model and prove one-time handoff/session invalidation.
+Threat-model and prove unpredictable one-time bootstrap credentials, authenticated device/audience/session binding, user confirmation where required, atomic redemption, anti-race/replay behavior, expiry/cancellation/revocation, and credential invalidation after redemption.
 
 ## Success criteria
 
