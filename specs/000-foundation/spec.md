@@ -37,7 +37,7 @@ Establish the canonical product thesis, evidence/provenance boundary, licensing 
 - migration/import, testing/qualification, release/distribution plans.
 - business/pricing hypothesis, brand/product language, metrics and community/growth plan.
 - SpecGrain/Diffciplane constitution and GitHub-first operating model.
-- canonical dependency roadmap and Foundation 000 task ledger.
+- canonical dependency roadmap, GitHub successor epic mapping and Foundation 000 task ledger.
 - explicit unresolved legal/licensing/distribution questions.
 
 ## Scope out
@@ -75,6 +75,7 @@ Establish the canonical product thesis, evidence/provenance boundary, licensing 
 18. Cross-device handoff bootstrap credentials are one-time, short-lived and non-replayable with explicit confirmation/redemption/revocation semantics.
 19. Mutable unarchived external webpages do not satisfy hard evidence-dependent gates.
 20. GitHub repository state is the durable planning/evidence authority; local/chat scratch is non-canonical.
+21. A GitHub successor epic records future intent but does not create implementation authority before its canonical prerequisites close.
 
 ## Primary architecture decisions proposed for validation
 
@@ -135,6 +136,7 @@ Establish the canonical product thesis, evidence/provenance boundary, licensing 
 - `docs/foundation/TEST-QUALIFICATION-PLAN.md`
 - `docs/foundation/RELEASE-DISTRIBUTION-PLAN.md`
 - `docs/foundation/OPERATING-MODEL.md`
+- `docs/foundation/EPIC-INDEX.md`
 
 ### Canonical governance
 
@@ -154,6 +156,7 @@ Foundation 000 may close only when all of the following are true:
 - the complete normative corpus above exists and is internally navigable from `docs/foundation/INDEX.md`;
 - exact repository evidence and mutable-web evidence status are recorded in `docs/foundation/EXTERNAL-SOURCES.md`;
 - product thesis, moat, product surfaces, business model, UX, community and success metrics are represented in-repository rather than remaining chat/local-only plans;
+- `docs/foundation/EPIC-INDEX.md` maps Specifications 001–017 to actual GitHub issues and preserves planning-only authority semantics;
 - master architecture defines domain/runtime/provider/security boundaries;
 - Stirling capability ambitions are decomposed into bounded Signthos priorities/providers rather than wholesale source-copy authority;
 - licensing strategy and `provenance/UPSTREAM.md` define fail-closed path/permission boundaries;
