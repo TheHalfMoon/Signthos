@@ -103,7 +103,7 @@ New Signthos capabilities target canonical contracts while inherited internals a
 
 ## Provenance manifest
 
-Specification 001 should implement a machine-readable manifest entry per imported/adapted unit.
+Specification 001 should implement a versioned machine-readable manifest entry per imported/adapted unit. The conceptual fields in this plan must stay aligned with the canonical provenance contract in `provenance/UPSTREAM.md`; this document must not introduce a weaker shadow schema.
 
 Required fields conceptually:
 
@@ -112,13 +112,21 @@ id: U001-I0001
 upstream:
   repository: documenso/documenso
   commit: <exact-sha>
-  paths:
-    - <path>
+  path: <exact-path>
+  copyright_holder: <value-or-unknown>
 license:
-  class: AGPL-3.0
-  evidence: <license-or-permission-reference>
+  spdx: AGPL-3.0-only
+  evidence: <license-evidence-reference>
+  permission_artifact: <controlled-reference-or-null>
+  permission_scope:
+    - copy
+    - modify
+    - redistribute
+    - publish
+    - derivative
 import:
   destination: <path>
+  date: <YYYY-MM-DD>
   signthos_commit: <sha>
   pull_request: <number>
 transformation:
@@ -128,6 +136,14 @@ review:
   status: verified
   evidence: <reference>
 ```
+
+Validation rules:
+
+- use exact SPDX expressions; ambiguous shorthand such as bare `AGPL-3.0` is invalid and fails closed;
+- restricted/commercial paths require a permission-artifact reference and every permission right needed for the intended transformation and distribution;
+- path-level classification must remain explicit even if Specification 001 later permits deterministic grouped records;
+- unknown, missing or conflicting license/permission evidence blocks the affected import;
+- a manifest record is provenance evidence, not authority to import a path that canonical governance still blocks.
 
 ## Permission artifacts
 
