@@ -1,0 +1,20 @@
+[package]
+name = "signthos-provenance"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85.0"
+description = "Offline provenance policy tooling for Signthos"
+publish = false
+
+[[bin]]
+name = "signthos-provenance"
+path = "src/main.rs"
+
+[dependencies]
+spdx = { version = "=0.13.5", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }

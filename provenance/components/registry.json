@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "kind": "component_registry",
+  "components": [
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-spdx-0.13.5",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "spdx",
+      "version": "0.13.5",
+      "source": {
+        "repository": "https://github.com/EmbarkStudios/spdx",
+        "revision": "10dcdc28d619b5bb1c14cbf546deea3578ead73c"
+      },
+      "package_checksum": "081670c233dfbed55690cc0cd38424e0e24ac1b2673d0b408b3f7b684738dfa9",
+      "license": {
+        "spdx": "Apache-2.0",
+        "evidence": [
+          "github:EmbarkStudios/spdx@10dcdc28d619b5bb1c14cbf546deea3578ead73c:Cargo.toml#package.license",
+          "crates.io-index:spdx@0.13.5#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": ["cli"],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-smallvec-1.15.1",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "smallvec",
+      "version": "1.15.1",
+      "source": {
+        "repository": "https://github.com/servo/rust-smallvec",
+        "revision": "d0f47a3ea99296498ee940b5d99f59b403c498a2"
+      },
+      "package_checksum": "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03",
+      "license": {
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:servo/rust-smallvec@d0f47a3ea99296498ee940b5d99f59b403c498a2:Cargo.toml#package.license",
+          "crates.io-index:smallvec@1.15.1#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": ["cli"],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    }
+  ]
+}

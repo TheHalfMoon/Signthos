@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signthos.dev/provenance/schema/v1/component.schema.json",
+  "title": "Signthos provenance component registry v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "kind", "components"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "component_registry" },
+    "components": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" }
+    }
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version",
+        "kind",
+        "id",
+        "ecosystem",
+        "component_type",
+        "name",
+        "version",
+        "source",
+        "package_checksum",
+        "license",
+        "artifact_form",
+        "distribution_surfaces",
+        "notice_requirement",
+        "derives_from",
+        "distribution_review"
+      ],
+      "properties": {
+        "schema_version": { "const": 1 },
+        "kind": { "const": "component" },
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+        },
+        "ecosystem": {
+          "type": "string",
+          "enum": ["cargo"]
+        },
+        "component_type": {
+          "type": "string",
+          "enum": ["library", "binary", "tool"]
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "source": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["repository", "revision"],
+          "properties": {
+            "repository": {
+              "type": "string",
+              "pattern": "^https://github\\.com/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{40}$"
+            }
+          }
+        },
+        "package_checksum": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "license": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["spdx", "evidence"],
+          "properties": {
+            "spdx": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "evidence": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            }
+          }
+        },
+        "artifact_form": {
+          "type": "string",
+          "enum": ["source", "static_library", "dynamic_library", "binary", "wasm", "other"]
+        },
+        "distribution_surfaces": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["server", "web", "desktop_direct", "desktop_store", "ios_app_store", "android_play", "sdk", "embed", "cli", "worker"]
+          }
+        },
+        "notice_requirement": {
+          "type": "string",
+          "enum": ["required", "not_required", "pending"]
+        },
+        "derives_from": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{2,127}$"
+          }
+        },
+        "distribution_review": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "evidence"],
+          "properties": {
+            "state": {
+              "type": "string",
+              "enum": ["not_applicable", "pending", "approved_with_evidence", "blocked"]
+            },
+            "evidence": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 512
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
