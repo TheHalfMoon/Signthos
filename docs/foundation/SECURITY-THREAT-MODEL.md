@@ -184,25 +184,25 @@ Controls:
 4. Visual masking is never represented as permanent redaction.
 5. Verification uncertainty/unsupported status is never represented as valid.
 6. Local-only operations do not silently transmit document bytes.
-7. A QR handoff cannot be reused indefinitely or redirected to another document.
+7. A QR handoff cannot be reused, redirected, or won by an unintended concurrent scanner without an explicit fail-closed outcome.
 8. Retried jobs cannot duplicate sends/signing side effects without detection/idempotency.
 9. Software updates/releases are authenticated.
 10. Logs/telemetry do not contain raw sensitive document/signature/key data by default.
 
 ## Redaction threat model
 
-A redaction is valid only if targeted recoverable content is removed according to the supported PDF model.
+A redaction may be represented as safely applied only when targeted recoverable content is absent from the exported PDF under an independent file-level verification invariant.
 
-Tests should attempt recovery through:
+Verification must use a parser/toolchain independent from the redaction implementation where practicable and attempt recovery through:
 
 - text extraction,
-- object inspection,
+- object/content-stream inspection,
 - copy/paste,
 - rendering layers,
 - annotations/forms,
 - metadata/attachments where in scope.
 
-A black rectangle alone fails.
+A black rectangle or correct-looking render alone fails. If independent verification cannot cover the claimed redaction scope, the product reports that verification as unsupported/incomplete rather than claiming safe redaction.
 
 ## Signature verification threat model
 
@@ -221,18 +221,22 @@ Verification output therefore exposes dimensions separately.
 
 - photographed QR reused later,
 - attacker scans first,
+- simultaneous scanners race redemption,
 - session relay/MITM,
-- wrong device/document binding,
+- wrong device/audience/document binding,
 - long-lived bearer token leak.
 
 Required controls:
 
-- very short-lived one-time descriptor,
-- authenticated session establishment,
-- display/confirm target document context,
-- replay invalidation,
-- no private key transfer,
-- auditable session events.
+- unpredictable, very short-lived, one-time bootstrap credential,
+- authenticated session establishment bound to the intended session and device/audience (or an equivalent authenticated-pairing property),
+- explicit target document/revision context and user confirmation where the threat model requires it,
+- atomic redemption so only one claimant can establish the handoff,
+- explicit first-scanner/race handling that fails closed rather than silently transferring authority,
+- immediate destruction/rotation of the bootstrap credential after redemption,
+- expiry plus cancellation/revocation before completion,
+- no long-lived bearer credential, raw document, or private key in the QR payload,
+- auditable initiation, confirmation, redemption, expiry, cancellation/revocation and completion events.
 
 ## Local device threat model
 
