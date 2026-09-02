@@ -84,6 +84,30 @@ fn duplicate_claim_is_reported_even_when_another_record_is_invalid() {
 }
 
 #[test]
+fn utf8_relative_posix_path_is_schema_aligned() {
+    let mut record = source_import("utf8-path", "src/ملف.rs", "2024-02-29");
+    record["upstream"]["path"] = Value::String("مصدر/lib.rs".to_owned());
+
+    let bytes = serde_json::to_vec(&record).expect("JSON serializes");
+    let report = validate_bytes("utf8.json", &bytes);
+    assert!(
+        report.is_valid(),
+        "schema-valid UTF-8 relative POSIX paths must not retain legacy PATH_INVALID: {}",
+        report.render_text()
+    );
+}
+
+#[test]
+fn trailing_slash_path_remains_invalid() {
+    let record = source_import("trailing-slash", "src/", "2024-02-29");
+    let bytes = serde_json::to_vec(&record).expect("JSON serializes");
+    let report = validate_bytes("trailing.json", &bytes);
+    assert!(report.diagnostics.iter().any(|diagnostic| {
+        diagnostic.code == "PATH_INVALID" && diagnostic.field == "$.import.destination"
+    }));
+}
+
+#[test]
 fn empty_component_distribution_review_evidence_item_is_rejected() {
     let record = json!({
         "schema_version": 1,
