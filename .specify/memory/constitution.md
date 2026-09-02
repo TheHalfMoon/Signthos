@@ -1,7 +1,7 @@
 # Signthos Constitution
 
 Version: 0.1-foundation
-Status: PROPOSED
+Status: CANONICAL
 
 ## I. Product integrity
 
