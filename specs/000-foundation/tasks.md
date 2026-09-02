@@ -1,6 +1,6 @@
 # Specification 000 — Canonical Task Ledger
 
-Status: ACTIVE
+Status: CLOSED_CANONICAL
 
 Legend:
 
@@ -44,39 +44,79 @@ A checked task does not imply the specification or PR is merge-qualified.
 - [x] `F0-T014` Add repository agent/contributor execution rules for Foundation 000.
 - [x] `F0-T015` Run change-surface reconciliation and prove no prohibited source import; recheck exact candidate head before merge qualification.
 - [x] `F0-T016` Obtain independent substantive review of architecture, provenance/licensing, PDF/signing strategies, quality attributes, competitor coverage and roadmap decomposition.
-- [ ] `F0-T017` Reconcile all substantive review findings and obtain independent re-evaluation that covers the reconciled exact candidate head/delta after normative content changes.
-- [ ] `F0-T018` Re-run exact-head qualification after review reconciliation; record unavailable/nonexistent CI accurately rather than treating skipped checks as PASS.
-- [ ] `F0-T019` Merge the exact qualified Foundation 000 head with expected-head protection where supported.
-- [ ] `F0-T020` Perform post-merge verification on canonical `main`.
+- [x] `F0-T017` Reconcile all substantive review findings and obtain independent re-evaluation that covers the reconciled exact candidate head/delta after normative content changes.
+- [x] `F0-T018` Re-run exact-head qualification after review reconciliation; record unavailable/nonexistent CI accurately rather than treating skipped checks as PASS.
+- [x] `F0-T019` Merge the exact qualified Foundation 000 head with expected-head protection where supported.
+- [x] `F0-T020` Perform post-merge verification on canonical `main`.
 - [ ] `F0-T021` Re-read canonical governance and determine whether Specification 001 is genuinely authorized.
 
-## Independent-review evidence
+## Canonical closeout evidence
 
-CodeRabbit submitted an independent substantive review on 2026-09-02 against reviewed head:
+### F0-T017 — independent exact-head re-evaluation
 
-`9a5a6339d639273d07bc03899cb4b72c3dbf2fad`
+CodeRabbit independently reviewed the complete reconciled Foundation 000 candidate and returned:
 
-The review contained nine actionable findings covering:
+`PASS — substantive Foundation 000 review completed.`
 
-1. competitor-matrix rating normalization,
-2. EmbedPDF/PDFium pinning and fixture baseline,
-3. PDF component-license/provenance matrix,
-4. reproducible/unverified pricing evidence classification,
-5. independent file-level redaction verification,
-6. non-replayable QR handoff pairing,
-7. provenance-manifest SPDX/permission/import metadata,
-8. roadmap dependency corrections,
-9. per-source immutable research provenance.
+Evidence:
 
-All nine original review threads have been answered with exact fix-commit evidence and resolved. However, additional normative Foundation corpus was added/changed after the reviewed head. Therefore `F0-T017` remains open until an independent reviewer substantively covers the reconciled final candidate head or a clearly bounded exact delta from the reviewed head.
+- reviewed head: `4d4ba4bdfd5f01d05caaff888526f9a3e13deec4`
+- reviewed base: `0c065257b382d5baa00b25fe7b19e9659ce3b9cb`
+- reviewed diff: 35 files, 9,066 additions, 0 deletions
+- result: no new blocking or non-blocking substantive defects
+- prior provenance-manifest finding explicitly reconciled
+- PR #2 issue comment: `5511819284`
+- all original inline review threads: resolved
 
-Other reviewer-path observations:
+The earlier CodeRabbit review on `9a5a6339d639273d07bc03899cb4b72c3dbf2fad` remains historical evidence for `F0-T016`; it is not used as the exact-head qualification substitute.
 
-- Qodo reported that reviews are paused because the connected workspace trial/credits are unavailable.
-- Cubic reported that the workspace exceeded its free monthly review line limit.
-- A GitHub Copilot reviewer request could not be established through the available repository reviewer interface.
+### F0-T018 — exact-head qualification
 
-These external constraints do not reduce the exact-candidate substantive-review requirement.
+Exact candidate qualification was recorded on PR #2 in issue comment `5511858375` and bound to:
+
+- base `main`: `0c065257b382d5baa00b25fe7b19e9659ce3b9cb`
+- candidate head: `4d4ba4bdfd5f01d05caaff888526f9a3e13deec4`
+- independent semantic PASS: CodeRabbit comment `5511819284`
+- change surface: 35 Foundation/governance/planning files only
+- no upstream application source import
+- no runtime dependency manifest
+- no production application implementation
+- no production deployment configuration
+- GitHub Actions workflow runs associated with the exact candidate: none observed
+- commit status context observed: CodeRabbit `success`; this status is not treated as a substitute for the substantive review comment
+- repository rulesets: none observed
+- traditional `main` branch protection: not enabled at qualification time
+
+Absent CI was recorded as absent, not fabricated as PASS.
+
+### F0-T019 — guarded merge
+
+Foundation PR #2 was merged with expected-head protection for exact qualified head:
+
+`4d4ba4bdfd5f01d05caaff888526f9a3e13deec4`
+
+Canonical merge commit:
+
+`0a14925dec8326a0c1378f9c567ee4dd59f90f51`
+
+Merge parents:
+
+- previous `main`: `0c065257b382d5baa00b25fe7b19e9659ce3b9cb`
+- exact qualified candidate: `4d4ba4bdfd5f01d05caaff888526f9a3e13deec4`
+
+### F0-T020 — post-merge verification
+
+Post-merge verification established that canonical `main` at `0a14925dec8326a0c1378f9c567ee4dd59f90f51` contains the Foundation-only merge surface and preserves the prohibited-import boundary:
+
+- Foundation/governance/planning content only
+- no upstream application source
+- no runtime dependency manifest
+- no production application implementation
+- no production deployment configuration
+
+Foundation 000 is therefore `CLOSED_CANONICAL` once this bookkeeping closeout commit is itself merged and verified on canonical `main`.
+
+`F0-T021` deliberately remains open until that closeout merge is canonical and live governance is re-read from `main`.
 
 ## Planning epic records
 
@@ -113,4 +153,4 @@ These do not prevent Foundation 000 from documenting the architecture, but they 
 
 ## Canonical completion rule
 
-Specification 000 becomes `CLOSED_CANONICAL` only after `F0-T001` through `F0-T020` are satisfied by observed evidence and the merged canonical state is verified. `F0-T021` is the continuation-boundary task and may authorize Specification 001 only after that closeout.
+Specification 000 is `CLOSED_CANONICAL` after `F0-T001` through `F0-T020` are satisfied by observed evidence and this closeout bookkeeping is merged and reverified on canonical `main`. `F0-T021` is the continuation-boundary task and may authorize Specification 001 only after that closeout.

@@ -9,7 +9,7 @@ GitHub issues are durable planning records. **An open issue does not authorize i
 
 | Specification | GitHub record | State | Authority |
 |---|---|---|---|
-| 000 — Foundation | PR #2; review gate Issue #3 | ACTIVE | Documentation/governance only until canonical closeout |
+| 000 — Foundation | PR #2; review gate Issue #3 | CLOSED_CANONICAL | Closed; successor authority requires `F0-T021` |
 
 ## v0.1 execution spine
 
@@ -41,17 +41,18 @@ GitHub issues are durable planning records. **An open issue does not authorize i
 ## Dependency view
 
 ```text
-#3 / Spec 000 review + closeout
-  -> #4 Spec 001
-      -> #5 Spec 002
-          -> #6 Spec 003
-              -> #7 Spec 004
-                  -> #8 Spec 005
-                      -> #9 Spec 006
-                      -> #10 Spec 007
-                          -> #11 Spec 008
-                      -> #12 Spec 009
-                  -> #13 Spec 010
+Spec 000 CLOSED_CANONICAL
+  -> F0-T021 successor authorization gate
+      -> #4 Spec 001
+          -> #5 Spec 002
+              -> #6 Spec 003
+                  -> #7 Spec 004
+                      -> #8 Spec 005
+                          -> #9 Spec 006
+                          -> #10 Spec 007
+                              -> #11 Spec 008
+                          -> #12 Spec 009
+                      -> #13 Spec 010
 
 #14 Spec 011 requires #6 Spec 003 + #12 Spec 009 + applicable server/runtime predecessors.
 #15 Spec 012 waits for every release-critical predecessor included in the release claim.
@@ -67,4 +68,6 @@ Do not use the existence, age, assignee, label, milestone, checkbox state, or fo
 
 ## Current frontier
 
-Foundation 000 remains the only active specification. No upstream product source import is authorized until PR #2 is independently re-reviewed on its reconciled candidate, exact-head qualified, merged, and post-merge verified.
+Foundation 000 is `CLOSED_CANONICAL`. `F0-T021` is the continuation-boundary task and remains open until canonical governance is re-read from the merged closeout state. Specification 001 remains `PLANNING_ONLY` until `F0-T021` explicitly authorizes it and live repository governance confirms no newer blocker.
+
+No Documenso EE/commercial path, Stirling restricted path, relicensing action, mobile distribution claim, or compliance/legal-effect claim is authorized by Foundation closeout or by the existence of a successor epic.
