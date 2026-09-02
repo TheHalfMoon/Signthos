@@ -1,6 +1,6 @@
 # Specification 001 — Canonical Task Ledger
 
-Status: SHAPING_PENDING_REVIEW
+Status: SHAPING_RECONCILIATION
 Issue: #4
 Authorized from canonical `main`: `2144b7765595a206e691f43aefd122aa5a150a1b`
 
@@ -19,11 +19,32 @@ A checked implementation task does not imply the PR, grain or specification is m
 - [x] `S1-T004` Define the standalone Rust `signthos-provenance` architecture and offline-by-default local Git verification boundary.
 - [x] `S1-T005` Decompose implementation into dependency-ordered grains with explicit path allowlists and no product runtime/source authority.
 - [x] `S1-T006` Define fixture, process, security/resource, deterministic-output and CI qualification strategy.
-- [ ] `S1-T007` Obtain independent substantive review of the exact shaping candidate covering `spec.md`, `plan.md` and `tasks.md`.
-- [ ] `S1-T008` Reconcile every shaping review finding and obtain exact-head re-evaluation after any normative amendment.
+- [x] `S1-T007` Obtain independent substantive review of the exact shaping candidate covering `spec.md`, `plan.md` and `tasks.md`.
+- [ ] `S1-T008` Reconcile every shaping review finding and obtain exact-head re-evaluation after normative amendment.
 - [ ] `S1-T009` Record exact-head shaping qualification, accurately distinguishing absent/skipped checks from PASS.
 - [ ] `S1-T010` Merge the exact qualified shaping head with `expected_head_sha` protection.
 - [ ] `S1-T011` Post-merge verify canonical `main` contains only the intended shaping surface and re-read Issue #4/governance before implementation.
+
+### S1-T007 review evidence
+
+CodeRabbit issue comment `5512755250` substantively reviewed exact shaping head:
+
+`16d769d0dc00448c65a55119d12a2552c631b55a`
+
+against base:
+
+`2144b7765595a206e691f43aefd122aa5a150a1b`
+
+Result: `ACTIONABLE FINDINGS`.
+
+The reviewer confirmed the shaping-only three-file surface and found no product source, Rust tooling, dependency manifests, CI workflow, credentials, paid-service configuration or Specification 002 implementation.
+
+Two findings require reconciliation before qualification:
+
+1. source-import records must bind import-ready state to a controlled review status, positive immutable Signthos PR identity and stable non-secret substantive review-evidence reference; pending/missing/rejected authorization must fail canonical validation while final exact-head qualification remains externally recorded to avoid self-reference;
+2. `import.date` must receive executable strict Gregorian `YYYY-MM-DD` validation with leap-day/impossible-date fixtures rather than relying on a conceptual string or non-enforced JSON Schema format.
+
+The current reconciliation amends `spec.md`, `plan.md` and this ledger only. `S1-T008` remains open until an independent reviewer re-evaluates the amended exact head.
 
 ### Shaping path allowlist
 
@@ -65,18 +86,21 @@ Explicitly prohibited:
 - product runtime/application directories;
 - credentials or paid service configuration.
 
-## S1-C — canonical schemas and strict loading
+## S1-C — canonical schemas, strict loading and import readiness
 
 Dependency: `S1-T021`.
 
-- [ ] `S1-T022` Create v1 source-import JSON Schema with closed object shapes and required semantic fields.
+- [ ] `S1-T022` Create v1 source-import JSON Schema with closed object shapes and required semantic fields, including review status/PR/evidence and import date.
 - [ ] `S1-T023` Create v1 policy JSON Schema and align component schema with the canonical Rust models.
 - [ ] `S1-T024` Implement strict source-import/component/policy typed deserialization with unknown-field rejection.
 - [ ] `S1-T025` Enforce per-record and total-run byte limits before unbounded allocation/deserialization.
-- [ ] `S1-T026` Validate canonical ids, exact 40-character lowercase hexadecimal upstream commit SHA, lowercase SHA-256 digests and normalized relative POSIX paths.
+- [ ] `S1-T026` Validate canonical ids, exact 40-character lowercase hexadecimal v1 Git object id, lowercase SHA-256 digests and normalized relative POSIX paths.
+- [ ] `S1-T026A` Enforce semantic proleptic-Gregorian `import.date` in exact zero-padded `YYYY-MM-DD` form, including year range `0001`–`9999`, leap-year rules and impossible-date rejection.
+- [ ] `S1-T026B` Enforce source-import review vocabulary `pending|qualified_exact_head|rejected`, positive immutable Signthos PR identity and non-empty stable non-secret review evidence; only `qualified_exact_head` may pass canonical/import-ready validation.
+- [ ] `S1-T026C` Preserve the two-stage authorization handoff: pending exact imported-byte review, manifest-only qualification amendment, independent exact-head/delta re-evaluation, and external Diffciplane qualification without a self-referential current-commit field.
 - [ ] `S1-T027` Reject absolute paths, traversal, backslash aliases, malformed normalization and duplicate semantic identities/destination claims.
-- [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output.
-- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C failure rule.
+- [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output, including `DATE_*` and `REVIEW_*` families.
+- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, missing/non-positive PR identity, pending/rejected/unknown review states.
 - [ ] `S1-T030` Run focused/full tests and change-surface proof.
 - [ ] `S1-T031` Independent exact-head review, reconciliation, qualification, expected-head merge and post-merge verification for Grain C.
 
