@@ -253,7 +253,7 @@ Semantics:
 
 Canonical validation is local and offline. It validates the kind/id grammar only; it does not contact GitHub.
 
-The following are invalid in v1 and MUST fail with a `REVIEW_*` diagnostic:
+The following are invalid in v1 and MUST fail local canonical validation with a `REVIEW_*` diagnostic:
 
 - arbitrary free text such as `approved`;
 - generic/mutable web URLs;
@@ -261,10 +261,9 @@ The following are invalid in v1 and MUST fail with a `REVIEW_*` diagnostic:
 - unsupported `github:*` reference kinds;
 - zero, negative, signed or leading-zero identifiers;
 - identifiers containing whitespace or non-ASCII digits;
-- mutable labels such as `latest`;
-- references whose syntax is canonical but whose semantic relationship to the declared PR/exact head has not been externally verified.
+- mutable labels such as `latest`.
 
-Syntax validity does **not** prove that the referenced object exists, is independent, is substantive, belongs to the declared PR, or reviewed the applicable exact head. Those semantic facts remain mandatory external Diffciplane evidence and must be verified against live GitHub before qualification/merge. A syntactically valid evidence reference cannot convert absent external review evidence into PASS.
+Syntax validity does **not** prove that the referenced object exists, is independent, is substantive, belongs to the declared PR, or reviewed the applicable exact head. Those semantic facts are intentionally outside local `validate`: absence or failure of that live evidence blocks external Diffciplane qualification and merge, not local syntax validation. The validator MUST NOT emit `REVIEW_*` solely because live GitHub existence, independence, substantive scope, PR relationship or exact-head applicability has not been supplied to the offline process. A local validator PASS is therefore necessary record-level evidence only and is never sufficient Diffciplane qualification.
 
 Required fixture coverage includes at least:
 
@@ -630,7 +629,7 @@ Specification 001 cannot close until all of the following are observed on the ex
 7. `import.date` is semantically validated as canonical proleptic-Gregorian `YYYY-MM-DD`, including leap-day and impossible-date tests;
 8. canonical source-import validation requires `review.status=qualified_exact_head`, a positive immutable PR number, and at least one canonical `review.evidence` reference matching the v1 immutable GitHub-reference grammar;
 9. pending, rejected, missing-review-evidence, malformed/unsupported/non-canonical review-evidence, and missing-PR records fail canonical/import-ready validation;
-10. review-evidence syntax validation remains local/offline while existence, independence, substantive scope, PR relationship and exact-head applicability remain mandatory external Diffciplane evidence;
+10. review-evidence syntax validation remains local/offline; existence, independence, substantive scope, PR relationship and exact-head applicability remain mandatory external Diffciplane evidence whose absence blocks qualification/merge rather than local `validate`;
 11. restricted/commercial path records fail without sufficient accepted permission evidence/scope;
 12. `restricted` and `unknown` classifications cannot authorize import;
 13. derived copyleft/restricted material cannot be relabeled permissive without explicit relicensing evidence;
@@ -650,6 +649,6 @@ Specification 001 cannot close until all of the following are observed on the ex
 
 ## Non-goals and claim boundaries
 
-Passing the provenance validator means the repository satisfies the encoded Signthos engineering policy for the records under validation. It is not legal advice and does not independently prove copyright ownership, enforceability of a private permission document, reviewer independence from a syntactically valid evidence reference, app-store legal compatibility, regulatory compliance or legal effect.
+Passing the local provenance validator means the repository satisfies the encoded record-local Signthos engineering policy for the records under validation. It is necessary but not sufficient for Diffciplane qualification, import authorization to merge, or any legal conclusion. It does not independently prove copyright ownership, enforceability of a private permission document, review-object existence, reviewer independence, substantive review scope, PR relationship, exact-head applicability, app-store legal compatibility, regulatory compliance or legal effect.
 
-The validator must never turn unknown external/legal/review facts into `PASS` merely because required fields are syntactically present.
+External Diffciplane qualification must fail closed when required live review/legal/governance facts are unknown or unverified; a local validator PASS cannot convert those unknown external facts into qualification.
