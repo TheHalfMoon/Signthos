@@ -28,7 +28,7 @@
         "path_prefix": {
           "type": "string",
           "minLength": 1,
-          "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*//$).+$"
+          "pattern": "^(?![A-Za-z]:/)(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*//$).+$"
         },
         "expression": { "type": "string", "minLength": 1, "maxLength": 256 },
         "permission_scopes": {
