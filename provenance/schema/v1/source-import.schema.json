@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://signthos.dev/provenance/schema/v1/source-import.schema.json",
+  "title": "Signthos source import record v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "kind",
+    "id",
+    "classification",
+    "upstream",
+    "license",
+    "permission",
+    "import",
+    "transformation",
+    "review"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "source_import" },
+    "id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$" },
+    "classification": {
+      "type": "string",
+      "enum": ["oss_permitted", "separate_permission_required", "restricted", "unknown"]
+    },
+    "upstream": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit", "path", "sha256", "copyright_holder"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "commit": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+        "path": { "$ref": "#/$defs/relativePath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "copyright_holder": { "type": "string", "minLength": 1, "maxLength": 512 }
+      }
+    },
+    "license": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spdx", "evidence"],
+      "properties": {
+        "spdx": { "type": "string", "minLength": 1, "maxLength": 256 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1, "maxLength": 512 }
+        }
+      }
+    },
+    "permission": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["artifact", "scope"],
+          "properties": {
+            "artifact": { "type": "string", "minLength": 1, "maxLength": 512 },
+            "scope": {
+              "type": "array",
+              "minItems": 1,
+              "uniqueItems": true,
+              "items": {
+                "type": "string",
+                "enum": [
+                  "copy",
+                  "modify",
+                  "create_derivative",
+                  "redistribute",
+                  "publish_source",
+                  "sublicense",
+                  "relicense",
+                  "commercial_use"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    },
+    "import": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["destination", "sha256", "date"],
+      "properties": {
+        "destination": { "$ref": "#/$defs/relativePath" },
+        "sha256": { "$ref": "#/$defs/sha256" },
+        "date": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+      }
+    },
+    "transformation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "notes", "derives_from"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["copied", "adapted", "rewritten_with_source_reference", "generated_from_upstream"]
+        },
+        "notes": { "type": "string", "maxLength": 2048 },
+        "derives_from": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{2,127}$" }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "pull_request", "evidence"],
+      "properties": {
+        "status": { "type": "string", "enum": ["pending", "qualified_exact_head", "rejected"] },
+        "pull_request": { "type": "integer", "minimum": 1 },
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "relativePath": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!/)(?!.*\\\\)(?!.*(?:^|/)\\.\\.?(?:/|$))(?!.*//)(?!.*//$).+$"
+    },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
