@@ -79,6 +79,15 @@ For capabilities such as:
 - complex repair,
 - large compression jobs.
 
+Heavy document processors are a separate untrusted-processing boundary. They must:
+
+- receive only the document/input references and narrowly scoped processing parameters needed for the step,
+- never receive raw signing keys, KMS/HSM signing authority, signer-provider credentials, account/session secrets, or unrelated control-plane/tenant credentials,
+- execute with explicit file/page/object/memory/CPU/time limits,
+- use sandbox/process/container isolation where feasible for the selected processor,
+- return outputs through bounded artifact references and create a new document revision for content-changing results,
+- expose timeout/cancellation/failure semantics without gaining authority to perform signing or routing side effects.
+
 ## Capability discovery
 
 Workers/providers advertise:
