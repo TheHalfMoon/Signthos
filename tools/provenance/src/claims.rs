@@ -28,21 +28,21 @@ impl ClaimTracker {
         record: &serde_json::Map<String, Value>,
         report: &mut ValidationReport,
     ) {
-        if let Some(id) = record.get("id").and_then(Value::as_str) {
-            if canonical_id(id, false) {
-                self.observe_id(path, "$.id", id, report);
-            }
+        match record.get("id").and_then(Value::as_str) {
+            Some(id) if canonical_id(id, false) => self.observe_id(path, "$.id", id, report),
+            _ => {}
         }
 
-        if let Some(destination) = record
+        match record
             .get("import")
             .and_then(Value::as_object)
             .and_then(|import| import.get("destination"))
             .and_then(Value::as_str)
         {
-            if canonical_relative_path(destination) {
+            Some(destination) if canonical_relative_path(destination) => {
                 self.observe_destination(path, destination, report);
             }
+            _ => {}
         }
     }
 
@@ -76,10 +76,9 @@ impl ClaimTracker {
         record: &serde_json::Map<String, Value>,
         report: &mut ValidationReport,
     ) {
-        if let Some(id) = record.get("id").and_then(Value::as_str) {
-            if canonical_id(id, true) {
-                self.observe_id(path, "$.id", id, report);
-            }
+        match record.get("id").and_then(Value::as_str) {
+            Some(id) if canonical_id(id, true) => self.observe_id(path, "$.id", id, report),
+            _ => {}
         }
     }
 
@@ -128,7 +127,11 @@ impl ClaimTracker {
 }
 
 fn push_once(report: &mut ValidationReport, diagnostic: Diagnostic) {
-    if !report.diagnostics.iter().any(|existing| existing == &diagnostic) {
+    if !report
+        .diagnostics
+        .iter()
+        .any(|existing| existing == &diagnostic)
+    {
         report.diagnostics.push(diagnostic);
     }
 }
