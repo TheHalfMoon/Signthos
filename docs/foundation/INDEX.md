@@ -58,6 +58,7 @@ Product surfaces:
 - [`OPERATING-MODEL.md`](./OPERATING-MODEL.md) — SpecGrain/Diffciplane execution lifecycle and GitHub-first repository workflow.
 - [`CAPABILITY-CATALOG.md`](./CAPABILITY-CATALOG.md) — planned feature/capability inventory and ownership by specification.
 - [`SUCCESS-METRICS.md`](./SUCCESS-METRICS.md) — technical, product, community and business metrics.
+- [`EPIC-INDEX.md`](./EPIC-INDEX.md) — GitHub issue mapping for Specifications 001–017 and their prerequisite/authority state.
 
 ### Community and identity
 
@@ -76,7 +77,7 @@ Product surfaces:
 
 ## Planning authority rule
 
-The documents in this catalog may define future intent and successor scope. They do **not** authorize implementation before canonical prerequisites are satisfied.
+The documents and issues in this catalog may define future intent and successor scope. They do **not** authorize implementation before canonical prerequisites are satisfied.
 
 In particular:
 
