@@ -9,13 +9,13 @@ GitHub issues are durable planning records. **An open issue does not authorize i
 
 | Specification | GitHub record | State | Authority |
 |---|---|---|---|
-| 000 — Foundation | PR #2; review gate Issue #3 | CLOSED_CANONICAL | Closed; successor authority requires `F0-T021` |
+| 000 — Foundation | PR #2; review gate Issue #3; closeout PR #21 | CLOSED_CANONICAL | Closed; `F0-T021` authorizes Spec 001 after this authorization record is merged and verified |
 
 ## v0.1 execution spine
 
 | Spec | Epic | Purpose | Prerequisite summary |
 |---:|---|---|---|
-| 001 | #4 | Provenance and import system | Spec 000 `CLOSED_CANONICAL` + F0-T021 authorization |
+| 001 | #4 | Provenance and import system | `AUTHORIZED_PENDING_F0_T021_CANONICALIZATION` — Spec 000 closed; this F0-T021 record must merge and be post-merge verified |
 | 002 | #5 | Documenso brownfield baseline | Spec 001 + exact authorized import paths/rights |
 | 003 | #6 | Signthos domain/anti-corruption boundary | Spec 002 |
 | 004 | #7 | Local PDF core | Spec 003 |
@@ -42,7 +42,7 @@ GitHub issues are durable planning records. **An open issue does not authorize i
 
 ```text
 Spec 000 CLOSED_CANONICAL
-  -> F0-T021 successor authorization gate
+  -> F0-T021 successor authorization record
       -> #4 Spec 001
           -> #5 Spec 002
               -> #6 Spec 003
@@ -68,6 +68,10 @@ Do not use the existence, age, assignee, label, milestone, checkbox state, or fo
 
 ## Current frontier
 
-Foundation 000 is `CLOSED_CANONICAL`. `F0-T021` is the continuation-boundary task and remains open until canonical governance is re-read from the merged closeout state. Specification 001 remains `PLANNING_ONLY` until `F0-T021` explicitly authorizes it and live repository governance confirms no newer blocker.
+Foundation 000 is `CLOSED_CANONICAL` on canonical `main` at `a39bcaf7705ac639d2da52ffd23f2d94ba7461ed`. Its closeout is independently reviewed, exact-head qualified, merged, and post-merge verified. Foundation review-gate Issue #3 is closed.
 
-No Documenso EE/commercial path, Stirling restricted path, relicensing action, mobile distribution claim, or compliance/legal-effect claim is authorized by Foundation closeout or by the existence of a successor epic.
+`F0-T021` has re-read canonical governance and determined that Specification 001 — Provenance and Import System is the next dependency-ordered successor and has no newer blocker to its bounded provenance/import-system work. That authorization becomes canonical only after this F0-T021 record is independently qualified, merged with expected-head protection, and post-merge verified.
+
+Until then, Issue #4 remains the durable successor record and no Spec 001 implementation should begin from this candidate branch.
+
+Even after Spec 001 authorization becomes canonical, no upstream product source is authorized merely to exercise the machinery. No Documenso EE/commercial path, Stirling restricted path, relicensing action, mobile distribution claim, credential/paid-service use, or compliance/legal-effect claim is authorized by F0-T021 or by the existence of the successor epic.
