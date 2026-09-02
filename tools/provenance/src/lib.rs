@@ -4,6 +4,8 @@ mod component_review_alignment;
 mod path_alignment;
 mod validation;
 
+use std::io::Read;
+
 pub use validation::{
     CanonicalRecord, ComponentRegistryRecord, Diagnostic, MAX_RECORD_BYTES, MAX_TOTAL_BYTES,
     PolicyRecord, SourceImportRecord, ValidationReport,
@@ -44,38 +46,81 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
     let mut canonical_paths = paths.to_vec();
     canonical_paths.sort();
 
-    for path in &canonical_paths {
-        let metadata = std::fs::symlink_metadata(path)
-            .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
-        if metadata.file_type().is_symlink() {
-            return Err(format!(
-                "IO_SYMLINK: {path}: canonical validation does not follow symlinks"
-            ));
-        }
-    }
-
-    let mut report = validation::validate_paths(&canonical_paths)?;
+    let mut report = ValidationReport {
+        diagnostics: Vec::new(),
+    };
     let mut total = 0_u64;
     let mut claim_tracker = claims::ClaimTracker::default();
+
     for path in &canonical_paths {
-        let metadata = std::fs::symlink_metadata(path)
-            .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
-        let size = metadata.len();
+        let bytes = read_record_bounded(path)?;
+        let size = bytes.len() as u64;
         if size > MAX_RECORD_BYTES {
+            report.diagnostics.push(Diagnostic {
+                path: path.to_owned(),
+                code: "SIZE_RECORD",
+                field: "$".to_owned(),
+                message: format!("record exceeds {MAX_RECORD_BYTES} byte limit"),
+            });
             continue;
         }
+
         total = total.saturating_add(size);
         if total > MAX_TOTAL_BYTES {
+            report.diagnostics.push(Diagnostic {
+                path: path.to_owned(),
+                code: "SIZE_TOTAL",
+                field: "$".to_owned(),
+                message: format!("run exceeds {MAX_TOTAL_BYTES} bytes"),
+            });
             break;
         }
-        let bytes = std::fs::read(path).map_err(|error| format!("IO_READ: {path}: {error}"))?;
-        path_alignment::reconcile_bytes(path, &bytes, &mut report);
-        alignment::augment_bytes(path, &bytes, &mut report);
-        component_review_alignment::augment_bytes(path, &bytes, &mut report);
+
+        let mut current = validate_bytes(path, &bytes);
+        report.diagnostics.append(&mut current.diagnostics);
         claim_tracker.observe(path, &bytes, &mut report);
     }
+
     sort_report(&mut report);
     Ok(report)
+}
+
+fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
+    let metadata = std::fs::symlink_metadata(path)
+        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+    if metadata.file_type().is_symlink() {
+        return Err(format!(
+            "IO_SYMLINK: {path}: canonical validation does not follow symlinks"
+        ));
+    }
+    if !metadata.is_file() {
+        return Err(format!("IO_NOT_FILE: {path}"));
+    }
+
+    #[cfg(target_os = "linux")]
+    let file = {
+        use std::fs::OpenOptions;
+        use std::os::unix::fs::OpenOptionsExt;
+
+        // Linux O_NOFOLLOW closes the symlink-swap window between the metadata
+        // check above and the actual open. A raced symlink therefore fails
+        // closed instead of being followed.
+        const O_NOFOLLOW: i32 = 0o400000;
+        OpenOptions::new()
+            .read(true)
+            .custom_flags(O_NOFOLLOW)
+            .open(path)
+            .map_err(|error| format!("IO_OPEN: {path}: {error}"))?
+    };
+
+    #[cfg(not(target_os = "linux"))]
+    let file = std::fs::File::open(path).map_err(|error| format!("IO_OPEN: {path}: {error}"))?;
+
+    let mut bytes = Vec::new();
+    file.take(MAX_RECORD_BYTES + 1)
+        .read_to_end(&mut bytes)
+        .map_err(|error| format!("IO_READ: {path}: {error}"))?;
+    Ok(bytes)
 }
 
 pub fn run(args: &[&str]) -> CliResult {
@@ -196,7 +241,10 @@ fn collect_json_files(directory: &str, paths: &mut Vec<String>) -> Result<(), St
         }
         if file_type.is_dir() {
             collect_json_files(&path.to_string_lossy(), paths)?;
-        } else if file_type.is_file() && path.extension().is_some_and(|extension| extension == "json")
+        } else if file_type.is_file()
+            && path
+                .extension()
+                .is_some_and(|extension| extension == "json")
         {
             paths.push(path.to_string_lossy().replace('\\', "/"));
         }
@@ -277,8 +325,14 @@ mod tests {
     fn explicit_duplicate_path_order_is_deterministic() {
         let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("../../provenance/fixtures/multi");
-        let first = fixtures.join("duplicate-destination-a.json").to_string_lossy().into_owned();
-        let second = fixtures.join("duplicate-destination-b.json").to_string_lossy().into_owned();
+        let first = fixtures
+            .join("duplicate-destination-a.json")
+            .to_string_lossy()
+            .into_owned();
+        let second = fixtures
+            .join("duplicate-destination-b.json")
+            .to_string_lossy()
+            .into_owned();
 
         let forward = validate_paths(&[first.clone(), second.clone()]).unwrap();
         let reverse = validate_paths(&[second, first]).unwrap();
