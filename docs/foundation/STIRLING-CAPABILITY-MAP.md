@@ -105,13 +105,21 @@ The UI can then explain that a capability is unavailable instead of failing unpr
 
 ## Redaction rule
 
-Redaction is security-sensitive and must distinguish:
+Redaction is security-sensitive and has three distinct stages:
 
-1. selecting/previewing a redaction region,
-2. permanently applying content removal,
-3. verifying that targeted content is no longer recoverable through supported extraction paths.
+1. **selection/preview** — identify content or regions intended for redaction;
+2. **permanent application** — create a new PDF revision that removes the targeted content rather than drawing a visual overlay;
+3. **independent file-level verification** — verify the exported revision before Signthos may label it safely redacted.
 
-A black rectangle drawn over visible text is not a valid redaction implementation.
+The file-level safety invariant is:
+
+> Targeted content must be absent from the exported PDF, including content recoverable through independent parsers and relevant object/text/image/annotation/form/metadata inspection, within the explicitly qualified verifier corpus and threat model.
+
+At minimum, a qualified redaction implementation must test that targeted content cannot be recovered by an independent parser/toolchain selected separately from the implementation path. Hidden objects, incremental-update history, annotations, form values, metadata and embedded content must be considered where relevant to the redaction target.
+
+A black rectangle drawn over visible text is **never** sufficient evidence of redaction. A successful render is also not sufficient evidence of file-level content removal.
+
+If Signthos cannot independently establish the file-level invariant for a document/provider combination, the UI/API must return an unsupported or unverified state rather than `SAFE_REDACTION`.
 
 ## Signature rule
 
@@ -139,7 +147,31 @@ Camera
  -> sign or route
 ```
 
-Desktop QR handoff should be able to launch this capture/signing flow without exposing a long-lived bearer token in the QR payload.
+### Secure desktop-to-mobile handoff
+
+Desktop QR handoff may launch capture/signing, but the QR payload must not contain a raw document or long-lived bearer credential.
+
+Any pairing credential represented by or derived from the QR payload must be:
+
+- one-time,
+- short-lived,
+- cryptographically random/unpredictable,
+- bound to the intended handoff session and expected device/audience or an equivalent authenticated pairing context,
+- invalid after successful redemption,
+- explicitly revocable by the initiating desktop session,
+- invalidated on expiry/cancellation.
+
+Required protocol semantics before implementation qualification:
+
+1. desktop creates a bounded handoff session and one-time pairing challenge;
+2. mobile scans and presents its pairing response/device context;
+3. desktop/user confirms the intended pairing before sensitive document/signing capability is released when the threat model requires confirmation;
+4. server/P2P coordinator atomically redeems the credential so a second claimant cannot replay it;
+5. successful redemption rotates or destroys the bootstrap credential;
+6. cancellation, expiry or explicit revocation makes subsequent redemption fail closed;
+7. audit/evidence records distinguish session creation, confirmation, redemption, expiry and revocation without logging reusable secrets.
+
+An observer who photographs the QR must not be able to claim the handoff later or race the intended device without detection/confirmation controls defined by the final threat model.
 
 ## Workflow rule
 
@@ -183,7 +215,7 @@ Recommended v0.1 capability target:
 - page organization,
 - merge/split,
 - basic metadata/info,
-- safe redaction,
+- independently verified safe redaction,
 - handwritten/self-sign UX,
 - cryptographic sign/verify foundation,
 - mobile scan,
