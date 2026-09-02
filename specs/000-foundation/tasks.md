@@ -37,6 +37,7 @@ A checked task does not imply the specification or PR is merge-qualified.
 - [x] `F0-T013G` Define automation/integration, threat-model, migration/import, testing/qualification and release/distribution plans.
 - [x] `F0-T013H` Define business/pricing hypothesis, success metrics, capability catalog and community/growth plan.
 - [x] `F0-T013I` Establish GitHub-first operating model and canonical Foundation index so durable planning does not live only in chat/local scratch.
+- [x] `F0-T013J` Create GitHub planning epics for Specifications 001–017 and record their actual issue mapping/prerequisite state in `docs/foundation/EPIC-INDEX.md`.
 
 ## Foundation closeout
 
@@ -76,6 +77,28 @@ Other reviewer-path observations:
 - A GitHub Copilot reviewer request could not be established through the available repository reviewer interface.
 
 These external constraints do not reduce the exact-candidate substantive-review requirement.
+
+## Planning epic records
+
+- Spec 001 → Issue #4
+- Spec 002 → Issue #5
+- Spec 003 → Issue #6
+- Spec 004 → Issue #7
+- Spec 005 → Issue #8
+- Spec 006 → Issue #9
+- Spec 007 → Issue #10
+- Spec 008 → Issue #11
+- Spec 009 → Issue #12
+- Spec 010 → Issue #13
+- Spec 011 → Issue #14
+- Spec 012 → Issue #15
+- Spec 013 → Issue #16
+- Spec 014 → Issue #17
+- Spec 015 → Issue #18
+- Spec 016 → Issue #19
+- Spec 017 → Issue #20
+
+Issue existence does not grant implementation authority.
 
 ## Explicit blockers carried forward
 
