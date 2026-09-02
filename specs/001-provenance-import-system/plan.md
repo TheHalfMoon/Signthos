@@ -1,6 +1,6 @@
 # Specification 001 — Implementation Plan
 
-Status: SHAPING_PENDING_REVIEW
+Status: SHAPING_RECONCILIATION
 Issue: #4
 Canonical authorization base: `2144b7765595a206e691f43aefd122aa5a150a1b`
 
@@ -8,7 +8,7 @@ Canonical authorization base: `2144b7765595a206e691f43aefd122aa5a150a1b`
 
 Deliver a small standalone provenance subsystem that makes future source import auditable and fail-closed before Specification 002 is allowed to import product code.
 
-The implementation sequence is intentionally narrower than the full Signthos product architecture. Specification 001 creates repository control-plane tooling only. It does not create the web app, server, database, desktop shell, mobile app, signing engine or PDF engine.
+Specification 001 creates repository control-plane tooling only. It does not create the web app, server, database, desktop shell, mobile app, signing engine or PDF engine.
 
 ## 2. Architectural decisions
 
@@ -23,13 +23,13 @@ Reasons:
 - cross-platform execution for Linux, macOS and Windows;
 - no coupling to a future Documenso-derived JavaScript workspace;
 - offline-by-default operation;
-- easy exact-version dependency locking with `Cargo.lock`.
+- exact dependency locking with `Cargo.lock`.
 
 The tool is not a production runtime dependency of Signthos product code.
 
 ### 2.2 Canonical JSON records
 
-Canonical provenance records are UTF-8 JSON. JSON Schema artifacts document the public record contract, while Rust typed deserialization is authoritative for executable validation.
+Canonical provenance records are UTF-8 JSON. JSON Schema artifacts document the public record contract, while Rust typed deserialization/semantic validation is authoritative for executable failure behavior.
 
 The parser must reject unknown fields. YAML is not accepted in v1.
 
@@ -37,7 +37,7 @@ The parser must reject unknown fields. YAML is not accepted in v1.
 
 Do not hand-write SPDX grammar.
 
-The implementation baseline is the maintained Embark Studios `spdx` crate family. Current upstream projects `cargo-deny` and `cargo-about` use `spdx` 0.13, which is a suitable candidate baseline, but the bootstrap task must pin the exact crate version/checksum/license in `Cargo.lock` and the component registry before merge.
+The implementation baseline is the maintained Embark Studios `spdx` crate family. Current upstream projects `cargo-deny` and `cargo-about` use the `spdx` 0.13 family, which is a suitable candidate baseline, but Grain B must pin the exact crate version/checksum/license in `Cargo.lock` and the component registry before merge.
 
 No dependency version named in this plan is authority by itself; live package metadata and lockfile evidence at the implementation head control.
 
@@ -53,6 +53,8 @@ Prefer Rust standard library plus a small dependency set:
 - test-only crates only when they reduce fixture/process-test risk.
 
 Do not add network clients, async runtimes, native Git libraries, databases, template engines or web frameworks unless a later task demonstrates necessity and expands authority explicitly.
+
+Strict Gregorian `YYYY-MM-DD` validation is simple bounded domain logic and should be implemented directly rather than adding a date/time runtime dependency solely for this contract, unless implementation evidence shows that doing so is unsafe or materially less maintainable.
 
 ### 2.5 Local Git process boundary
 
@@ -71,6 +73,28 @@ Machine-readable validation output and NOTICE generation must be deterministic:
 - LF line endings;
 - byte-identical output from byte-identical validated inputs.
 
+### 2.7 Import authorization is part of semantic validity
+
+A source-import record cannot become import-ready through source/license fields alone.
+
+Canonical validation requires:
+
+- `review.status=qualified_exact_head`;
+- positive immutable Signthos PR number;
+- at least one stable non-secret substantive review-evidence reference.
+
+`pending` and `rejected` records remain structurally representable for workflow staging but fail canonical/import-ready `validate`.
+
+To avoid current-commit self-reference, later import PRs use a two-stage Diffciplane handoff:
+
+1. candidate record begins `pending` after the PR number exists;
+2. independent review evaluates the exact imported-byte candidate head;
+3. manifest-only amendment records `qualified_exact_head`, PR identity and review evidence without changing imported bytes;
+4. reviewer re-evaluates the authorization delta/new exact head and confirms imported digests are unchanged;
+5. final exact-head qualification remains external governance evidence.
+
+No canonical-validation flag may silently convert a pending import into PASS.
+
 ## 3. Repository target surface
 
 Specification 001 may ultimately modify only these top-level surfaces unless the task ledger is explicitly amended and independently reviewed:
@@ -81,9 +105,11 @@ provenance/
 tools/provenance/
 .github/workflows/provenance.yml
 NOTICE
-AGENTS.md                 # only if contributor execution rules require Spec 001-specific amendment
-README.md                 # only for bounded provenance contributor entry-point documentation
+AGENTS.md
+README.md
 ```
+
+`AGENTS.md` and `README.md` are authorized only for bounded provenance invocation/contributor instructions in the explicit task that allows them.
 
 No product application source directory is authorized.
 
@@ -125,14 +151,17 @@ Allowed paths:
 
 No source-import records or upstream product code.
 
-### Grain C — canonical schemas and strict record loading
+### Grain C — canonical schemas, strict loading and import-readiness fields
 
 Purpose:
 
 - implement source-import, component and policy Rust models;
 - add JSON Schema artifacts;
 - reject unknown/malformed/oversized records;
-- enforce stable identities, normalized paths and exact SHA/digest shapes.
+- enforce stable identities, normalized paths and exact SHA/digest shapes;
+- enforce semantic Gregorian import date;
+- enforce controlled source-import review state, positive immutable PR identity and non-empty stable review evidence;
+- ensure `pending`/`rejected` fail canonical/import-ready validation.
 
 Allowed paths:
 
@@ -269,8 +298,10 @@ Cover pure validation functions:
 
 - schema/model constraints;
 - path normalization;
-- SHA-1 commit-shape validation;
+- v1 40-character Git object-id validation;
 - SHA-256 digest validation;
+- strict proleptic-Gregorian date validation;
+- source-import review-state/PR/evidence validity;
 - SPDX policy;
 - permission scope closure;
 - restricted-path precedence;
@@ -282,15 +313,23 @@ Cover pure validation functions:
 
 Versioned `provenance/fixtures/valid` and `provenance/fixtures/invalid` cases must include:
 
-- minimal valid OSS import;
+- minimal valid OSS import with `qualified_exact_head`, positive PR identity and review evidence;
 - valid separate-permission record using a non-secret evidence id;
+- valid leap date `2024-02-29`;
 - missing required field;
 - unknown field;
 - malformed JSON;
 - oversized record;
-- abbreviated commit SHA;
+- abbreviated commit object id;
 - uppercase/non-canonical digest;
 - absolute/traversal/backslash path;
+- invalid dates including `2025-02-29`, `2026-13-01`, `2026-02-30`, `2026-2-01`, and `0000-01-01`;
+- missing review evidence;
+- empty review evidence;
+- missing/non-positive PR identity;
+- `pending` source-import review state;
+- `rejected` source-import review state;
+- unknown source-import review state;
 - bare `AGPL-3.0`;
 - unknown SPDX id;
 - `restricted` and `unknown` import classifications;
@@ -312,6 +351,7 @@ Exercise:
 - exit codes 0–4;
 - `validate` human output;
 - `validate --json` deterministic output;
+- proof that canonical `validate` rejects pending/rejected import authorization;
 - `notice` and `notice --check`;
 - `explain <id>`;
 - `verify-source` with synthetic local Git repositories;
@@ -358,16 +398,16 @@ Current public evidence supports the architectural candidate that Embark Studios
 
 Do not cite mutable crate popularity or version numbers as long-lived authority. The committed lockfile and component records are the release-relevant evidence.
 
-## 9. No hidden legal inference
+## 9. No hidden legal or review inference
 
 The validator enforces encoded engineering policy. It must distinguish:
 
 - syntactic validity;
 - repository policy validity;
-- preserved evidence references;
+- preserved review/evidence references;
 - external/legal facts that remain unverified.
 
-A syntactically complete record cannot turn an unknown legal right into an approved right.
+A syntactically complete record cannot turn an unknown legal right into an approved right. Likewise, `review.status=qualified_exact_head` plus an evidence string cannot prove reviewer independence by itself; independent GitHub review and exact-head qualification remain external Diffciplane gates.
 
 ## 10. Shaping exit gate
 
@@ -377,7 +417,8 @@ Implementation may begin only after:
 2. the change surface is shaping-only;
 3. independent substantive review evaluates the exact shaping head;
 4. all findings are reconciled;
-5. exact-head qualification is recorded;
-6. the shaping PR merges with expected-head protection;
-7. post-merge verification confirms canonical `main` contains only the intended shaping surface;
-8. Issue #4 remains `ACTIVE` and no newer governance blocker exists.
+5. the amended exact head receives independent re-evaluation;
+6. exact-head qualification is recorded;
+7. the shaping PR merges with expected-head protection;
+8. post-merge verification confirms canonical `main` contains only the intended shaping surface;
+9. Issue #4 remains `ACTIVE` and no newer governance blocker exists.
