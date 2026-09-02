@@ -48,7 +48,7 @@ A checked task does not imply the specification or PR is merge-qualified.
 - [x] `F0-T018` Re-run exact-head qualification after review reconciliation; record unavailable/nonexistent CI accurately rather than treating skipped checks as PASS.
 - [x] `F0-T019` Merge the exact qualified Foundation 000 head with expected-head protection where supported.
 - [x] `F0-T020` Perform post-merge verification on canonical `main`.
-- [ ] `F0-T021` Re-read canonical governance and determine whether Specification 001 is genuinely authorized.
+- [x] `F0-T021` Re-read canonical governance and determine whether Specification 001 is genuinely authorized.
 
 ## Canonical closeout evidence
 
@@ -114,9 +114,35 @@ Post-merge verification established that canonical `main` at `0a14925dec8326a0c1
 - no production application implementation
 - no production deployment configuration
 
-Foundation 000 is therefore `CLOSED_CANONICAL` once this bookkeeping closeout commit is itself merged and verified on canonical `main`.
+Foundation 000 was then canonically closed through PR #21. That closeout received an independent exact-head substantive PASS in CodeRabbit issue comment `5512353637`, exact-head qualification in PR #21 comment `5512372913`, expected-head merge to canonical commit `a39bcaf7705ac639d2da52ffd23f2d94ba7461ed`, and post-merge verification in PR #21 comment `5512411428`.
 
-`F0-T021` deliberately remains open until that closeout merge is canonical and live governance is re-read from `main`.
+### F0-T021 — successor authorization
+
+Canonical governance was re-read from `main` at:
+
+`a39bcaf7705ac639d2da52ffd23f2d94ba7461ed`
+
+Observed successor-authority facts:
+
+- Specification 000 is `CLOSED_CANONICAL`.
+- Constitution status is `CANONICAL`.
+- Foundation closeout is merged and post-merge verified.
+- Foundation review-gate Issue #3 is closed as completed.
+- no open pull request exists at the authorization check.
+- Issue #4 is the dependency-ordered Specification 001 epic.
+- `ROADMAP.md`, `provenance/UPSTREAM.md`, the Constitution, `AGENTS.md`, and the Foundation epic index expose no newer blocker to building the provenance/import machinery itself.
+- `provenance/UPSTREAM.md` remains `PRE-IMPORT` and fail-closed.
+
+Determination: **Specification 001 — Provenance and Import System is authorized after this F0-T021 record is merged and post-merge verified.** Its authority is limited to the bounded provenance/import-system specification and implementation that canonical Spec 001 defines. It does not authorize any upstream product-source import merely to exercise the machinery.
+
+The following gates remain independently binding and are not waived by Spec 001 authorization:
+
+- `B001` Documenso commercial/EE rights evidence;
+- `B002` final component/repository licensing compatibility before derived/imported product-code release;
+- `B003` Stirling restricted-source rights;
+- `B004` exact mobile-distribution dependency/derivation review;
+- `B005` signing/PAdES/regulatory claim evidence;
+- `B006` reproducible market/pricing evidence for hard business gates.
 
 ## Planning epic records
 
@@ -153,4 +179,4 @@ These do not prevent Foundation 000 from documenting the architecture, but they 
 
 ## Canonical completion rule
 
-Specification 000 is `CLOSED_CANONICAL` after `F0-T001` through `F0-T020` are satisfied by observed evidence and this closeout bookkeeping is merged and reverified on canonical `main`. `F0-T021` is the continuation-boundary task and may authorize Specification 001 only after that closeout.
+Specification 000 is `CLOSED_CANONICAL`. `F0-T021` authorizes Specification 001 only after this successor-authorization record is independently qualified, merged with expected-head protection, and post-merge verified on canonical `main`.
