@@ -25,26 +25,41 @@ A checked implementation task does not imply the PR, grain or specification is m
 - [ ] `S1-T010` Merge the exact qualified shaping head with `expected_head_sha` protection.
 - [ ] `S1-T011` Post-merge verify canonical `main` contains only the intended shaping surface and re-read Issue #4/governance before implementation.
 
-### S1-T007 review evidence
+### Shaping review/reconciliation evidence
 
-CodeRabbit issue comment `5512755250` substantively reviewed exact shaping head:
+Initial substantive CodeRabbit review:
 
-`16d769d0dc00448c65a55119d12a2552c631b55a`
-
-against base:
-
-`2144b7765595a206e691f43aefd122aa5a150a1b`
-
-Result: `ACTIONABLE FINDINGS`.
+- comment: `5512755250`
+- reviewed head: `16d769d0dc00448c65a55119d12a2552c631b55a`
+- base: `2144b7765595a206e691f43aefd122aa5a150a1b`
+- result: `ACTIONABLE FINDINGS`
 
 The reviewer confirmed the shaping-only three-file surface and found no product source, Rust tooling, dependency manifests, CI workflow, credentials, paid-service configuration or Specification 002 implementation.
 
-Two findings require reconciliation before qualification:
+Initial findings:
 
-1. source-import records must bind import-ready state to a controlled review status, positive immutable Signthos PR identity and stable non-secret substantive review-evidence reference; pending/missing/rejected authorization must fail canonical validation while final exact-head qualification remains externally recorded to avoid self-reference;
-2. `import.date` must receive executable strict Gregorian `YYYY-MM-DD` validation with leap-day/impossible-date fixtures rather than relying on a conceptual string or non-enforced JSON Schema format.
+1. source-import records needed controlled review status, positive immutable Signthos PR identity and substantive review-evidence binding while keeping final merge/exact-head qualification outside the self-referential record;
+2. `import.date` needed executable strict Gregorian `YYYY-MM-DD` validation with leap-day/impossible-date fixtures.
 
-The current reconciliation amends `spec.md`, `plan.md` and this ledger only. `S1-T008` remains open until an independent reviewer re-evaluates the amended exact head.
+First amended exact-head re-evaluation:
+
+- comment: `5512866118`
+- reviewed head: `0aba1ee0bf62c8406185a2e21d8802baa1455d61`
+- base: `2144b7765595a206e691f43aefd122aa5a150a1b`
+- result: `ACTIONABLE FINDING`
+
+That re-evaluation explicitly confirmed both initial findings were reconciled, then identified one remaining fail-closed weakness: `review.evidence` was constrained only as non-empty text and did not define an executable stable-reference grammar.
+
+Current reconciliation therefore additionally requires:
+
+- v1 evidence kinds `github:issue-comment`, `github:pull-request-review`, and `github:pull-request-review-comment` only;
+- canonical lexical form `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$`;
+- offline local syntax validation;
+- `REVIEW_*` rejection for arbitrary text, generic URLs, unsupported kinds, zero/negative/signed/leading-zero ids, mutable labels and non-ASCII decimal ids;
+- valid/invalid fixture coverage for the grammar;
+- explicit preservation of live GitHub verification of existence, independence, substantive scope, PR relationship and exact-head applicability as external Diffciplane gates.
+
+`S1-T008` remains open until an independent reviewer evaluates the new exact head and returns no unresolved actionable findings.
 
 ### Shaping path allowlist
 
@@ -95,12 +110,14 @@ Dependency: `S1-T021`.
 - [ ] `S1-T024` Implement strict source-import/component/policy typed deserialization with unknown-field rejection.
 - [ ] `S1-T025` Enforce per-record and total-run byte limits before unbounded allocation/deserialization.
 - [ ] `S1-T026` Validate canonical ids, exact 40-character lowercase hexadecimal v1 Git object id, lowercase SHA-256 digests and normalized relative POSIX paths.
-- [ ] `S1-T026A` Enforce semantic proleptic-Gregorian `import.date` in exact zero-padded `YYYY-MM-DD` form, including year range `0001`–`9999`, leap-year rules and impossible-date rejection.
-- [ ] `S1-T026B` Enforce source-import review vocabulary `pending|qualified_exact_head|rejected`, positive immutable Signthos PR identity and non-empty stable non-secret review evidence; only `qualified_exact_head` may pass canonical/import-ready validation.
+- [ ] `S1-T026A` Enforce semantic proleptic-Gregorian `import.date` in exact zero-padded ASCII `YYYY-MM-DD` form, including year range `0001`–`9999`, leap-year rules and impossible-date rejection.
+- [ ] `S1-T026B` Enforce source-import review vocabulary `pending|qualified_exact_head|rejected`, positive immutable Signthos PR identity and non-empty review evidence; only `qualified_exact_head` may pass canonical/import-ready validation.
 - [ ] `S1-T026C` Preserve the two-stage authorization handoff: pending exact imported-byte review, manifest-only qualification amendment, independent exact-head/delta re-evaluation, and external Diffciplane qualification without a self-referential current-commit field.
+- [ ] `S1-T026D` Enforce the canonical offline review-evidence grammar `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$` and reject arbitrary text, URLs, unsupported kinds, non-canonical/mutable ids and non-ASCII decimal forms with `REVIEW_*` diagnostics.
+- [ ] `S1-T026E` Keep semantic verification that a canonical evidence reference exists, is independent/substantive, belongs to the declared PR and covers the applicable exact head outside local syntax validation as a mandatory live Diffciplane gate.
 - [ ] `S1-T027` Reject absolute paths, traversal, backslash aliases, malformed normalization and duplicate semantic identities/destination claims.
 - [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output, including `DATE_*` and `REVIEW_*` families.
-- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, missing/non-positive PR identity, pending/rejected/unknown review states.
+- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, valid canonical evidence kinds, arbitrary free text, generic URLs, unsupported evidence kinds, zero/negative/signed/leading-zero/mutable/non-ASCII evidence ids, missing/non-positive PR identity, and pending/rejected/unknown review states.
 - [ ] `S1-T030` Run focused/full tests and change-surface proof.
 - [ ] `S1-T031` Independent exact-head review, reconciliation, qualification, expected-head merge and post-merge verification for Grain C.
 
