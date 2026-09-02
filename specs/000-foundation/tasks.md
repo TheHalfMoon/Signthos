@@ -30,8 +30,8 @@ A checked task does not imply the specification or PR is merge-qualified.
 
 ## Foundation closeout
 
-- [ ] `F0-T014` Add repository agent/contributor execution rules for Foundation 000.
-- [ ] `F0-T015` Run exact-head change-surface reconciliation and prove no prohibited source import.
+- [x] `F0-T014` Add repository agent/contributor execution rules for Foundation 000.
+- [x] `F0-T015` Run change-surface reconciliation and prove no prohibited source import; recheck exact candidate head before merge qualification.
 - [ ] `F0-T016` Obtain independent substantive review of architecture, provenance, competitor coverage and roadmap decomposition.
 - [ ] `F0-T017` Reconcile all substantive review findings on the exact candidate head.
 - [ ] `F0-T018` Re-run exact-head qualification after review reconciliation.
