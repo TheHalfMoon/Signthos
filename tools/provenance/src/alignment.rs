@@ -141,6 +141,9 @@ fn policy(path: &str, record: &Map<String, Value>, report: &mut ValidationReport
             }
         }
 
+        optional_string_type(path, rule, "repository", &format!("{base}.repository"), report);
+        optional_string_type(path, rule, "path_prefix", &format!("{base}.path_prefix"), report);
+
         if rule.contains_key("expression") {
             bounded_string(
                 path,
@@ -170,6 +173,18 @@ fn policy(path: &str, record: &Map<String, Value>, report: &mut ValidationReport
 
 fn object<'a>(record: &'a Map<String, Value>, key: &str) -> Option<&'a Map<String, Value>> {
     record.get(key).and_then(Value::as_object)
+}
+
+fn optional_string_type(
+    path: &str,
+    record: &Map<String, Value>,
+    key: &str,
+    field: &str,
+    report: &mut ValidationReport,
+) {
+    if record.contains_key(key) && !matches!(record.get(key), Some(Value::String(_))) {
+        push(report, path, "SCHEMA_TYPE", field, "expected string");
+    }
 }
 
 fn bounded_string(
@@ -342,5 +357,25 @@ mod tests {
         let mut report = ValidationReport { diagnostics: Vec::new() };
         augment_bytes("fixture.json", &serde_json::to_vec(&value).unwrap(), &mut report);
         assert!(report.diagnostics.iter().any(|diagnostic| diagnostic.code == "SCHEMA_UNIQUE"));
+    }
+
+    #[test]
+    fn policy_optional_path_fields_require_strings() {
+        let value = json!({
+            "kind": "policy",
+            "rules": [{
+                "id": "rule-one",
+                "repository": 7,
+                "path_prefix": false
+            }]
+        });
+        let mut report = ValidationReport { diagnostics: Vec::new() };
+        augment_bytes("fixture.json", &serde_json::to_vec(&value).unwrap(), &mut report);
+        assert!(report.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == "SCHEMA_TYPE" && diagnostic.field == "$.rules[0].repository"
+        }));
+        assert!(report.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code == "SCHEMA_TYPE" && diagnostic.field == "$.rules[0].path_prefix"
+        }));
     }
 }
