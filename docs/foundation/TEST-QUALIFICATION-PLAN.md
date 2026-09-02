@@ -128,9 +128,14 @@ Examples:
 
 ### Redaction
 
-- targeted text/content is not recoverable through supported extraction/object paths,
-- rendered appearance is correct,
-- metadata/attachments scope documented.
+A provider may claim safe redaction only when the **exported PDF** passes an independent file-level verification invariant:
+
+- targeted text/content is absent when inspected by a parser/toolchain independent from the redaction implementation where practicable,
+- recovery attempts cover object/content streams and other recoverable layers relevant to the claimed scope rather than only the provider's own extraction API,
+- rendered appearance is correct but is treated as necessary and insufficient by itself,
+- metadata/attachments/annotations/forms scope is documented and tested where included in the claim,
+- a fixture proving recovery from a visual-overlay-only redaction fails the safe-redaction qualification,
+- if independent verification cannot cover the advertised redaction scope, qualification fails closed and the product reports the verification as unsupported/incomplete rather than safe.
 
 ### Signature-preserving operations
 
