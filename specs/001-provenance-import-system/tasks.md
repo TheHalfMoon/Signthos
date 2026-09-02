@@ -50,14 +50,24 @@ First amended exact-head re-evaluation:
 
 That re-evaluation explicitly confirmed both initial findings were reconciled, then identified one remaining fail-closed weakness: `review.evidence` was constrained only as non-empty text and did not define an executable stable-reference grammar.
 
-Current reconciliation therefore additionally requires:
+Second amended exact-head re-evaluation:
+
+- comment: `5513410383`
+- reviewed head: `d7defb42d32a1ab95faa7a40cfb15b699e7b816b`
+- base: `2144b7765595a206e691f43aefd122aa5a150a1b`
+- result: `ACTIONABLE FINDING`
+
+That re-evaluation confirmed the earlier authorization/date findings and executable evidence-reference grammar were reconciled. It identified one remaining semantic contradiction: an offline local validator cannot emit `REVIEW_*` based on whether a syntax-valid GitHub evidence reference has been externally proven to exist, be independent/substantive, belong to the declared PR, or apply to the exact head.
+
+Current reconciliation therefore requires:
 
 - v1 evidence kinds `github:issue-comment`, `github:pull-request-review`, and `github:pull-request-review-comment` only;
 - canonical lexical form `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$`;
-- offline local syntax validation;
+- offline local syntax/record-state validation only;
 - `REVIEW_*` rejection for arbitrary text, generic URLs, unsupported kinds, zero/negative/signed/leading-zero ids, mutable labels and non-ASCII decimal ids;
-- valid/invalid fixture coverage for the grammar;
-- explicit preservation of live GitHub verification of existence, independence, substantive scope, PR relationship and exact-head applicability as external Diffciplane gates.
+- valid/invalid fixture coverage for those record-local rules;
+- explicit preservation of live GitHub verification of existence, independence, substantive scope, PR relationship and exact-head applicability as external Diffciplane gates;
+- explicit rule that absence/failure of those live facts blocks external qualification/merge rather than local `validate`, and that local validator PASS is never sufficient Diffciplane qualification.
 
 `S1-T008` remains open until an independent reviewer evaluates the new exact head and returns no unresolved actionable findings.
 
@@ -113,11 +123,11 @@ Dependency: `S1-T021`.
 - [ ] `S1-T026A` Enforce semantic proleptic-Gregorian `import.date` in exact zero-padded ASCII `YYYY-MM-DD` form, including year range `0001`–`9999`, leap-year rules and impossible-date rejection.
 - [ ] `S1-T026B` Enforce source-import review vocabulary `pending|qualified_exact_head|rejected`, positive immutable Signthos PR identity and non-empty review evidence; only `qualified_exact_head` may pass canonical/import-ready validation.
 - [ ] `S1-T026C` Preserve the two-stage authorization handoff: pending exact imported-byte review, manifest-only qualification amendment, independent exact-head/delta re-evaluation, and external Diffciplane qualification without a self-referential current-commit field.
-- [ ] `S1-T026D` Enforce the canonical offline review-evidence grammar `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$` and reject arbitrary text, URLs, unsupported kinds, non-canonical/mutable ids and non-ASCII decimal forms with `REVIEW_*` diagnostics.
-- [ ] `S1-T026E` Keep semantic verification that a canonical evidence reference exists, is independent/substantive, belongs to the declared PR and covers the applicable exact head outside local syntax validation as a mandatory live Diffciplane gate.
+- [ ] `S1-T026D` Enforce the canonical offline review-evidence grammar `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$` and reject arbitrary text, URLs, unsupported kinds, non-canonical/mutable ids and non-ASCII decimal forms with record-local `REVIEW_*` diagnostics.
+- [ ] `S1-T026E` Keep semantic verification that a canonical evidence reference exists, is independent/substantive, belongs to the declared PR and covers the applicable exact head outside local syntax validation as a mandatory live Diffciplane gate; absence/failure blocks external qualification/merge rather than local `validate`, and a local PASS never implies qualification.
 - [ ] `S1-T027` Reject absolute paths, traversal, backslash aliases, malformed normalization and duplicate semantic identities/destination claims.
-- [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output, including `DATE_*` and `REVIEW_*` families.
-- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, valid canonical evidence kinds, arbitrary free text, generic URLs, unsupported evidence kinds, zero/negative/signed/leading-zero/mutable/non-ASCII evidence ids, missing/non-positive PR identity, and pending/rejected/unknown review states.
+- [ ] `S1-T028` Implement stable deterministic diagnostic model and `validate` / `validate --json` baseline output, including `DATE_*` and record-local `REVIEW_*` families.
+- [ ] `S1-T029` Add valid/invalid synthetic fixtures for every Grain C record-local failure rule, including valid leap day, impossible/non-canonical dates, missing/empty review evidence, valid canonical evidence kinds, arbitrary free text, generic URLs, unsupported evidence kinds, zero/negative/signed/leading-zero/mutable/non-ASCII evidence ids, missing/non-positive PR identity, and pending/rejected/unknown review states.
 - [ ] `S1-T030` Run focused/full tests and change-surface proof.
 - [ ] `S1-T031` Independent exact-head review, reconciliation, qualification, expected-head merge and post-merge verification for Grain C.
 
