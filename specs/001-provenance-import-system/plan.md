@@ -81,7 +81,25 @@ Canonical validation requires:
 
 - `review.status=qualified_exact_head`;
 - positive immutable Signthos PR number;
-- at least one stable non-secret substantive review-evidence reference.
+- at least one canonical immutable GitHub review-evidence reference.
+
+The only v1 evidence-reference forms are:
+
+```text
+github:issue-comment:<positive-decimal-id>
+github:pull-request-review:<positive-decimal-id>
+github:pull-request-review-comment:<positive-decimal-id>
+```
+
+The executable lexical contract is:
+
+```text
+^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$
+```
+
+Arbitrary strings, URLs, mutable labels, unsupported GitHub reference kinds, zero/negative/signed/leading-zero ids and non-ASCII decimal digits fail `REVIEW_*` validation.
+
+Syntax checking is intentionally local and offline. The validator does not contact GitHub and cannot infer reviewer independence, substantive scope, existence, PR relationship or exact-head applicability from the string. Those remain external Diffciplane gates verified from live GitHub before qualification.
 
 `pending` and `rejected` records remain structurally representable for workflow staging but fail canonical/import-ready `validate`.
 
@@ -89,7 +107,7 @@ To avoid current-commit self-reference, later import PRs use a two-stage Diffcip
 
 1. candidate record begins `pending` after the PR number exists;
 2. independent review evaluates the exact imported-byte candidate head;
-3. manifest-only amendment records `qualified_exact_head`, PR identity and review evidence without changing imported bytes;
+3. manifest-only amendment records `qualified_exact_head`, PR identity and canonical evidence reference without changing imported bytes;
 4. reviewer re-evaluates the authorization delta/new exact head and confirms imported digests are unchanged;
 5. final exact-head qualification remains external governance evidence.
 
@@ -160,8 +178,8 @@ Purpose:
 - reject unknown/malformed/oversized records;
 - enforce stable identities, normalized paths and exact SHA/digest shapes;
 - enforce semantic Gregorian import date;
-- enforce controlled source-import review state, positive immutable PR identity and non-empty stable review evidence;
-- ensure `pending`/`rejected` fail canonical/import-ready validation.
+- enforce controlled source-import review state, positive immutable PR identity and canonical review-evidence grammar;
+- ensure `pending`/`rejected` and malformed/unsupported evidence references fail canonical/import-ready validation.
 
 Allowed paths:
 
@@ -301,7 +319,8 @@ Cover pure validation functions:
 - v1 40-character Git object-id validation;
 - SHA-256 digest validation;
 - strict proleptic-Gregorian date validation;
-- source-import review-state/PR/evidence validity;
+- source-import review-state/PR validity;
+- canonical review-evidence kind/id grammar;
 - SPDX policy;
 - permission scope closure;
 - restricted-path precedence;
@@ -313,7 +332,8 @@ Cover pure validation functions:
 
 Versioned `provenance/fixtures/valid` and `provenance/fixtures/invalid` cases must include:
 
-- minimal valid OSS import with `qualified_exact_head`, positive PR identity and review evidence;
+- minimal valid OSS import with `qualified_exact_head`, positive PR identity and canonical review evidence;
+- valid review evidence forms for issue comment, PR review and PR review comment ids;
 - valid separate-permission record using a non-secret evidence id;
 - valid leap date `2024-02-29`;
 - missing required field;
@@ -326,6 +346,12 @@ Versioned `provenance/fixtures/valid` and `provenance/fixtures/invalid` cases mu
 - invalid dates including `2025-02-29`, `2026-13-01`, `2026-02-30`, `2026-2-01`, and `0000-01-01`;
 - missing review evidence;
 - empty review evidence;
+- free-text review evidence such as `approved`;
+- mutable/generic URL review evidence;
+- unsupported evidence kind such as `github:issue:23`;
+- zero/negative/signed/leading-zero evidence ids;
+- mutable label id such as `latest`;
+- non-ASCII decimal evidence id;
 - missing/non-positive PR identity;
 - `pending` source-import review state;
 - `rejected` source-import review state;
@@ -351,7 +377,8 @@ Exercise:
 - exit codes 0–4;
 - `validate` human output;
 - `validate --json` deterministic output;
-- proof that canonical `validate` rejects pending/rejected import authorization;
+- proof that canonical `validate` rejects pending/rejected import authorization and malformed/unsupported review evidence;
+- proof that review-evidence syntax validation is offline and does not attempt GitHub access;
 - `notice` and `notice --check`;
 - `explain <id>`;
 - `verify-source` with synthetic local Git repositories;
@@ -404,10 +431,10 @@ The validator enforces encoded engineering policy. It must distinguish:
 
 - syntactic validity;
 - repository policy validity;
-- preserved review/evidence references;
-- external/legal facts that remain unverified.
+- canonical evidence-reference syntax;
+- external review semantics and legal facts that remain unverified.
 
-A syntactically complete record cannot turn an unknown legal right into an approved right. Likewise, `review.status=qualified_exact_head` plus an evidence string cannot prove reviewer independence by itself; independent GitHub review and exact-head qualification remain external Diffciplane gates.
+A syntactically complete record cannot turn an unknown legal right into an approved right. Likewise, `review.status=qualified_exact_head` plus a syntactically canonical evidence reference cannot prove existence, reviewer independence, substantive scope, PR relationship or exact-head applicability by itself; live GitHub verification and independent exact-head qualification remain external Diffciplane gates.
 
 ## 10. Shaping exit gate
 
