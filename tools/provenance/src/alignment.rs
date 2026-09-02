@@ -142,8 +142,8 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
         );
 
         if let Some(license) = object(component, "license") {
-            if license.get("classification").and_then(Value::as_str) == Some("spdx") {
-                bounded_string(
+            match license.get("classification").and_then(Value::as_str) {
+                Some("spdx") => bounded_string(
                     path,
                     license,
                     "spdx",
@@ -151,7 +151,8 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
                     1,
                     256,
                     report,
-                );
+                ),
+                _ => {}
             }
             unique_string_array(
                 path,
