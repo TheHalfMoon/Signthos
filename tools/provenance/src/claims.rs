@@ -151,6 +151,9 @@ fn canonical_relative_path(value: &str) -> bool {
         || value.starts_with('/')
         || value.ends_with('/')
         || value.contains('\\')
+        || value
+            .chars()
+            .any(|character| matches!(character, '\n' | '\r' | '\u{2028}' | '\u{2029}'))
         || drive_qualified(value)
     {
         return false;
@@ -186,18 +189,38 @@ mod tests {
             "import": {"destination": "src/other.rs"}
         });
         let mut tracker = ClaimTracker::default();
-        let mut report = ValidationReport { diagnostics: Vec::new() };
-        tracker.observe("a.json", &serde_json::to_vec(&first).unwrap(), &mut report);
-        tracker.observe("b.json", &serde_json::to_vec(&second).unwrap(), &mut report);
-        assert!(report
-            .diagnostics
-            .iter()
-            .any(|diagnostic| diagnostic.code == "SCHEMA_DUPLICATE_ID"));
+        let mut report = ValidationReport {
+            diagnostics: Vec::new(),
+        };
+        tracker.observe(
+            "a.json",
+            &serde_json::to_vec(&first).unwrap(),
+            &mut report,
+        );
+        tracker.observe(
+            "b.json",
+            &serde_json::to_vec(&second).unwrap(),
+            &mut report,
+        );
+        assert!(
+            report
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "SCHEMA_DUPLICATE_ID")
+        );
     }
 
     #[test]
     fn utf8_relative_paths_are_canonical_claims() {
         assert!(canonical_relative_path("src/ملف.rs"));
-        assert!(!canonical_relative_path("../ملف.rs"));
+        for value in [
+            "../ملف.rs",
+            "src/\nrecord.rs",
+            "src/\rrecord.rs",
+            "src/\u{2028}record.rs",
+            "src/\u{2029}record.rs",
+        ] {
+            assert!(!canonical_relative_path(value), "{value:?}");
+        }
     }
 }
