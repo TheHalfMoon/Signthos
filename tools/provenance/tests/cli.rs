@@ -74,7 +74,13 @@ fn validate_json_is_machine_readable_and_uses_stdout() {
     assert!(output.stderr.is_empty());
     let value: serde_json::Value = serde_json::from_slice(&output.stdout).unwrap();
     assert_eq!(value["valid"], false);
-    assert!(value["diagnostics"].as_array().unwrap().iter().any(|item| item["code"] == "DATE_INVALID"));
+    assert!(
+        value["diagnostics"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|item| item["code"] == "DATE_INVALID")
+    );
 }
 
 #[test]
