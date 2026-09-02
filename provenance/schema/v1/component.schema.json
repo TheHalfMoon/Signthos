@@ -82,8 +82,12 @@
         "license": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["spdx", "evidence"],
+          "required": ["classification", "evidence"],
           "properties": {
+            "classification": {
+              "type": "string",
+              "enum": ["spdx", "restricted", "custom", "unknown"]
+            },
             "spdx": {
               "type": "string",
               "minLength": 1,
@@ -99,7 +103,29 @@
                 "maxLength": 512
               }
             }
-          }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "classification": { "const": "spdx" }
+                }
+              },
+              "then": { "required": ["spdx"] }
+            },
+            {
+              "if": {
+                "properties": {
+                  "classification": {
+                    "enum": ["restricted", "custom", "unknown"]
+                  }
+                }
+              },
+              "then": {
+                "not": { "required": ["spdx"] }
+              }
+            }
+          ]
         },
         "artifact_form": {
           "type": "string",
