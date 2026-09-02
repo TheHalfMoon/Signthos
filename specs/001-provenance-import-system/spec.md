@@ -80,6 +80,7 @@ When these sources conflict, the Constitution, active specification and live can
 - stable permission-scope vocabulary;
 - stable transformation taxonomy;
 - stable source-import review/authorization vocabulary;
+- canonical immutable review-evidence reference grammar;
 - stable distribution-review metadata;
 - machine-readable JSON Schema artifacts;
 - deterministic canonical ordering rules.
@@ -95,6 +96,7 @@ When these sources conflict, the Constitution, active specification and live can
 - source/destination SHA-256 validation;
 - strict Gregorian import-date validation;
 - immutable pull-request identity and review-evidence validation for import-ready records;
+- canonical review-evidence reference syntax validation;
 - required permission-artifact and permission-scope checks;
 - restricted-path deny/permission rules;
 - derived-code reclassification checks;
@@ -154,7 +156,7 @@ Instead, exact byte binding is established by:
 - exact destination path;
 - destination SHA-256 digest for the reviewed candidate tree;
 - immutable Signthos pull-request number;
-- stable non-secret substantive review-evidence reference;
+- canonical stable non-secret substantive review-evidence reference;
 - exact-head qualification/re-evaluation evidence recorded by Diffciplane outside the self-referential file content.
 
 A later post-merge evidence record may reference a merge commit without being used to define that commit's own content identity.
@@ -194,7 +196,7 @@ Conceptual normalized shape:
   "review": {
     "status": "qualified_exact_head",
     "pull_request": 123,
-    "evidence": ["github:issue-comment:stable-review-evidence"]
+    "evidence": ["github:issue-comment:5512755250"]
   }
 }
 ```
@@ -216,13 +218,73 @@ Only `qualified_exact_head` is an import-authorizing state for canonical reposit
 For every canonical source-import record:
 
 - `review.pull_request` is required and MUST be a positive immutable GitHub pull-request number in the Signthos repository;
-- `review.evidence` is required and MUST contain at least one stable, non-secret reference to substantive independent review evidence;
+- `review.evidence` is required and MUST contain at least one canonical stable non-secret reference to substantive independent review evidence;
 - `pending` fails canonical/import-ready validation;
 - `rejected` fails canonical/import-ready validation;
 - missing PR identity fails closed;
 - missing/empty review evidence fails closed;
+- unsupported or malformed review evidence fails closed;
 - a status string outside the controlled vocabulary fails closed;
-- status presence never substitutes for evidence-dependent governance gates outside the record.
+- status/evidence presence never substitutes for evidence-dependent governance gates outside the record.
+
+### Canonical `review.evidence` reference grammar
+
+Version 1 accepts only immutable GitHub evidence identifiers in the Signthos repository, encoded as one of these exact ASCII forms:
+
+```text
+github:issue-comment:<id>
+github:pull-request-review:<id>
+github:pull-request-review-comment:<id>
+```
+
+`<id>` is a base-10 positive GitHub object identifier matching `[1-9][0-9]*` with no sign, whitespace, separators or leading zeroes.
+
+The full v1 lexical grammar is therefore:
+
+```text
+^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$
+```
+
+Semantics:
+
+- `github:issue-comment:<id>` identifies a GitHub issue/PR conversation comment by immutable comment id; this form is necessary because independent automated substantive review may be delivered as a PR issue comment.
+- `github:pull-request-review:<id>` identifies a submitted GitHub pull-request review object by immutable review id.
+- `github:pull-request-review-comment:<id>` identifies an inline pull-request review comment by immutable review-comment id.
+
+Canonical validation is local and offline. It validates the kind/id grammar only; it does not contact GitHub.
+
+The following are invalid in v1 and MUST fail with a `REVIEW_*` diagnostic:
+
+- arbitrary free text such as `approved`;
+- generic/mutable web URLs;
+- branch names, commit labels or PR numbers used as evidence strings;
+- unsupported `github:*` reference kinds;
+- zero, negative, signed or leading-zero identifiers;
+- identifiers containing whitespace or non-ASCII digits;
+- mutable labels such as `latest`;
+- references whose syntax is canonical but whose semantic relationship to the declared PR/exact head has not been externally verified.
+
+Syntax validity does **not** prove that the referenced object exists, is independent, is substantive, belongs to the declared PR, or reviewed the applicable exact head. Those semantic facts remain mandatory external Diffciplane evidence and must be verified against live GitHub before qualification/merge. A syntactically valid evidence reference cannot convert absent external review evidence into PASS.
+
+Required fixture coverage includes at least:
+
+Valid:
+
+- `github:issue-comment:5512755250`
+- `github:pull-request-review:12345`
+- `github:pull-request-review-comment:67890`
+
+Invalid:
+
+- `approved`
+- `https://github.com/TheHalfMoon/Signthos/pull/23`
+- `github:issue:23`
+- `github:issue-comment:0`
+- `github:issue-comment:001`
+- `github:issue-comment:-1`
+- `github:issue-comment:latest`
+- `github:unknown:123`
+- `github:issue-comment:１２３`
 
 ### Qualification handoff without self-reference
 
@@ -230,13 +292,13 @@ Later import PRs must use a two-stage exact-head flow so the record can preserve
 
 1. the import candidate is opened with its record in `pending` state and an immutable PR number;
 2. independent substantive review evaluates that exact candidate/imported-byte head and emits stable review evidence;
-3. a bounded manifest-only authorization amendment sets `review.status` to `qualified_exact_head` and records the review evidence reference, without changing imported destination bytes;
+3. a bounded manifest-only authorization amendment sets `review.status` to `qualified_exact_head` and records a canonical review-evidence reference, without changing imported destination bytes;
 4. the new exact head receives independent re-evaluation of the authorization delta and proof that the reviewed imported destination bytes/digests are unchanged;
 5. Diffciplane records final exact-head qualification outside the provenance record and merges with expected-head protection.
 
 Canonical `validate` rejects `pending` and `rejected` records. A future workflow may provide a separately named prequalification structural command, but no permissive flag on canonical `validate` may silently turn pending authorization into PASS.
 
-The validator does not claim that a string reference proves reviewer independence; canonical GitHub review/qualification evidence remains an external governance gate.
+The validator does not claim that a syntactically valid reference proves reviewer independence; canonical GitHub review/qualification evidence remains an external governance gate.
 
 ## Import date semantics
 
@@ -334,7 +396,7 @@ Every source-import record MUST use:
 - SHA-256 digest for source bytes;
 - SHA-256 digest for destination bytes;
 - strict canonical import date;
-- immutable pull-request identity and import-ready review evidence.
+- immutable pull-request identity and canonical import-ready review evidence.
 
 Reject:
 
@@ -566,27 +628,28 @@ Specification 001 cannot close until all of the following are observed on the ex
 5. exact 40-character upstream Git object id and normalized paths are mandatory in v1;
 6. source/destination SHA-256 mismatches fail;
 7. `import.date` is semantically validated as canonical proleptic-Gregorian `YYYY-MM-DD`, including leap-day and impossible-date tests;
-8. canonical source-import validation requires `review.status=qualified_exact_head`, a positive immutable PR number, and non-empty stable non-secret review evidence;
-9. pending, rejected, missing-review-evidence and missing-PR records fail canonical/import-ready validation;
-10. restricted/commercial path records fail without sufficient accepted permission evidence/scope;
-11. `restricted` and `unknown` classifications cannot authorize import;
-12. derived copyleft/restricted material cannot be relabeled permissive without explicit relicensing evidence;
-13. component/package/binary records are validated, including the provenance tool's own dependencies;
-14. distribution-review `pending`/`blocked` cannot be represented as approved;
-15. NOTICE generation is byte-deterministic and `notice --check` detects drift;
-16. source drift can be detected against a synthetic local Git checkout without network access;
-17. malformed/oversized/traversal/symlink fixtures fail safely;
-18. valid and invalid fixture corpus is versioned and distributable;
-19. CI runs the validator and deterministic NOTICE check on the exact head;
-20. no unauthorized product-source import is present;
-21. independent substantive exact-head review completes with all findings reconciled;
-22. exact-head qualification records tests/CI accurately;
-23. merge uses expected-head protection;
-24. canonical `main` passes post-merge verification;
-25. successor authority for Specification 002 is determined separately after closeout.
+8. canonical source-import validation requires `review.status=qualified_exact_head`, a positive immutable PR number, and at least one canonical `review.evidence` reference matching the v1 immutable GitHub-reference grammar;
+9. pending, rejected, missing-review-evidence, malformed/unsupported/non-canonical review-evidence, and missing-PR records fail canonical/import-ready validation;
+10. review-evidence syntax validation remains local/offline while existence, independence, substantive scope, PR relationship and exact-head applicability remain mandatory external Diffciplane evidence;
+11. restricted/commercial path records fail without sufficient accepted permission evidence/scope;
+12. `restricted` and `unknown` classifications cannot authorize import;
+13. derived copyleft/restricted material cannot be relabeled permissive without explicit relicensing evidence;
+14. component/package/binary records are validated, including the provenance tool's own dependencies;
+15. distribution-review `pending`/`blocked` cannot be represented as approved;
+16. NOTICE generation is byte-deterministic and `notice --check` detects drift;
+17. source drift can be detected against a synthetic local Git checkout without network access;
+18. malformed/oversized/traversal/symlink fixtures fail safely;
+19. valid and invalid fixture corpus is versioned and distributable;
+20. CI runs the validator and deterministic NOTICE check on the exact head;
+21. no unauthorized product-source import is present;
+22. independent substantive exact-head review completes with all findings reconciled;
+23. exact-head qualification records tests/CI accurately;
+24. merge uses expected-head protection;
+25. canonical `main` passes post-merge verification;
+26. successor authority for Specification 002 is determined separately after closeout.
 
 ## Non-goals and claim boundaries
 
-Passing the provenance validator means the repository satisfies the encoded Signthos engineering policy for the records under validation. It is not legal advice and does not independently prove copyright ownership, enforceability of a private permission document, reviewer independence from a string reference, app-store legal compatibility, regulatory compliance or legal effect.
+Passing the provenance validator means the repository satisfies the encoded Signthos engineering policy for the records under validation. It is not legal advice and does not independently prove copyright ownership, enforceability of a private permission document, reviewer independence from a syntactically valid evidence reference, app-store legal compatibility, regulatory compliance or legal effect.
 
-The validator must never turn unknown external/legal facts into `PASS` merely because required fields are syntactically present.
+The validator must never turn unknown external/legal/review facts into `PASS` merely because required fields are syntactically present.
