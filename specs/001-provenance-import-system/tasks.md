@@ -167,9 +167,26 @@ Explicitly prohibited:
 - product runtime/application directories;
 - credentials or paid service configuration.
 
+### Pre-CI execution evidence adoption
+
+- [ ] `S1-T021A` Adopt `specs/001-provenance-import-system/execution-evidence.md` as the normative pre-CI execution-evidence boundary after that addendum's exact head receives independent substantive review, expected-head merge protection, and canonical post-merge verification. This task gates only use of the non-merge `verify/spec001-*` execution mechanism for Grains C–H; it does not retroactively invalidate Grain C implementation work that began after `S1-T021` and before this operational blocker was discovered.
+
+Once `S1-T021A` is canonically complete:
+
+- the Constitution and `AGENTS.md` remain higher authority than all Specification 001 files;
+- this `tasks.md` remains the canonical dependency/order ledger;
+- `execution-evidence.md` is a subordinate normative addendum only for the mechanics and evidence binding of temporary pre-Grain-I remote execution;
+- for that narrow subject, the addendum supersedes `plan.md` only to authorize a temporary `.github/workflows/spec001-ephemeral-verify.yml` on a non-merge `verify/spec001-*` branch created from an already-existing exact candidate SHA;
+- no Grain C–H implementation merge-candidate path allowlist is widened by the addendum, and `.github/workflows/**` remains prohibited from those implementation PRs;
+- Grain I and `S1-T078` retain exclusive authority for the first canonical persistent `.github/workflows/provenance.yml` and repository CI integration;
+- verification-run evidence is stale after any candidate-head change and can never substitute for independent semantic review, exact-head qualification, live external review-evidence verification, rights evidence, or guarded merge;
+- no verification branch may be created or used under this authority until `S1-T021A` is complete.
+
+The `S1-T021A` adoption candidate itself is limited to `tasks.md`, `execution-evidence.md`, and Issue/PR evidence. It does not authorize product/application source, upstream source import, network/runtime integration beyond public toolchain/dependency retrieval inside the temporary verifier, credentials, paid services, restricted/commercial source, relicensing, legal/compliance claims, or Specification 002.
+
 ## S1-C — canonical schemas, strict loading and import readiness
 
-Dependency: `S1-T021`.
+Dependency: `S1-T021` for implementation. `S1-T021A` is additionally required before invoking the optional pre-CI remote verification mechanism described in `execution-evidence.md`.
 
 ### Grain C dependency-provenance authority clarification
 
