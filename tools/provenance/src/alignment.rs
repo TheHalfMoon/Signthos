@@ -17,26 +17,78 @@ pub(crate) fn augment_bytes(path: &str, bytes: &[u8], report: &mut ValidationRep
 
 fn source_import(path: &str, record: &Map<String, Value>, report: &mut ValidationReport) {
     if let Some(upstream) = object(record, "upstream") {
-        bounded_string(path, upstream, "copyright_holder", "$.upstream.copyright_holder", 1, 512, report);
+        bounded_string(
+            path,
+            upstream,
+            "copyright_holder",
+            "$.upstream.copyright_holder",
+            1,
+            512,
+            report,
+        );
         relative_path(path, upstream, "path", "$.upstream.path", report);
     }
 
     if let Some(license) = object(record, "license") {
-        bounded_string(path, license, "spdx", "$.license.spdx", 1, 256, report);
-        unique_string_array(path, license, "evidence", "$.license.evidence", Some(512), report);
+        bounded_string(
+            path,
+            license,
+            "spdx",
+            "$.license.spdx",
+            1,
+            256,
+            report,
+        );
+        unique_string_array(
+            path,
+            license,
+            "evidence",
+            "$.license.evidence",
+            Some(512),
+            report,
+        );
     }
 
     if let Some(permission) = object(record, "permission") {
-        bounded_string(path, permission, "artifact", "$.permission.artifact", 1, 512, report);
-        unique_string_array(path, permission, "scope", "$.permission.scope", None, report);
+        bounded_string(
+            path,
+            permission,
+            "artifact",
+            "$.permission.artifact",
+            1,
+            512,
+            report,
+        );
+        unique_string_array(
+            path,
+            permission,
+            "scope",
+            "$.permission.scope",
+            None,
+            report,
+        );
     }
 
     if let Some(import) = object(record, "import") {
-        relative_path(path, import, "destination", "$.import.destination", report);
+        relative_path(
+            path,
+            import,
+            "destination",
+            "$.import.destination",
+            report,
+        );
     }
 
     if let Some(transformation) = object(record, "transformation") {
-        bounded_string(path, transformation, "notes", "$.transformation.notes", 0, 2048, report);
+        bounded_string(
+            path,
+            transformation,
+            "notes",
+            "$.transformation.notes",
+            0,
+            2048,
+            report,
+        );
         canonical_id_array(
             path,
             transformation,
@@ -48,7 +100,14 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     if let Some(review) = object(record, "review") {
-        unique_string_array(path, review, "evidence", "$.review.evidence", None, report);
+        unique_string_array(
+            path,
+            review,
+            "evidence",
+            "$.review.evidence",
+            None,
+            report,
+        );
     }
 }
 
@@ -63,8 +122,24 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
         };
         let base = format!("$.components[{index}]");
 
-        bounded_string(path, component, "name", &format!("{base}.name"), 1, 128, report);
-        bounded_string(path, component, "version", &format!("{base}.version"), 1, 64, report);
+        bounded_string(
+            path,
+            component,
+            "name",
+            &format!("{base}.name"),
+            1,
+            128,
+            report,
+        );
+        bounded_string(
+            path,
+            component,
+            "version",
+            &format!("{base}.version"),
+            1,
+            64,
+            report,
+        );
 
         if let Some(license) = object(component, "license") {
             if license.get("classification").and_then(Value::as_str) == Some("spdx") {
@@ -129,20 +204,31 @@ fn policy(path: &str, record: &Map<String, Value>, report: &mut ValidationReport
         };
         let base = format!("$.rules[{index}]");
 
-        if let Some(Value::String(id)) = rule.get("id") {
-            if !canonical_id(id, true) {
-                push(
-                    report,
-                    path,
-                    "SCHEMA_ID",
-                    &format!("{base}.id"),
-                    "invalid canonical policy-rule id",
-                );
-            }
+        match rule.get("id") {
+            Some(Value::String(id)) if !canonical_id(id, true) => push(
+                report,
+                path,
+                "SCHEMA_ID",
+                &format!("{base}.id"),
+                "invalid canonical policy-rule id",
+            ),
+            _ => {}
         }
 
-        optional_string_type(path, rule, "repository", &format!("{base}.repository"), report);
-        optional_string_type(path, rule, "path_prefix", &format!("{base}.path_prefix"), report);
+        optional_string_type(
+            path,
+            rule,
+            "repository",
+            &format!("{base}.repository"),
+            report,
+        );
+        optional_string_type(
+            path,
+            rule,
+            "path_prefix",
+            &format!("{base}.path_prefix"),
+            report,
+        );
 
         if rule.contains_key("expression") {
             bounded_string(
@@ -156,7 +242,13 @@ fn policy(path: &str, record: &Map<String, Value>, report: &mut ValidationReport
             );
         }
         if rule.contains_key("path_prefix") {
-            relative_path(path, rule, "path_prefix", &format!("{base}.path_prefix"), report);
+            relative_path(
+                path,
+                rule,
+                "path_prefix",
+                &format!("{base}.path_prefix"),
+                report,
+            );
         }
         if rule.contains_key("permission_scopes") {
             unique_string_array(
@@ -200,7 +292,7 @@ fn bounded_string(
         return;
     };
     let len = value.chars().count();
-    if len < min || len > max {
+    if !(min..=max).contains(&len) {
         push(
             report,
             path,
@@ -354,9 +446,20 @@ mod tests {
                 "evidence": ["github:issue-comment:1", "github:issue-comment:1"]
             }
         });
-        let mut report = ValidationReport { diagnostics: Vec::new() };
-        augment_bytes("fixture.json", &serde_json::to_vec(&value).unwrap(), &mut report);
-        assert!(report.diagnostics.iter().any(|diagnostic| diagnostic.code == "SCHEMA_UNIQUE"));
+        let mut report = ValidationReport {
+            diagnostics: Vec::new(),
+        };
+        augment_bytes(
+            "fixture.json",
+            &serde_json::to_vec(&value).unwrap(),
+            &mut report,
+        );
+        assert!(
+            report
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == "SCHEMA_UNIQUE")
+        );
     }
 
     #[test]
@@ -369,8 +472,14 @@ mod tests {
                 "path_prefix": false
             }]
         });
-        let mut report = ValidationReport { diagnostics: Vec::new() };
-        augment_bytes("fixture.json", &serde_json::to_vec(&value).unwrap(), &mut report);
+        let mut report = ValidationReport {
+            diagnostics: Vec::new(),
+        };
+        augment_bytes(
+            "fixture.json",
+            &serde_json::to_vec(&value).unwrap(),
+            &mut report,
+        );
         assert!(report.diagnostics.iter().any(|diagnostic| {
             diagnostic.code == "SCHEMA_TYPE" && diagnostic.field == "$.rules[0].repository"
         }));
