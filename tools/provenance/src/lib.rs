@@ -1,5 +1,6 @@
 mod alignment;
 mod claims;
+mod component_review_alignment;
 mod validation;
 
 pub use validation::{
@@ -31,6 +32,7 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
     let mut report = validation::validate_bytes(path, bytes);
     if bytes.len() as u64 <= MAX_RECORD_BYTES {
         alignment::augment_bytes(path, bytes, &mut report);
+        component_review_alignment::augment_bytes(path, bytes, &mut report);
     }
     sort_report(&mut report);
     report
@@ -63,6 +65,7 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
         }
         let bytes = std::fs::read(path).map_err(|error| format!("IO_READ: {path}: {error}"))?;
         alignment::augment_bytes(path, &bytes, &mut report);
+        component_review_alignment::augment_bytes(path, &bytes, &mut report);
         claim_tracker.observe(path, &bytes, &mut report);
     }
     sort_report(&mut report);
