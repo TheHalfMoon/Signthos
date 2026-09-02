@@ -1,8 +1,9 @@
+mod alignment;
 mod validation;
 
 pub use validation::{
     CanonicalRecord, ComponentRegistryRecord, Diagnostic, MAX_RECORD_BYTES, MAX_TOTAL_BYTES,
-    PolicyRecord, SourceImportRecord, ValidationReport, validate_bytes, validate_paths,
+    PolicyRecord, SourceImportRecord, ValidationReport,
 };
 
 pub const EXIT_SUCCESS: u8 = 0;
@@ -23,6 +24,46 @@ pub struct CliResult {
 pub fn dependency_sanity() -> bool {
     spdx::Expression::parse("MIT OR Apache-2.0").is_ok()
         && serde_json::from_str::<serde_json::Value>(r#"{"ok":true}"#).is_ok()
+}
+
+pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
+    let mut report = validation::validate_bytes(path, bytes);
+    if bytes.len() as u64 <= MAX_RECORD_BYTES {
+        alignment::augment_bytes(path, bytes, &mut report);
+    }
+    sort_report(&mut report);
+    report
+}
+
+pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
+    for path in paths {
+        let metadata = std::fs::symlink_metadata(path)
+            .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+        if metadata.file_type().is_symlink() {
+            return Err(format!(
+                "IO_SYMLINK: {path}: canonical validation does not follow symlinks"
+            ));
+        }
+    }
+
+    let mut report = validation::validate_paths(paths)?;
+    let mut total = 0_u64;
+    for path in paths {
+        let metadata = std::fs::symlink_metadata(path)
+            .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+        let size = metadata.len();
+        if size > MAX_RECORD_BYTES {
+            continue;
+        }
+        total = total.saturating_add(size);
+        if total > MAX_TOTAL_BYTES {
+            break;
+        }
+        let bytes = std::fs::read(path).map_err(|error| format!("IO_READ: {path}: {error}"))?;
+        alignment::augment_bytes(path, &bytes, &mut report);
+    }
+    sort_report(&mut report);
+    Ok(report)
 }
 
 pub fn run(args: &[&str]) -> CliResult {
@@ -101,11 +142,16 @@ fn default_validation_paths() -> Result<Vec<String>, String> {
     let mut paths = Vec::new();
 
     for candidate in candidates {
-        let metadata = match std::fs::metadata(candidate) {
+        let metadata = match std::fs::symlink_metadata(candidate) {
             Ok(metadata) => metadata,
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
             Err(error) => return Err(format!("IO_METADATA: {candidate}: {error}")),
         };
+        if metadata.file_type().is_symlink() {
+            return Err(format!(
+                "IO_SYMLINK: {candidate}: canonical validation does not follow symlinks"
+            ));
+        }
         if metadata.is_file() {
             paths.push(candidate.to_owned());
         } else if metadata.is_dir() {
@@ -144,6 +190,17 @@ fn collect_json_files(directory: &str, paths: &mut Vec<String>) -> Result<(), St
         }
     }
     Ok(())
+}
+
+fn sort_report(report: &mut ValidationReport) {
+    report.diagnostics.sort_by(|left, right| {
+        (&left.path, left.code, &left.field, &left.message).cmp(&(
+            &right.path,
+            right.code,
+            &right.field,
+            &right.message,
+        ))
+    });
 }
 
 fn success(message: &str) -> CliResult {
