@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "grain-c-invalid-review-leading-zero",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/signthos-fixture",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/example.txt",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {"spdx": "MIT", "evidence": ["fixture:license:mit"]},
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-c/output-review-leading-zero.txt",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-02"
+  },
+  "transformation": {"kind": "copied", "notes": "Synthetic invalid review fixture", "derives_from": []},
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:001"]
+  }
+}
