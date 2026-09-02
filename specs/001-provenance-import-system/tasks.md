@@ -1,6 +1,6 @@
 # Specification 001 — Canonical Task Ledger
 
-Status: SHAPING_RECONCILIATION
+Status: GRAIN_B_COMPLETE
 Issue: #4
 Authorized from canonical `main`: `2144b7765595a206e691f43aefd122aa5a150a1b`
 
@@ -20,10 +20,10 @@ A checked implementation task does not imply the PR, grain or specification is m
 - [x] `S1-T005` Decompose implementation into dependency-ordered grains with explicit path allowlists and no product runtime/source authority.
 - [x] `S1-T006` Define fixture, process, security/resource, deterministic-output and CI qualification strategy.
 - [x] `S1-T007` Obtain independent substantive review of the exact shaping candidate covering `spec.md`, `plan.md` and `tasks.md`.
-- [ ] `S1-T008` Reconcile every shaping review finding and obtain exact-head re-evaluation after normative amendment.
-- [ ] `S1-T009` Record exact-head shaping qualification, accurately distinguishing absent/skipped checks from PASS.
-- [ ] `S1-T010` Merge the exact qualified shaping head with `expected_head_sha` protection.
-- [ ] `S1-T011` Post-merge verify canonical `main` contains only the intended shaping surface and re-read Issue #4/governance before implementation.
+- [x] `S1-T008` Reconcile every shaping review finding and obtain exact-head re-evaluation after normative amendment.
+- [x] `S1-T009` Record exact-head shaping qualification, accurately distinguishing absent/skipped checks from PASS.
+- [x] `S1-T010` Merge the exact qualified shaping head with `expected_head_sha` protection.
+- [x] `S1-T011` Post-merge verify canonical `main` contains only the intended shaping surface and re-read Issue #4/governance before implementation.
 
 ### Shaping review/reconciliation evidence
 
@@ -59,17 +59,27 @@ Second amended exact-head re-evaluation:
 
 That re-evaluation confirmed the earlier authorization/date findings and executable evidence-reference grammar were reconciled. It identified one remaining semantic contradiction: an offline local validator cannot emit `REVIEW_*` based on whether a syntax-valid GitHub evidence reference has been externally proven to exist, be independent/substantive, belong to the declared PR, or apply to the exact head.
 
-Current reconciliation therefore requires:
+Final shaping reconciliation established:
 
 - v1 evidence kinds `github:issue-comment`, `github:pull-request-review`, and `github:pull-request-review-comment` only;
 - canonical lexical form `^github:(issue-comment|pull-request-review|pull-request-review-comment):[1-9][0-9]*$`;
 - offline local syntax/record-state validation only;
 - `REVIEW_*` rejection for arbitrary text, generic URLs, unsupported kinds, zero/negative/signed/leading-zero ids, mutable labels and non-ASCII decimal ids;
-- valid/invalid fixture coverage for those record-local rules;
-- explicit preservation of live GitHub verification of existence, independence, substantive scope, PR relationship and exact-head applicability as external Diffciplane gates;
-- explicit rule that absence/failure of those live facts blocks external qualification/merge rather than local `validate`, and that local validator PASS is never sufficient Diffciplane qualification.
+- valid/invalid fixture requirements for those record-local rules;
+- live GitHub verification of existence, independence, substantive scope, PR relationship and exact-head applicability preserved as external Diffciplane gates;
+- absence/failure of those live facts blocks external qualification/merge rather than local `validate`, and local validator PASS is never sufficient Diffciplane qualification.
 
-`S1-T008` remains open until an independent reviewer evaluates the new exact head and returns no unresolved actionable findings.
+Final independent shaping re-evaluation:
+
+- CodeRabbit comment: `5513505367`
+- reviewed head: `6e56c7dcb9857e80415f5cf795bea07d77cf06be`
+- base: `2144b7765595a206e691f43aefd122aa5a150a1b`
+- result: `PASS`
+- exact-head qualification: PR #23 comment `5513522873`
+- guarded merge: PR #23 -> canonical `main` `08022382524cec92fc0e829b2666568b17822c0f`
+- post-merge verification and governance reread: PR #23 comment `5513550515`
+
+The shaping qualification recorded that no GitHub Actions workflow run existed for the docs-only head and did not convert absent/neutral checks into CI PASS. Canonical post-merge comparison contained only `spec.md`, `plan.md`, and `tasks.md`.
 
 ### Shaping path allowlist
 
@@ -80,22 +90,68 @@ Only:
 - `specs/001-provenance-import-system/tasks.md`
 - Issue #4 metadata/comments
 
-No runtime/toolchain/dependency changes are authorized before `S1-T011`.
+No runtime/toolchain/dependency changes were introduced before `S1-T011`.
 
 ## S1-B — Rust bootstrap and component provenance
 
 Dependency: `S1-T011`.
 
-- [ ] `S1-T012` Create a fresh implementation branch from the exact post-shaping canonical `main`; do not continue implementation on the shaping branch.
-- [ ] `S1-T013` Create `tools/provenance/Cargo.toml`, `Cargo.lock`, minimal source layout and CLI entry point without network/runtime integration.
-- [ ] `S1-T014` Pin the Rust edition and minimum supported Rust version candidate based on live toolchain/dependency evidence; document any MSRV limitation explicitly.
-- [ ] `S1-T015` Pin the minimum dependency set and verify exact locked versions/checksums/source origins, including the maintained SPDX parser.
-- [ ] `S1-T016` Create the v1 component schema and bootstrap component registry covering every direct/transitive dependency used by `signthos-provenance`.
-- [ ] `S1-T017` Record exact dependency license evidence without inferring permissive status from package names or repository ownership.
-- [ ] `S1-T018` Implement CLI command shell and stable exit-code contract `0`–`4` with focused process tests.
-- [ ] `S1-T019` Run formatting, linting and focused/full bootstrap tests; record exact commands/results.
-- [ ] `S1-T020` Prove the Grain B diff contains only bootstrap/component-provenance allowed paths and no product/upstream source.
-- [ ] `S1-T021` Obtain independent substantive exact-head review of Grain B, reconcile findings, qualify, expected-head merge, and post-merge verify before Grain C.
+- [x] `S1-T012` Create a fresh implementation branch from the exact post-shaping canonical `main`; do not continue implementation on the shaping branch.
+- [x] `S1-T013` Create `tools/provenance/Cargo.toml`, `Cargo.lock`, minimal source layout and CLI entry point without network/runtime integration.
+- [x] `S1-T014` Pin the Rust edition and minimum supported Rust version candidate based on live toolchain/dependency evidence; document any MSRV limitation explicitly.
+- [x] `S1-T015` Pin the minimum dependency set and verify exact locked versions/checksums/source origins, including the maintained SPDX parser.
+- [x] `S1-T016` Create the v1 component schema and bootstrap component registry covering every direct/transitive dependency used by `signthos-provenance`.
+- [x] `S1-T017` Record exact dependency license evidence without inferring permissive status from package names or repository ownership.
+- [x] `S1-T018` Implement CLI command shell and stable exit-code contract `0`–`4` with focused process tests.
+- [x] `S1-T019` Run formatting, linting and focused/full bootstrap tests; record exact commands/results.
+- [x] `S1-T020` Prove the Grain B diff contains only bootstrap/component-provenance allowed paths and no product/upstream source.
+- [x] `S1-T021` Obtain independent substantive exact-head review of Grain B, reconcile findings, qualify, expected-head merge, and post-merge verify before Grain C.
+
+### Grain B canonical evidence
+
+Implementation branch and base:
+
+- branch: `feat/001-grain-b-provenance-bootstrap`
+- exact canonical starting point: `08022382524cec92fc0e829b2666568b17822c0f`
+- PR: #24
+- exact qualified head: `0ef82ddb15ebf686d03ad85970f3c33c5964af66`
+
+Bootstrap dependency evidence:
+
+- Rust edition: `2024`
+- MSRV candidate and tested toolchain: `1.85.0`
+- `spdx 0.13.5`: crates.io checksum `081670c233dfbed55690cc0cd38424e0e24ac1b2673d0b408b3f7b684738dfa9`, source revision `10dcdc28d619b5bb1c14cbf546deea3578ead73c`, package license metadata `Apache-2.0`
+- `smallvec 1.15.1`: crates.io checksum `67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03`, source revision `d0f47a3ea99296498ee940b5d99f59b403c498a2`, package license metadata `MIT OR Apache-2.0`
+- resolved normal dependency graph: exactly `signthos-provenance 0.1.0 -> spdx 0.13.5 -> smallvec 1.15.1`
+
+Exact-head execution evidence:
+
+- CodeRabbit execution comment: `5514095311`
+- result: `QUALIFIED` for the execution gate on head `0ef82ddb15ebf686d03ad85970f3c33c5964af66`
+- formatting check: PASS using the installed Rust 1.85.0 sysroot `cargo-fmt` after proving the runner PATH/shim defect
+- clippy: PASS with `-D warnings`
+- library tests: 4 passed, 0 failed
+- CLI integration tests: 4 passed, 0 failed
+- binary tests: 0 failed
+- doctest phase: executed successfully, 0 failed
+- `cargo metadata --locked`: PASS
+- `cargo tree --locked`: PASS
+
+The runner's missing `cargo-fmt`/`rustdoc` PATH shims were repaired by invoking the already-installed toolchain sysroot binaries; no repository change or qualification waiver was used.
+
+Independent review and merge evidence:
+
+- independent substantive exact-head review: CodeRabbit comment `5514151207`
+- review result: `PASS` with no actionable substantive defects
+- qualification: PR #24 comment `5514164947`
+- unresolved review threads immediately before merge: zero
+- GitHub Actions workflow runs for Grain B head: none; repository CI workflow remains owned by Grain I and absence was not represented as PASS
+- Cubic check: `neutral` because its monthly review-line limit was reached; not treated as PASS
+- guarded merge: PR #24 -> canonical `main` `f0932f537197431f65fc4e1debf40ad1b2ea438b`
+- merge parents: `08022382524cec92fc0e829b2666568b17822c0f` and `0ef82ddb15ebf686d03ad85970f3c33c5964af66`
+- post-merge verification and fresh governance reread: PR #24 comment `5514180440`
+
+Canonical base-to-merge comparison contains exactly seven Grain B files and no upstream product/application source, workflow, credential, paid-service configuration, restricted/commercial import, relicensing action, legal/compliance claim, or Specification 002 implementation.
 
 ### Grain B path allowlist
 
