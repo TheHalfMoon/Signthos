@@ -83,6 +83,15 @@ fn license_ref_cannot_authorize_source_import() {
 }
 
 #[test]
+fn conflicting_license_evidence_fails_closed() {
+    assert_code(
+        "provenance/fixtures/grain-d/source-import-conflicting-license-evidence.json",
+        "SPDX_CONFLICT",
+        "$.license.evidence[1]",
+    );
+}
+
+#[test]
 fn spdx_diagnostics_are_deterministic() {
     let relative = "provenance/fixtures/grain-d/source-import-unknown-spdx.json";
     let bytes = read(relative);

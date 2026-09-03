@@ -3,6 +3,7 @@ use serde_json::{Map, Value};
 use spdx::{Expression, LicenseItem, ParseMode};
 
 const LICENSE_POLICY_JSON: &str = include_str!("../../../provenance/policy/license-policy.json");
+const LICENSE_EVIDENCE_CLAIM_PREFIX: &str = "spdx-expression:";
 
 pub(crate) fn augment_bytes(path: &str, bytes: &[u8], report: &mut ValidationReport) {
     let Ok(Value::Object(record)) = serde_json::from_slice::<Value>(bytes) else {
@@ -28,6 +29,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     };
 
     validate_expression(path, expression, "$.license.spdx", true, report);
+    validate_evidence_claims(path, license, expression, "$.license.evidence", report);
 }
 
 fn component_registry(path: &str, record: &Map<String, Value>, report: &mut ValidationReport) {
@@ -49,13 +51,40 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
             continue;
         };
 
-        validate_expression(
-            path,
-            expression,
-            &format!("$.components[{index}].license.spdx"),
-            true,
-            report,
-        );
+        let spdx_field = format!("$.components[{index}].license.spdx");
+        let evidence_field = format!("$.components[{index}].license.evidence");
+        validate_expression(path, expression, &spdx_field, true, report);
+        validate_evidence_claims(path, license, expression, &evidence_field, report);
+    }
+}
+
+fn validate_evidence_claims(
+    path: &str,
+    license: &Map<String, Value>,
+    expression: &str,
+    field: &str,
+    report: &mut ValidationReport,
+) {
+    let Some(evidence) = license.get("evidence").and_then(Value::as_array) else {
+        return;
+    };
+
+    for (index, item) in evidence.iter().enumerate() {
+        let Some(item) = item.as_str() else {
+            continue;
+        };
+        let Some(claimed_expression) = item.strip_prefix(LICENSE_EVIDENCE_CLAIM_PREFIX) else {
+            continue;
+        };
+        if claimed_expression != expression {
+            push(
+                report,
+                path,
+                "SPDX_CONFLICT",
+                &format!("{field}[{index}]"),
+                "evidence SPDX claim conflicts with canonical license expression",
+            );
+        }
     }
 }
 
