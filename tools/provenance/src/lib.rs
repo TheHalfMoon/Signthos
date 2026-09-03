@@ -88,8 +88,8 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
 }
 
 fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
-    let metadata = std::fs::symlink_metadata(path)
-        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+    let metadata =
+        std::fs::symlink_metadata(path).map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
     if metadata.file_type().is_symlink() {
         return Err(format!(
             "IO_SYMLINK: {path}: canonical validation does not follow symlinks"
@@ -302,10 +302,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("system clock must be after Unix epoch")
             .as_nanos();
-        std::env::temp_dir().join(format!(
-            "signthos-{label}-{}-{nonce}",
-            std::process::id()
-        ))
+        std::env::temp_dir().join(format!("signthos-{label}-{}-{nonce}", std::process::id()))
     }
 
     #[test]
@@ -338,8 +335,8 @@ mod tests {
 
     #[test]
     fn explicit_duplicate_path_order_is_deterministic() {
-        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../provenance/fixtures/multi");
+        let fixtures =
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../provenance/fixtures/multi");
         let first = fixtures
             .join("duplicate-destination-a.json")
             .to_string_lossy()

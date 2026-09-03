@@ -1,5 +1,6 @@
 use serde_json::{Map, Value};
 use std::collections::HashSet;
+use std::fmt::Write as _;
 
 pub const MAX_RECORD_BYTES: u64 = 1_048_576;
 pub const MAX_TOTAL_BYTES: u64 = 4_194_304;
@@ -39,15 +40,16 @@ impl ValidationReport {
     }
 
     pub fn render_text(&self) -> String {
-        self.diagnostics
-            .iter()
-            .map(|diagnostic| {
-                format!(
-                    "{}: {} [{}]: {}\n",
-                    diagnostic.path, diagnostic.code, diagnostic.field, diagnostic.message
-                )
-            })
-            .collect()
+        let mut rendered = String::new();
+        for diagnostic in &self.diagnostics {
+            writeln!(
+                rendered,
+                "{}: {} [{}]: {}",
+                diagnostic.path, diagnostic.code, diagnostic.field, diagnostic.message
+            )
+            .expect("writing diagnostics to String cannot fail");
+        }
+        rendered
     }
 
     pub fn render_json(&self) -> String {
@@ -116,14 +118,8 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
 }
 
 fn parse_record(path: &str, bytes: &[u8]) -> Result<CanonicalRecord, Vec<Diagnostic>> {
-    let value: Value = serde_json::from_slice(bytes).map_err(|error| {
-        vec![Diagnostic::new(
-            path,
-            "JSON_SYNTAX",
-            "$",
-            error.to_string(),
-        )]
-    })?;
+    let value: Value = serde_json::from_slice(bytes)
+        .map_err(|error| vec![Diagnostic::new(path, "JSON_SYNTAX", "$", error.to_string())])?;
     let object = value.as_object().ok_or_else(|| {
         vec![Diagnostic::new(
             path,
@@ -261,13 +257,7 @@ fn source_import(
             )),
             _ => {}
         }
-        match text(
-            path,
-            upstream,
-            "path",
-            "$.upstream.path",
-            &mut diagnostics,
-        ) {
+        match text(path, upstream, "path", "$.upstream.path", &mut diagnostics) {
             Some(value) if !rel_path(&value) => diagnostics.push(Diagnostic::new(
                 path,
                 "PATH_INVALID",
@@ -389,20 +379,8 @@ fn source_import(
                 ));
             }
         }
-        digest(
-            path,
-            import,
-            "sha256",
-            "$.import.sha256",
-            &mut diagnostics,
-        );
-        match text(
-            path,
-            import,
-            "date",
-            "$.import.date",
-            &mut diagnostics,
-        ) {
+        digest(path, import, "sha256", "$.import.sha256", &mut diagnostics);
+        match text(path, import, "date", "$.import.date", &mut diagnostics) {
             Some(value) if !date(&value) => diagnostics.push(Diagnostic::new(
                 path,
                 "DATE_INVALID",
@@ -895,10 +873,7 @@ fn component_registry(
     }
 }
 
-fn policy(
-    path: &str,
-    record: &Map<String, Value>,
-) -> Result<PolicyRecord, Vec<Diagnostic>> {
+fn policy(path: &str, record: &Map<String, Value>) -> Result<PolicyRecord, Vec<Diagnostic>> {
     let mut diagnostics = Vec::new();
     keys(
         path,
@@ -923,14 +898,7 @@ fn policy(
         &mut diagnostics,
     );
     version(path, record, "$", &mut diagnostics);
-    constant(
-        path,
-        record,
-        "kind",
-        "policy",
-        "$.kind",
-        &mut diagnostics,
-    );
+    constant(path, record, "kind", "policy", "$.kind", &mut diagnostics);
 
     let id = text(path, record, "id", "$.id", &mut diagnostics).unwrap_or_default();
     if !id.is_empty() && !record_id(&id, true) {
@@ -1002,13 +970,7 @@ fn policy(
                     &field,
                     &mut diagnostics,
                 );
-                nonempty(
-                    path,
-                    rule,
-                    "id",
-                    &format!("{field}.id"),
-                    &mut diagnostics,
-                );
+                nonempty(path, rule, "id", &format!("{field}.id"), &mut diagnostics);
                 enum_text(
                     path,
                     rule,
@@ -1019,25 +981,25 @@ fn policy(
                 );
 
                 match rule.get("repository") {
-                    Some(Value::String(value)) if !repo_id(value) => diagnostics.push(
-                        Diagnostic::new(
+                    Some(Value::String(value)) if !repo_id(value) => {
+                        diagnostics.push(Diagnostic::new(
                             path,
                             "SOURCE_REPOSITORY",
                             format!("{field}.repository"),
                             "invalid repository",
-                        ),
-                    ),
+                        ))
+                    }
                     _ => {}
                 }
                 match rule.get("path_prefix") {
-                    Some(Value::String(value)) if !rel_path(value) => diagnostics.push(
-                        Diagnostic::new(
+                    Some(Value::String(value)) if !rel_path(value) => {
+                        diagnostics.push(Diagnostic::new(
                             path,
                             "PATH_INVALID",
                             format!("{field}.path_prefix"),
                             "invalid path prefix",
-                        ),
-                    ),
+                        ))
+                    }
                     _ => {}
                 }
                 match rule.get("expression") {
@@ -1297,9 +1259,7 @@ fn enum_strings(
     match string_values(object.get(key)) {
         Some(values)
             if (!nonempty || !values.is_empty())
-                && values
-                    .iter()
-                    .all(|value| allowed.contains(&value.as_str())) => {}
+                && values.iter().all(|value| allowed.contains(&value.as_str())) => {}
         _ => diagnostics.push(Diagnostic::new(
             path,
             "SCHEMA_VALUE",
@@ -1390,10 +1350,7 @@ fn rel_path(value: &str) -> bool {
 
 fn drive_qualified(value: &str) -> bool {
     let bytes = value.as_bytes();
-    bytes.len() >= 3
-        && bytes[0].is_ascii_alphabetic()
-        && bytes[1] == b':'
-        && bytes[2] == b'/'
+    bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'/'
 }
 
 fn review_ref(value: &str) -> bool {

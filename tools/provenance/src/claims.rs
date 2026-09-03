@@ -82,13 +82,7 @@ impl ClaimTracker {
         }
     }
 
-    fn observe_id(
-        &mut self,
-        path: &str,
-        field: &str,
-        id: &str,
-        report: &mut ValidationReport,
-    ) {
+    fn observe_id(&mut self, path: &str, field: &str, id: &str, report: &mut ValidationReport) {
         if self.ids.insert(id.to_owned(), path.to_owned()).is_some() {
             push_once(
                 report,
@@ -168,10 +162,7 @@ fn canonical_relative_path(value: &str) -> bool {
 
 fn drive_qualified(value: &str) -> bool {
     let bytes = value.as_bytes();
-    bytes.len() >= 3
-        && bytes[0].is_ascii_alphabetic()
-        && bytes[1] == b':'
-        && bytes[2] == b'/'
+    bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'/'
 }
 
 #[cfg(test)]
@@ -195,16 +186,8 @@ mod tests {
         let mut report = ValidationReport {
             diagnostics: Vec::new(),
         };
-        tracker.observe(
-            "a.json",
-            &serde_json::to_vec(&first).unwrap(),
-            &mut report,
-        );
-        tracker.observe(
-            "b.json",
-            &serde_json::to_vec(&second).unwrap(),
-            &mut report,
-        );
+        tracker.observe("a.json", &serde_json::to_vec(&first).unwrap(), &mut report);
+        tracker.observe("b.json", &serde_json::to_vec(&second).unwrap(), &mut report);
         assert!(
             report
                 .diagnostics

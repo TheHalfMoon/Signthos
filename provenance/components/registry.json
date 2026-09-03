@@ -61,6 +61,326 @@
         "state": "pending",
         "evidence": []
       }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-itoa-1.0.18",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "itoa",
+      "version": "1.0.18",
+      "source": {
+        "repository": "https://github.com/dtolnay/itoa",
+        "revision": "af77385d0daf4d0e949e81f2588be2e44f69f086"
+      },
+      "package_checksum": "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:dtolnay/itoa@af77385d0daf4d0e949e81f2588be2e44f69f086:Cargo.toml#package.license",
+          "crates.io-index:itoa@1.0.18#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-memchr-2.8.3",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "memchr",
+      "version": "2.8.3",
+      "source": {
+        "repository": "https://github.com/BurntSushi/memchr",
+        "revision": "5fdb40c054e1fff359a2f7bdf7f87a13b34b465d"
+      },
+      "package_checksum": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98",
+      "license": {
+        "classification": "spdx",
+        "spdx": "Unlicense OR MIT",
+        "evidence": [
+          "github:BurntSushi/memchr@5fdb40c054e1fff359a2f7bdf7f87a13b34b465d:Cargo.toml#package.license",
+          "crates.io-index:memchr@2.8.3#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-proc-macro2-1.0.107",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "proc-macro2",
+      "version": "1.0.107",
+      "source": {
+        "repository": "https://github.com/dtolnay/proc-macro2",
+        "revision": "ed8a5497669cd63db33bf24646f261b012bbbc4a"
+      },
+      "package_checksum": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:dtolnay/proc-macro2@ed8a5497669cd63db33bf24646f261b012bbbc4a:Cargo.toml#package.license",
+          "crates.io-index:proc-macro2@1.0.107#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-quote-1.0.47",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "quote",
+      "version": "1.0.47",
+      "source": {
+        "repository": "https://github.com/dtolnay/quote",
+        "revision": "723dcb47d3f0ddc896e17287c8a8d3f2ea2317d5"
+      },
+      "package_checksum": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:dtolnay/quote@723dcb47d3f0ddc896e17287c8a8d3f2ea2317d5:Cargo.toml#package.license",
+          "crates.io-index:quote@1.0.47#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-ryu-1.0.23",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "ryu",
+      "version": "1.0.23",
+      "source": {
+        "repository": "https://github.com/dtolnay/ryu",
+        "revision": "f0b52bb194befe6fd242154f2182fafd43a819b8"
+      },
+      "package_checksum": "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f",
+      "license": {
+        "classification": "spdx",
+        "spdx": "Apache-2.0 OR BSL-1.0",
+        "evidence": [
+          "github:dtolnay/ryu@f0b52bb194befe6fd242154f2182fafd43a819b8:Cargo.toml#package.license",
+          "crates.io-index:ryu@1.0.23#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-serde-1.0.219",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "serde",
+      "version": "1.0.219",
+      "source": {
+        "repository": "https://github.com/serde-rs/serde",
+        "revision": "49d098debdf8b5c38bfb6868f455c6ce542c422c"
+      },
+      "package_checksum": "5f0e2c6ed6606019b4e29e69dbaba95b11854410e5347d525002456dbbb786b6",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:serde-rs/serde@49d098debdf8b5c38bfb6868f455c6ce542c422c:serde/Cargo.toml#package.license",
+          "crates.io-index:serde@1.0.219#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-serde_derive-1.0.219",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "serde_derive",
+      "version": "1.0.219",
+      "source": {
+        "repository": "https://github.com/serde-rs/serde",
+        "revision": "49d098debdf8b5c38bfb6868f455c6ce542c422c"
+      },
+      "package_checksum": "5b0276cf7f2c73365f7157c8123c21cd9a50fbbd844757af28ca1f5925fc2a00",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:serde-rs/serde@49d098debdf8b5c38bfb6868f455c6ce542c422c:serde_derive/Cargo.toml#package.license",
+          "crates.io-index:serde_derive@1.0.219#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-serde_json-1.0.140",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "serde_json",
+      "version": "1.0.140",
+      "source": {
+        "repository": "https://github.com/serde-rs/json",
+        "revision": "762783414e6c4f8d670c9d87eb04913efb80d3be"
+      },
+      "package_checksum": "20068b6e96dc6c9bd23e01df8827e6c7e1f2fddd43c21810382803c136b99373",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:serde-rs/json@762783414e6c4f8d670c9d87eb04913efb80d3be:Cargo.toml#package.license",
+          "crates.io-index:serde_json@1.0.140#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-syn-2.0.119",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "syn",
+      "version": "2.0.119",
+      "source": {
+        "repository": "https://github.com/dtolnay/syn",
+        "revision": "3295f9e9841785ac88a5e558c884854d5fb7d67f"
+      },
+      "package_checksum": "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT OR Apache-2.0",
+        "evidence": [
+          "github:dtolnay/syn@3295f9e9841785ac88a5e558c884854d5fb7d67f:Cargo.toml#package.license",
+          "crates.io-index:syn@2.0.119#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    },
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "cargo-unicode-ident-1.0.24",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "unicode-ident",
+      "version": "1.0.24",
+      "source": {
+        "repository": "https://github.com/dtolnay/unicode-ident",
+        "revision": "5b54a632702b5744a1c40ea01c127c0ac0498172"
+      },
+      "package_checksum": "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75",
+      "license": {
+        "classification": "spdx",
+        "spdx": "(MIT OR Apache-2.0) AND Unicode-3.0",
+        "evidence": [
+          "github:dtolnay/unicode-ident@5b54a632702b5744a1c40ea01c127c0ac0498172:Cargo.toml#package.license",
+          "crates.io-index:unicode-ident@1.0.24#cksum"
+        ]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": [
+        "cli"
+      ],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
     }
   ]
 }

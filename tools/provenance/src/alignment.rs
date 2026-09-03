@@ -30,15 +30,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     if let Some(license) = object(record, "license") {
-        bounded_string(
-            path,
-            license,
-            "spdx",
-            "$.license.spdx",
-            1,
-            256,
-            report,
-        );
+        bounded_string(path, license, "spdx", "$.license.spdx", 1, 256, report);
         unique_string_array(
             path,
             license,
@@ -70,13 +62,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     if let Some(import) = object(record, "import") {
-        relative_path(
-            path,
-            import,
-            "destination",
-            "$.import.destination",
-            report,
-        );
+        relative_path(path, import, "destination", "$.import.destination", report);
     }
 
     if let Some(transformation) = object(record, "transformation") {
@@ -100,14 +86,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     if let Some(review) = object(record, "review") {
-        unique_string_array(
-            path,
-            review,
-            "evidence",
-            "$.review.evidence",
-            None,
-            report,
-        );
+        unique_string_array(path, review, "evidence", "$.review.evidence", None, report);
     }
 }
 
@@ -142,8 +121,8 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
         );
 
         if let Some(license) = object(component, "license") {
-            match license.get("classification").and_then(Value::as_str) {
-                Some("spdx") => bounded_string(
+            if let Some("spdx") = license.get("classification").and_then(Value::as_str) {
+                bounded_string(
                     path,
                     license,
                     "spdx",
@@ -151,8 +130,7 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
                     1,
                     256,
                     report,
-                ),
-                _ => {}
+                );
             }
             unique_string_array(
                 path,
@@ -392,10 +370,7 @@ fn relative_path(
 
 fn drive_qualified(value: &str) -> bool {
     let bytes = value.as_bytes();
-    bytes.len() >= 3
-        && bytes[0].is_ascii_alphabetic()
-        && bytes[1] == b':'
-        && bytes[2] == b'/'
+    bytes.len() >= 3 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':' && bytes[2] == b'/'
 }
 
 fn canonical_id(value: &str, lowercase: bool) -> bool {
@@ -411,13 +386,7 @@ fn canonical_id(value: &str, lowercase: bool) -> bool {
         && (!lowercase || value.bytes().all(|byte| !byte.is_ascii_uppercase()))
 }
 
-fn push(
-    report: &mut ValidationReport,
-    path: &str,
-    code: &'static str,
-    field: &str,
-    message: &str,
-) {
+fn push(report: &mut ValidationReport, path: &str, code: &'static str, field: &str, message: &str) {
     report.diagnostics.push(Diagnostic {
         path: path.to_owned(),
         code,

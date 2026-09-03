@@ -51,8 +51,14 @@ mod tests {
                 "distribution_review": {"evidence": [""]}
             }]
         });
-        let mut report = ValidationReport { diagnostics: Vec::new() };
-        augment_bytes("fixture.json", &serde_json::to_vec(&value).unwrap(), &mut report);
+        let mut report = ValidationReport {
+            diagnostics: Vec::new(),
+        };
+        augment_bytes(
+            "fixture.json",
+            &serde_json::to_vec(&value).unwrap(),
+            &mut report,
+        );
         assert!(report.diagnostics.iter().any(|diagnostic| {
             diagnostic.code == "SCHEMA_LENGTH"
                 && diagnostic.field == "$.components[0].distribution_review.evidence[0]"

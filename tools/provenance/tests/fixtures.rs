@@ -66,7 +66,10 @@ fn assert_diagnostic(value: &Value, code: &str, field: &str) {
 
 #[test]
 fn valid_source_import_fixture_passes() {
-    let report = validate_bytes("valid/source-import.json", &read("valid/source-import.json"));
+    let report = validate_bytes(
+        "valid/source-import.json",
+        &read("valid/source-import.json"),
+    );
     assert!(report.is_valid(), "{}", report.render_text());
 }
 
@@ -183,7 +186,10 @@ fn structural_fixture_reports_expected_families() {
         "DIGEST_INVALID",
     ] {
         assert!(
-            report.diagnostics.iter().any(|diagnostic| diagnostic.code == code),
+            report
+                .diagnostics
+                .iter()
+                .any(|diagnostic| diagnostic.code == code),
             "missing {code}: {}",
             report.render_text()
         );

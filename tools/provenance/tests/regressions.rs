@@ -52,8 +52,11 @@ fn source_import(id: &str, destination: &str, date: &str) -> Value {
 }
 
 fn write_json(path: &Path, value: &Value) {
-    fs::write(path, serde_json::to_vec_pretty(value).expect("JSON serializes"))
-        .expect("temporary fixture writes");
+    fs::write(
+        path,
+        serde_json::to_vec_pretty(value).expect("JSON serializes"),
+    )
+    .expect("temporary fixture writes");
 }
 
 #[test]
@@ -64,9 +67,18 @@ fn duplicate_claim_is_reported_even_when_another_record_is_invalid() {
     let invalid = root.join("invalid.json");
     let first = root.join("first.json");
     let second = root.join("second.json");
-    write_json(&invalid, &source_import("unique-invalid", "src/invalid.rs", "2025-02-29"));
-    write_json(&first, &source_import("shared-id", "src/first.rs", "2024-02-29"));
-    write_json(&second, &source_import("shared-id", "src/second.rs", "2024-02-29"));
+    write_json(
+        &invalid,
+        &source_import("unique-invalid", "src/invalid.rs", "2025-02-29"),
+    );
+    write_json(
+        &first,
+        &source_import("shared-id", "src/first.rs", "2024-02-29"),
+    );
+    write_json(
+        &second,
+        &source_import("shared-id", "src/second.rs", "2024-02-29"),
+    );
 
     let paths = [&invalid, &first, &second]
         .iter()
@@ -158,7 +170,10 @@ fn explicit_file_symlink_is_rejected() {
     fs::create_dir_all(&root).expect("temporary fixture directory");
     let target = root.join("target.json");
     let link = root.join("link.json");
-    write_json(&target, &source_import("direct-symlink", "src/direct.rs", "2024-02-29"));
+    write_json(
+        &target,
+        &source_import("direct-symlink", "src/direct.rs", "2024-02-29"),
+    );
     symlink(&target, &link).expect("create symlink");
 
     let result = validate_paths(&[link.to_string_lossy().into_owned()]);
@@ -178,7 +193,10 @@ fn recursive_default_discovery_rejects_symlink() {
     fs::create_dir_all(&imports).expect("temporary imports directory");
     let target = root.join("target.json");
     let link = imports.join("link.json");
-    write_json(&target, &source_import("recursive-symlink", "src/recursive.rs", "2024-02-29"));
+    write_json(
+        &target,
+        &source_import("recursive-symlink", "src/recursive.rs", "2024-02-29"),
+    );
     symlink(&target, &link).expect("create symlink");
 
     let output = Command::new(env!("CARGO_BIN_EXE_signthos-provenance"))
