@@ -397,14 +397,19 @@ impl GitAdapter {
             .stderr(Stdio::null())
             .spawn()
             .map_err(map_git_spawn_error)?;
-        let stdout = child.stdout.take().ok_or_else(|| {
-            VerifySourceError::Io("SOURCE_BLOB_READ: local Git stdout is unavailable".to_owned())
-        })?;
+        let stdout = match child.stdout.take() {
+            Some(stdout) => stdout,
+            None => {
+                terminate_and_reap(&mut child);
+                return Err(VerifySourceError::Io(
+                    "SOURCE_BLOB_READ: local Git stdout is unavailable".to_owned(),
+                ));
+            }
+        };
         let digest = match sha256::digest_reader(stdout) {
             Ok(digest) => digest,
             Err(_) => {
-                let _ = child.kill();
-                let _ = child.wait();
+                terminate_and_reap(&mut child);
                 return Err(VerifySourceError::Io(
                     "SOURCE_BLOB_READ: local Git blob output is unreadable".to_owned(),
                 ));
@@ -434,24 +439,16 @@ impl GitAdapter {
             .stderr(Stdio::null())
             .spawn()
             .map_err(map_git_spawn_error)?;
-        let mut stdout = child.stdout.take().ok_or_else(|| {
-            VerifySourceError::Io(format!("{failure_code}: local Git stdout is unavailable"))
-        })?;
-        let mut output = Vec::new();
-        stdout
-            .by_ref()
-            .take(SMALL_GIT_OUTPUT_LIMIT + 1)
-            .read_to_end(&mut output)
-            .map_err(|_| {
-                VerifySourceError::Io(format!("{failure_code}: local Git output is unreadable"))
-            })?;
-        if output.len() as u64 > SMALL_GIT_OUTPUT_LIMIT {
-            let _ = child.kill();
-            let _ = child.wait();
-            return Err(VerifySourceError::Verification(format!(
-                "{failure_code}: local Git output exceeded the bounded limit"
-            )));
-        }
+        let mut stdout = match child.stdout.take() {
+            Some(stdout) => stdout,
+            None => {
+                terminate_and_reap(&mut child);
+                return Err(VerifySourceError::Io(format!(
+                    "{failure_code}: local Git stdout is unavailable"
+                )));
+            }
+        };
+        let output = read_bounded_child_output(&mut stdout, &mut child, failure_code)?;
         let status = child.wait().map_err(|_| {
             VerifySourceError::Io(format!(
                 "{failure_code}: local Git process could not be joined"
@@ -480,6 +477,37 @@ impl GitAdapter {
             .args(operation.args());
         command
     }
+}
+
+fn read_bounded_child_output<R: std::io::Read>(
+    reader: &mut R,
+    child: &mut std::process::Child,
+    failure_code: &'static str,
+) -> Result<Vec<u8>, VerifySourceError> {
+    let mut output = Vec::new();
+    if reader
+        .by_ref()
+        .take(SMALL_GIT_OUTPUT_LIMIT + 1)
+        .read_to_end(&mut output)
+        .is_err()
+    {
+        terminate_and_reap(child);
+        return Err(VerifySourceError::Io(format!(
+            "{failure_code}: local Git output is unreadable"
+        )));
+    }
+    if output.len() as u64 > SMALL_GIT_OUTPUT_LIMIT {
+        terminate_and_reap(child);
+        return Err(VerifySourceError::Verification(format!(
+            "{failure_code}: local Git output exceeded the bounded limit"
+        )));
+    }
+    Ok(output)
+}
+
+fn terminate_and_reap(child: &mut std::process::Child) {
+    let _ = child.kill();
+    let _ = child.wait();
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -671,6 +699,14 @@ mod tests {
     use super::*;
     use std::ffi::OsStr;
 
+    struct FailingReader;
+
+    impl std::io::Read for FailingReader {
+        fn read(&mut self, _buffer: &mut [u8]) -> std::io::Result<usize> {
+            Err(std::io::Error::other("synthetic read failure"))
+        }
+    }
+
     #[test]
     fn git_operation_surface_has_no_network_mutating_verbs() {
         let operations = [
@@ -747,6 +783,37 @@ mod tests {
         let record = format!("100644 blob {object}\tsrc/other.txt");
         let error = parse_tree_entry(record.as_bytes(), "src/example.txt").unwrap_err();
         assert!(matches!(error, VerifySourceError::Verification(_)));
+    }
+
+    #[test]
+    fn bounded_read_error_terminates_and_reaps_child() {
+        let mut child = Command::new("git")
+            .args(["hash-object", "--stdin"])
+            .stdin(Stdio::piped())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+            .expect("local git must execute on the qualification host");
+        let _stdin = child.stdin.take().expect("git stdin is piped");
+        let mut reader = FailingReader;
+
+        let error = read_bounded_child_output(&mut reader, &mut child, "SOURCE_GIT_TEST")
+            .expect_err("synthetic read failure must fail closed");
+        match error {
+            VerifySourceError::Io(message) => {
+                assert_eq!(message, "SOURCE_GIT_TEST: local Git output is unreadable");
+            }
+            VerifySourceError::Verification(message) => {
+                panic!("read failure must map to I/O failure, got {message}");
+            }
+        }
+        assert!(
+            child
+                .try_wait()
+                .expect("child terminal state is readable")
+                .is_some(),
+            "read-error path must terminate and reap the child"
+        );
     }
 
     #[test]
