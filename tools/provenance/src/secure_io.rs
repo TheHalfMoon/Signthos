@@ -1,7 +1,7 @@
 use std::io::Read as _;
-use std::path::{Component, Path};
 #[cfg(target_os = "linux")]
 use std::path::PathBuf;
+use std::path::{Component, Path};
 
 use crate::MAX_RECORD_BYTES;
 
