@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-d-deprecated-spdx",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/signthos-fixture",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/deprecated.txt",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "wxWindows",
+    "evidence": ["fixture:license:deprecated"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-d/deprecated.txt",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Synthetic fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}
