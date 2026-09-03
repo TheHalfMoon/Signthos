@@ -46,9 +46,7 @@ fn generate_from_snapshots(snapshots: &[(String, Vec<u8>)]) -> Result<String, No
 fn snapshot_records(paths: &[String]) -> Result<Vec<(String, Vec<u8>)>, String> {
     paths
         .iter()
-        .map(|path| {
-            secure_io::read_record_bounded(path).map(|bytes| (path.to_owned(), bytes))
-        })
+        .map(|path| secure_io::read_record_bounded(path).map(|bytes| (path.to_owned(), bytes)))
         .collect()
 }
 
