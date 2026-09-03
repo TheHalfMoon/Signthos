@@ -89,7 +89,8 @@ fn validate_json_is_machine_readable_and_uses_stdout() {
 
 #[test]
 fn absolute_validate_path_is_rejected_without_host_path_output() {
-    let absolute = repository_root().join("provenance/fixtures/grain-c/invalid/date-impossible.json");
+    let absolute =
+        repository_root().join("provenance/fixtures/grain-c/invalid/date-impossible.json");
     let absolute = absolute.to_string_lossy().into_owned();
     let output = invoke(&["validate", "--json", &absolute]);
 
