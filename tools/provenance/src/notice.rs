@@ -4,6 +4,7 @@ use crate::{
 };
 use serde_json::Value;
 use std::fmt::Write as _;
+use std::io::Read as _;
 
 const COMPONENT_REGISTRY: &str = "provenance/components/registry.json";
 const IMPORT_DIRECTORY: &str = "provenance/imports";
@@ -24,7 +25,7 @@ struct NoticeEntry {
 
 pub(crate) fn generate_canonical_notice() -> Result<String, NoticeError> {
     let paths = canonical_projection_paths().map_err(NoticeError::Io)?;
-    let snapshots = snapshot_records(&paths).map_err(NoticeError::Io)?;
+    let snapshots = snapshot_records(&paths)?;
     generate_from_snapshots(&snapshots)
 }
 
@@ -43,11 +44,32 @@ fn generate_from_snapshots(snapshots: &[(String, Vec<u8>)]) -> Result<String, No
     Ok(render(&entries))
 }
 
-fn snapshot_records(paths: &[String]) -> Result<Vec<(String, Vec<u8>)>, String> {
-    paths
-        .iter()
-        .map(|path| secure_io::read_record_bounded(path).map(|bytes| (path.to_owned(), bytes)))
-        .collect()
+fn snapshot_records(paths: &[String]) -> Result<Vec<(String, Vec<u8>)>, NoticeError> {
+    let mut snapshots = Vec::with_capacity(paths.len());
+    let mut total = 0_u64;
+
+    for path in paths {
+        let bytes = secure_io::read_record_bounded(path).map_err(NoticeError::Io)?;
+        total = checked_snapshot_total(total, bytes.len() as u64, path)?;
+        snapshots.push((path.to_owned(), bytes));
+    }
+
+    Ok(snapshots)
+}
+
+fn checked_snapshot_total(total: u64, size: u64, path: &str) -> Result<u64, NoticeError> {
+    let next = total.saturating_add(size);
+    if next > MAX_TOTAL_BYTES {
+        return Err(NoticeError::Validation(ValidationReport {
+            diagnostics: vec![Diagnostic {
+                path: path.to_owned(),
+                code: "SIZE_TOTAL",
+                field: "$".to_owned(),
+                message: format!("run exceeds {MAX_TOTAL_BYTES} bytes"),
+            }],
+        }));
+    }
+    Ok(next)
 }
 
 fn validate_snapshots(snapshots: &[(String, Vec<u8>)]) -> ValidationReport {
@@ -102,22 +124,37 @@ fn validate_snapshots(snapshots: &[(String, Vec<u8>)]) -> ValidationReport {
 }
 
 pub(crate) fn notice_is_current(expected: &str) -> Result<bool, String> {
-    let metadata = match std::fs::symlink_metadata(NOTICE_PATH) {
+    file_matches_expected_bounded(NOTICE_PATH, expected.as_bytes())
+}
+
+fn file_matches_expected_bounded(path: &str, expected: &[u8]) -> Result<bool, String> {
+    let metadata = match std::fs::symlink_metadata(path) {
         Ok(metadata) => metadata,
         Err(error) if error.kind() == std::io::ErrorKind::NotFound => return Ok(false),
-        Err(error) => return Err(format!("IO_NOTICE_METADATA: {NOTICE_PATH}: {error}")),
+        Err(error) => return Err(format!("IO_NOTICE_METADATA: {path}: {error}")),
     };
     if metadata.file_type().is_symlink() {
         return Err(format!(
-            "IO_NOTICE_SYMLINK: {NOTICE_PATH}: canonical NOTICE must not be a symlink"
+            "IO_NOTICE_SYMLINK: {path}: canonical NOTICE must not be a symlink"
         ));
     }
     if !metadata.is_file() {
-        return Err(format!("IO_NOTICE_NOT_FILE: {NOTICE_PATH}"));
+        return Err(format!("IO_NOTICE_NOT_FILE: {path}"));
     }
-    let actual = std::fs::read(NOTICE_PATH)
-        .map_err(|error| format!("IO_NOTICE_READ: {NOTICE_PATH}: {error}"))?;
-    Ok(actual == expected.as_bytes())
+
+    let expected_len = u64::try_from(expected.len())
+        .map_err(|_| format!("IO_NOTICE_SIZE: {path}: expected NOTICE length is not representable"))?;
+    if metadata.len() != expected_len {
+        return Ok(false);
+    }
+
+    let file = std::fs::File::open(path)
+        .map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
+    let mut actual = Vec::with_capacity(expected.len());
+    file.take(expected_len.saturating_add(1))
+        .read_to_end(&mut actual)
+        .map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
+    Ok(actual == expected)
 }
 
 fn canonical_projection_paths() -> Result<Vec<String>, String> {
@@ -326,6 +363,7 @@ fn render(entries: &[NoticeEntry]) -> String {
 mod tests {
     use super::*;
     use serde_json::json;
+    use std::time::{SystemTime, UNIX_EPOCH};
 
     fn render_from(values: &[Value]) -> String {
         let mut entries = Vec::new();
@@ -340,6 +378,17 @@ mod tests {
         entries.sort();
         entries.dedup();
         render(&entries)
+    }
+
+    fn temp_notice_path(label: &str) -> String {
+        let nonce = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system clock must be after Unix epoch")
+            .as_nanos();
+        format!(
+            ".signthos-notice-{label}-{}-{nonce}",
+            std::process::id()
+        )
     }
 
     #[test]
@@ -385,6 +434,32 @@ mod tests {
             one_line("a\r\nb\\c\u{2028}d\u{2029}e\u{0085}f\u{000B}g"),
             "a\\r\\nb\\\\c\\u{2028}d\\u{2029}e\\u{0085}f\\u{000B}g"
         );
+    }
+
+    #[test]
+    fn snapshot_total_fails_before_exceeding_run_limit() {
+        assert_eq!(
+            checked_snapshot_total(MAX_TOTAL_BYTES - 1, 1, "last.json").unwrap(),
+            MAX_TOTAL_BYTES
+        );
+        let error = checked_snapshot_total(MAX_TOTAL_BYTES, 1, "overflow.json").unwrap_err();
+        let NoticeError::Validation(report) = error else {
+            panic!("total overflow must be a validation failure");
+        };
+        assert_eq!(report.diagnostics.len(), 1);
+        assert_eq!(report.diagnostics[0].code, "SIZE_TOTAL");
+        assert_eq!(report.diagnostics[0].path, "overflow.json");
+    }
+
+    #[test]
+    fn drift_check_is_length_bounded_and_exact() {
+        let path = temp_notice_path("bounded");
+        std::fs::write(&path, b"abcdef").expect("temporary NOTICE fixture is written");
+        assert!(!file_matches_expected_bounded(&path, b"abc").unwrap());
+        assert!(file_matches_expected_bounded(&path, b"abcdef").unwrap());
+        std::fs::write(&path, b"abcdeg").expect("temporary NOTICE fixture is replaced");
+        assert!(!file_matches_expected_bounded(&path, b"abcdef").unwrap());
+        std::fs::remove_file(&path).expect("temporary NOTICE fixture is removed");
     }
 
     #[test]
