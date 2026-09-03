@@ -2,9 +2,9 @@ mod alignment;
 mod claims;
 mod component_review_alignment;
 mod repository_alignment;
+mod secure_io;
 mod validation;
 
-use std::io::Read;
 use std::path::{Component, Path, PathBuf};
 
 pub use validation::{
@@ -59,7 +59,7 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
     let mut claim_tracker = claims::ClaimTracker::default();
 
     for path in &canonical_paths {
-        let bytes = read_record_bounded(path)?;
+        let bytes = secure_io::read_record_bounded(path)?;
         let size = bytes.len() as u64;
         total = total.saturating_add(size);
 
@@ -118,132 +118,6 @@ fn validate_repository_relative_path(path: &str) -> Result<(), String> {
 fn has_windows_drive_prefix(path: &str) -> bool {
     let bytes = path.as_bytes();
     bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':'
-}
-
-fn ensure_no_symlink_components(path: &str) -> Result<(), String> {
-    let components: Vec<_> = Path::new(path).components().collect();
-    let mut current = PathBuf::new();
-
-    for (index, component) in components.iter().enumerate() {
-        let Component::Normal(segment) = component else {
-            return Err(format!("IO_PATH: {path}: non-normal path component"));
-        };
-        current.push(segment);
-        let metadata = std::fs::symlink_metadata(&current)
-            .map_err(|error| format!("IO_METADATA: {}: {error}", current.display()))?;
-        if metadata.file_type().is_symlink() {
-            return Err(format!(
-                "IO_SYMLINK: {}: canonical validation does not follow symlinks",
-                current.display()
-            ));
-        }
-        if index + 1 < components.len() && !metadata.is_dir() {
-            return Err(format!("IO_NOT_DIR: {}", current.display()));
-        }
-    }
-
-    Ok(())
-}
-
-fn ensure_repository_containment(path: &str) -> Result<(), String> {
-    let repository_root =
-        std::fs::canonicalize(".").map_err(|error| format!("IO_CANONICALIZE: .: {error}"))?;
-    let resolved =
-        std::fs::canonicalize(path).map_err(|error| format!("IO_CANONICALIZE: {path}: {error}"))?;
-    if !resolved.starts_with(&repository_root) {
-        return Err(format!(
-            "IO_PATH_ESCAPE: {path}: resolved path leaves the repository root"
-        ));
-    }
-    Ok(())
-}
-
-fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
-    validate_repository_relative_path(path)?;
-    ensure_no_symlink_components(path)?;
-    ensure_repository_containment(path)?;
-
-    let metadata =
-        std::fs::symlink_metadata(path).map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
-    if metadata.file_type().is_symlink() {
-        return Err(format!(
-            "IO_SYMLINK: {path}: canonical validation does not follow symlinks"
-        ));
-    }
-    if !metadata.is_file() {
-        return Err(format!("IO_NOT_FILE: {path}"));
-    }
-
-    let file = open_record_nofollow(path)?;
-    let opened_metadata = file
-        .metadata()
-        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
-    if !opened_metadata.is_file() {
-        return Err(format!("IO_NOT_FILE: {path}"));
-    }
-
-    let mut bytes = Vec::new();
-    file.take(MAX_RECORD_BYTES + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|error| format!("IO_READ: {path}: {error}"))?;
-    Ok(bytes)
-}
-
-#[cfg(target_os = "linux")]
-fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
-    use std::fs::OpenOptions;
-    use std::os::unix::fs::OpenOptionsExt;
-
-    const O_NOFOLLOW: i32 = 0o400000;
-    OpenOptions::new()
-        .read(true)
-        .custom_flags(O_NOFOLLOW)
-        .open(path)
-        .map_err(|error| format!("IO_OPEN: {path}: {error}"))
-}
-
-#[cfg(target_os = "macos")]
-fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
-    use std::fs::OpenOptions;
-    use std::os::unix::fs::OpenOptionsExt;
-
-    const O_NOFOLLOW: i32 = 0x0000_0100;
-    OpenOptions::new()
-        .read(true)
-        .custom_flags(O_NOFOLLOW)
-        .open(path)
-        .map_err(|error| format!("IO_OPEN: {path}: {error}"))
-}
-
-#[cfg(target_os = "windows")]
-fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
-    use std::fs::OpenOptions;
-    use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
-
-    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
-    const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0000_0400;
-
-    let file = OpenOptions::new()
-        .read(true)
-        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
-        .open(path)
-        .map_err(|error| format!("IO_OPEN: {path}: {error}"))?;
-    let metadata = file
-        .metadata()
-        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
-    if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
-        return Err(format!(
-            "IO_SYMLINK: {path}: canonical validation does not follow reparse points"
-        ));
-    }
-    Ok(file)
-}
-
-#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
-fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
-    Err(format!(
-        "IO_SECURE_OPEN_UNAVAILABLE: {path}: platform lacks an approved no-follow open implementation"
-    ))
 }
 
 pub fn run(args: &[&str]) -> CliResult {
@@ -350,34 +224,7 @@ fn default_validation_paths() -> Result<Vec<String>, String> {
 
 fn collect_json_files(directory: &str, paths: &mut Vec<String>) -> Result<(), String> {
     validate_repository_relative_path(directory)?;
-    ensure_no_symlink_components(directory)?;
-    ensure_repository_containment(directory)?;
-
-    let entries = std::fs::read_dir(directory)
-        .map_err(|error| format!("IO_READ_DIR: {directory}: {error}"))?;
-    for entry in entries {
-        let entry = entry.map_err(|error| format!("IO_READ_DIR: {directory}: {error}"))?;
-        let file_type = entry
-            .file_type()
-            .map_err(|error| format!("IO_FILE_TYPE: {}: {error}", entry.path().display()))?;
-        let path = entry.path();
-        if file_type.is_symlink() {
-            return Err(format!(
-                "IO_SYMLINK: {}: canonical validation does not follow symlinks",
-                path.display()
-            ));
-        }
-        if file_type.is_dir() {
-            collect_json_files(&path.to_string_lossy().replace('\\', "/"), paths)?;
-        } else if file_type.is_file()
-            && path
-                .extension()
-                .is_some_and(|extension| extension == "json")
-        {
-            paths.push(path.to_string_lossy().replace('\\', "/"));
-        }
-    }
-    Ok(())
+    secure_io::collect_json_files(directory, paths)
 }
 
 fn sort_report(report: &mut ValidationReport) {
@@ -486,6 +333,7 @@ mod tests {
         }
     }
 
+    #[cfg(target_os = "linux")]
     #[test]
     fn explicit_duplicate_path_order_is_deterministic() {
         let root = temp_root("duplicate-order");
@@ -506,6 +354,7 @@ mod tests {
         assert_eq!(forward, reverse);
     }
 
+    #[cfg(target_os = "linux")]
     #[test]
     fn repeated_explicit_path_is_idempotent() {
         let root = temp_root("repeat");
@@ -522,6 +371,7 @@ mod tests {
         assert!(repeated.is_valid(), "{}", repeated.render_text());
     }
 
+    #[cfg(target_os = "linux")]
     #[test]
     fn oversized_records_contribute_to_total_limit() {
         let root = temp_root("oversized-total");
@@ -553,7 +403,7 @@ mod tests {
         );
     }
 
-    #[cfg(unix)]
+    #[cfg(target_os = "linux")]
     #[test]
     fn explicit_parent_symlink_is_rejected() {
         use std::os::unix::fs::symlink;
@@ -572,6 +422,6 @@ mod tests {
         let error = validate_paths(&[path]).unwrap_err();
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&external);
-        assert!(error.starts_with("IO_SYMLINK:"));
+        assert!(error.starts_with("IO_SECURE_TRAVERSAL:"));
     }
 }
