@@ -1,6 +1,7 @@
 mod alignment;
 mod claims;
 mod component_review_alignment;
+mod repository_alignment;
 mod validation;
 
 use std::io::Read;
@@ -35,6 +36,7 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
     if bytes.len() as u64 <= MAX_RECORD_BYTES {
         alignment::augment_bytes(path, bytes, &mut report);
         component_review_alignment::augment_bytes(path, bytes, &mut report);
+        repository_alignment::augment_bytes(path, bytes, &mut report);
     }
     sort_report(&mut report);
     report
@@ -43,6 +45,7 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
 pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
     let mut canonical_paths = paths.to_vec();
     canonical_paths.sort();
+    canonical_paths.dedup();
 
     let mut report = ValidationReport {
         diagnostics: Vec::new(),
@@ -99,30 +102,83 @@ fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
         return Err(format!("IO_NOT_FILE: {path}"));
     }
 
-    #[cfg(target_os = "linux")]
-    let file = {
-        use std::fs::OpenOptions;
-        use std::os::unix::fs::OpenOptionsExt;
-
-        // Linux O_NOFOLLOW closes the symlink-swap window between the metadata
-        // check above and the actual open. A raced symlink therefore fails
-        // closed instead of being followed.
-        const O_NOFOLLOW: i32 = 0o400000;
-        OpenOptions::new()
-            .read(true)
-            .custom_flags(O_NOFOLLOW)
-            .open(path)
-            .map_err(|error| format!("IO_OPEN: {path}: {error}"))?
-    };
-
-    #[cfg(not(target_os = "linux"))]
-    let file = std::fs::File::open(path).map_err(|error| format!("IO_OPEN: {path}: {error}"))?;
+    let file = open_record_nofollow(path)?;
+    let opened_metadata = file
+        .metadata()
+        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+    if !opened_metadata.is_file() {
+        return Err(format!("IO_NOT_FILE: {path}"));
+    }
 
     let mut bytes = Vec::new();
     file.take(MAX_RECORD_BYTES + 1)
         .read_to_end(&mut bytes)
         .map_err(|error| format!("IO_READ: {path}: {error}"))?;
     Ok(bytes)
+}
+
+#[cfg(target_os = "linux")]
+fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
+    use std::fs::OpenOptions;
+    use std::os::unix::fs::OpenOptionsExt;
+
+    // Linux O_NOFOLLOW makes the open itself reject a symlink, closing the
+    // replacement window after the informational symlink_metadata check.
+    const O_NOFOLLOW: i32 = 0o400000;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+        .map_err(|error| format!("IO_OPEN: {path}: {error}"))
+}
+
+#[cfg(target_os = "macos")]
+fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
+    use std::fs::OpenOptions;
+    use std::os::unix::fs::OpenOptionsExt;
+
+    // Darwin O_NOFOLLOW. Keep the platform constant local so Grain C does not
+    // add a native libc dependency solely for one fail-closed open flag.
+    const O_NOFOLLOW: i32 = 0x0000_0100;
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+        .map_err(|error| format!("IO_OPEN: {path}: {error}"))
+}
+
+#[cfg(target_os = "windows")]
+fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
+    use std::fs::OpenOptions;
+    use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
+
+    // Open the reparse point itself rather than following it, then reject any
+    // reparse-point handle. This binds the check to the opened object and
+    // closes the check/open replacement race without adding a native crate.
+    const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
+    const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0000_0400;
+
+    let file = OpenOptions::new()
+        .read(true)
+        .custom_flags(FILE_FLAG_OPEN_REPARSE_POINT)
+        .open(path)
+        .map_err(|error| format!("IO_OPEN: {path}: {error}"))?;
+    let metadata = file
+        .metadata()
+        .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
+    if metadata.file_attributes() & FILE_ATTRIBUTE_REPARSE_POINT != 0 {
+        return Err(format!(
+            "IO_SYMLINK: {path}: canonical validation does not follow reparse points"
+        ));
+    }
+    Ok(file)
+}
+
+#[cfg(not(any(target_os = "linux", target_os = "macos", target_os = "windows")))]
+fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
+    Err(format!(
+        "IO_SECURE_OPEN_UNAVAILABLE: {path}: platform lacks an approved no-follow open implementation"
+    ))
 }
 
 pub fn run(args: &[&str]) -> CliResult {
@@ -349,6 +405,19 @@ mod tests {
         let forward = validate_paths(&[first.clone(), second.clone()]).unwrap();
         let reverse = validate_paths(&[second, first]).unwrap();
         assert_eq!(forward, reverse);
+    }
+
+    #[test]
+    fn repeated_explicit_path_is_idempotent() {
+        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../provenance/fixtures/valid/source-import.json")
+            .to_string_lossy()
+            .into_owned();
+
+        let once = validate_paths(std::slice::from_ref(&fixture)).unwrap();
+        let repeated = validate_paths(&[fixture.clone(), fixture]).unwrap();
+        assert_eq!(once, repeated);
+        assert!(repeated.is_valid(), "{}", repeated.render_text());
     }
 
     #[test]
