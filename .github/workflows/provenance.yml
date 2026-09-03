@@ -1,0 +1,69 @@
+name: Provenance
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/provenance.yml"
+      - "tools/provenance/**"
+      - "provenance/**"
+      - "NOTICE"
+      - "README.md"
+      - "AGENTS.md"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/provenance.yml"
+      - "tools/provenance/**"
+      - "provenance/**"
+      - "NOTICE"
+      - "README.md"
+      - "AGENTS.md"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: provenance-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  provenance:
+    name: Provenance qualification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RUSTUP_TOOLCHAIN: "1.85.0"
+      CARGO_TERM_COLOR: always
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Install Rust 1.85.0
+        run: rustup toolchain install 1.85.0 --profile minimal --component rustfmt,clippy
+
+      - name: Fetch locked dependencies
+        run: cargo fetch --locked --manifest-path tools/provenance/Cargo.toml
+
+      - name: Verify locked dependency graph
+        run: |
+          cargo metadata --locked --offline --manifest-path tools/provenance/Cargo.toml > /dev/null
+          cargo tree --locked --offline --manifest-path tools/provenance/Cargo.toml
+
+      - name: Check formatting
+        run: cargo fmt --manifest-path tools/provenance/Cargo.toml -- --check
+
+      - name: Run strict Clippy
+        run: cargo clippy --locked --offline --manifest-path tools/provenance/Cargo.toml --all-targets --all-features -- -D warnings
+
+      - name: Run complete tests
+        run: cargo test --locked --offline --manifest-path tools/provenance/Cargo.toml --all-targets --all-features
+
+      - name: Run documentation tests
+        run: cargo test --locked --offline --manifest-path tools/provenance/Cargo.toml --doc
+
+      - name: Validate canonical provenance records
+        run: cargo run --locked --offline --manifest-path tools/provenance/Cargo.toml -- validate
+
+      - name: Check deterministic NOTICE
+        run: cargo run --locked --offline --manifest-path tools/provenance/Cargo.toml -- notice --check
