@@ -70,13 +70,7 @@ fn commit_file(root: &Path, path: &str, bytes: &[u8], message: &str) -> String {
         .to_owned()
 }
 
-fn write_record(
-    workspace: &Path,
-    repository: &str,
-    commit: &str,
-    path: &str,
-    source_sha256: &str,
-) {
+fn write_record(workspace: &Path, repository: &str, commit: &str, path: &str, source_sha256: &str) {
     let imports = workspace.join("provenance/imports");
     fs::create_dir_all(&imports).expect("import record directory is created");
     let record = json!({
@@ -197,7 +191,12 @@ fn verifies_exact_local_source_without_authorizing_import() {
 #[test]
 fn rejects_local_head_drift() {
     let fixture = Fixture::new();
-    commit_file(&fixture.source, "src/other.txt", b"drift\n", "drift fixture");
+    commit_file(
+        &fixture.source,
+        "src/other.txt",
+        b"drift\n",
+        "drift fixture",
+    );
     let output = fixture.verify();
     assert_eq!(output.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&output.stderr).contains("SOURCE_COMMIT_MISMATCH"));
@@ -232,7 +231,11 @@ fn rejects_source_digest_mismatch() {
 #[test]
 fn rejects_repository_identity_mismatch() {
     let fixture = Fixture::new();
-    fixture.rewrite_record("example/other-repository", "src/example.txt", CONTENT_SHA256);
+    fixture.rewrite_record(
+        "example/other-repository",
+        "src/example.txt",
+        CONTENT_SHA256,
+    );
     let output = fixture.verify();
     assert_eq!(output.status.code(), Some(1));
     assert!(String::from_utf8_lossy(&output.stderr).contains("SOURCE_REPOSITORY_MISMATCH"));
