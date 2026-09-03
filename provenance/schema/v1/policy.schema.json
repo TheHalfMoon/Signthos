@@ -24,7 +24,7 @@
           "type": "string",
           "enum": ["allow", "deny", "require_permission", "reject_expression"]
         },
-        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "repository": { "type": "string", "pattern": "^(?!\\.{1,2}/)(?![A-Za-z0-9_.-]+/\\.{1,2}$)[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
         "path_prefix": {
           "type": "string",
           "minLength": 1,
