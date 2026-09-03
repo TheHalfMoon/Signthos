@@ -28,7 +28,8 @@ fn main() -> ExitCode {
 fn has_absolute_validate_path(args: &[String]) -> bool {
     matches!(args.first().map(String::as_str), Some("validate"))
         && args.iter().skip(1).any(|arg| {
-            !arg.starts_with('-') && (Path::new(arg).is_absolute() || drive_absolute(arg) || arg.starts_with("\\\\"))
+            !arg.starts_with('-')
+                && (Path::new(arg).is_absolute() || drive_absolute(arg) || arg.starts_with("\\\\"))
         })
 }
 
