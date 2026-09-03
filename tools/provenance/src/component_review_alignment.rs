@@ -261,6 +261,29 @@ fn validate_distribution(
     let evidence_field = format!("$.components[{index}].distribution_review.evidence");
     let state_field = format!("$.components[{index}].distribution_review.state");
 
+    if let Some(items) = evidence {
+        if state == Some("approved_with_evidence") && items.is_empty() {
+            push(
+                report,
+                path,
+                "SCHEMA_LENGTH",
+                &evidence_field,
+                "approved_with_evidence requires at least one evidence item",
+            );
+        }
+        for (evidence_index, item) in items.iter().enumerate() {
+            if item.as_str() == Some("") {
+                push(
+                    report,
+                    path,
+                    "SCHEMA_LENGTH",
+                    &format!("{evidence_field}[{evidence_index}]"),
+                    "string item must not be empty",
+                );
+            }
+        }
+    }
+
     if state == Some("approved_with_evidence") {
         match evidence {
             Some(items) if !items.is_empty() => {
