@@ -129,7 +129,7 @@ fn component_is_clearly_permissive(component: &Map<String, Value>) -> bool {
 }
 
 fn clearly_permissive_spdx(expression: &str) -> bool {
-    let normalized = expression.replace('(', " ").replace(')', " ");
+    let normalized = expression.replace(['(', ')'], " ");
     let mut saw_license = false;
     for token in normalized.split_whitespace() {
         if matches!(token, "AND" | "OR") {
