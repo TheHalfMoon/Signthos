@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "component_registry",
+  "components": [
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "grain-f-store-pending",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "grain-f-store-pending",
+      "version": "1.0.0",
+      "source": {
+        "repository": "https://github.com/example/grain-f",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "package_checksum": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT",
+        "evidence": ["fixture:license:mit", "spdx-expression:MIT"]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": ["ios_app_store"],
+      "notice_requirement": "pending",
+      "derives_from": [],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    }
+  ]
+}

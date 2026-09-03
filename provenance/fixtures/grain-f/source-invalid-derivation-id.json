@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "grain-f-invalid-derivation-id",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/grain-f",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/invalid-relation.rs",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "AGPL-3.0-only",
+    "evidence": ["fixture:license:agpl", "spdx-expression:AGPL-3.0-only"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-f/invalid-relation.rs",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "rewritten_with_source_reference",
+    "notes": "Synthetic derivation metadata only",
+    "derives_from": ["../noncanonical-parent"]
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}

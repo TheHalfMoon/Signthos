@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "grain-f-derived-no-relicense",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/grain-f",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/derived.rs",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "MIT",
+    "evidence": ["fixture:license:mit", "spdx-expression:MIT"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-f/derived-no-relicense.rs",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "adapted",
+    "notes": "Synthetic derivation metadata only",
+    "derives_from": ["synthetic-copyleft-parent"]
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}

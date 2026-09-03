@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "component_registry",
+  "components": [
+    {
+      "schema_version": 1,
+      "kind": "component",
+      "id": "grain-f-derived-component-no-relicense",
+      "ecosystem": "cargo",
+      "component_type": "library",
+      "name": "grain-f-derived-component-no-relicense",
+      "version": "1.0.0",
+      "source": {
+        "repository": "https://github.com/example/grain-f",
+        "revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      },
+      "package_checksum": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "license": {
+        "classification": "spdx",
+        "spdx": "MIT",
+        "evidence": ["fixture:license:mit", "spdx-expression:MIT"]
+      },
+      "artifact_form": "source",
+      "distribution_surfaces": ["sdk"],
+      "notice_requirement": "pending",
+      "derives_from": ["synthetic-copyleft-parent"],
+      "distribution_review": {
+        "state": "pending",
+        "evidence": []
+      }
+    }
+  ]
+}
