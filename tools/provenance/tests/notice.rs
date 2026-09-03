@@ -74,7 +74,8 @@ fn notice_check_accepts_canonical_bytes() {
 #[test]
 fn notice_check_detects_byte_drift_without_mutating_notice() {
     let root = temp_root("drift");
-    fs::create_dir_all(root.join("provenance/components")).expect("fixture directory is created");
+    fs::create_dir_all(root.join("provenance/components"))
+        .expect("fixture directory is created");
     fs::write(
         root.join("provenance/components/registry.json"),
         include_bytes!("../../../provenance/components/registry.json"),
