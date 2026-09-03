@@ -111,6 +111,15 @@ fn proc_fd_child(parent: &std::fs::File, child: &std::ffi::OsStr) -> PathBuf {
 }
 
 #[cfg(target_os = "linux")]
+fn secure_open_error(code: &str, path: &str, error: std::io::Error) -> String {
+    if error.raw_os_error() == Some(40) {
+        format!("IO_SYMLINK: {path}: canonical validation does not follow symlinks")
+    } else {
+        format!("{code}: {path}: {error}")
+    }
+}
+
+#[cfg(target_os = "linux")]
 fn open_child_directory(
     parent: &std::fs::File,
     child: &std::ffi::OsStr,
@@ -126,7 +135,7 @@ fn open_child_directory(
         .read(true)
         .custom_flags(O_DIRECTORY | O_NOFOLLOW)
         .open(proc_fd_child(parent, child))
-        .map_err(|error| format!("IO_SECURE_TRAVERSAL: {display_path}: {error}"))
+        .map_err(|error| secure_open_error("IO_SECURE_TRAVERSAL", display_path, error))
 }
 
 #[cfg(target_os = "linux")]
@@ -144,7 +153,7 @@ fn open_child_file(
         .read(true)
         .custom_flags(O_NOFOLLOW)
         .open(proc_fd_child(parent, child))
-        .map_err(|error| format!("IO_SECURE_OPEN: {display_path}: {error}"))
+        .map_err(|error| secure_open_error("IO_SECURE_OPEN", display_path, error))
 }
 
 #[cfg(target_os = "linux")]
@@ -165,7 +174,11 @@ fn collect_json_files_from_handle(
         let name_text = name.to_str().ok_or_else(|| {
             format!("IO_PATH_ENCODING: {directory}: directory entry is not valid UTF-8")
         })?;
-        if name_text == "." || name_text == ".." || name_text.contains('/') || name_text.contains('\\') {
+        if name_text == "."
+            || name_text == ".."
+            || name_text.contains('/')
+            || name_text.contains('\\')
+        {
             return Err(format!("IO_PATH: {directory}: invalid directory entry"));
         }
 
@@ -181,10 +194,11 @@ fn collect_json_files_from_handle(
         if file_type.is_dir() {
             let child = open_child_directory(handle, &name, &relative)?;
             collect_json_files_from_handle(&relative, &child, paths)?;
-        } else if file_type.is_file() && Path::new(name_text).extension().is_some_and(|ext| ext == "json") {
-            // Do not trust the directory-entry type as authorization to read. The later
-            // record open repeats descriptor-relative O_NOFOLLOW traversal from the
-            // retained repository root before reading any bytes.
+        } else if file_type.is_file()
+            && Path::new(name_text)
+                .extension()
+                .is_some_and(|extension| extension == "json")
+        {
             paths.push(relative);
         }
     }
@@ -212,6 +226,7 @@ fn collect_json_files_beneath_repository(
 mod tests {
     use super::*;
     use std::fs;
+    use std::io::Read as _;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_root(label: &str) -> PathBuf {
@@ -245,10 +260,15 @@ mod tests {
         let external_abs = fs::canonicalize(&external).expect("external directory canonicalizes");
         symlink(external_abs, &original).expect("replacement symlink is created");
 
-        let mut file = open_child_file(&root_handle, std::ffi::OsStr::new("record.json"), "record.json")
-            .expect("retained directory handle remains usable");
+        let mut file = open_child_file(
+            &root_handle,
+            std::ffi::OsStr::new("record.json"),
+            "record.json",
+        )
+        .expect("retained directory handle remains usable");
         let mut bytes = Vec::new();
-        file.read_to_end(&mut bytes).expect("retained file is readable");
+        file.read_to_end(&mut bytes)
+            .expect("retained file is readable");
 
         let _ = fs::remove_file(&original);
         let _ = fs::remove_dir_all(&root);
@@ -265,5 +285,12 @@ mod tests {
         }
         open_child_directory(&handle, std::ffi::OsStr::new(child), child)
             .expect("test parent opens securely")
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    #[test]
+    fn unsupported_platform_fails_closed() {
+        let error = read_record_bounded("provenance/components/registry.json").unwrap_err();
+        assert!(error.starts_with("IO_SECURE_OPEN_UNAVAILABLE:"));
     }
 }
