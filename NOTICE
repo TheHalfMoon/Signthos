@@ -1,0 +1,23 @@
+Signthos NOTICE
+
+Generated deterministically from validated canonical provenance records.
+This inventory summary does not replace required full license texts, copyright notices, attribution artifacts, or other distribution obligations.
+
+Components
+----------
+- cargo-itoa-1.0.18 | itoa 1.0.18 | SPDX: MIT OR Apache-2.0
+- cargo-memchr-2.8.3 | memchr 2.8.3 | SPDX: Unlicense OR MIT
+- cargo-proc-macro2-1.0.107 | proc-macro2 1.0.107 | SPDX: MIT OR Apache-2.0
+- cargo-quote-1.0.47 | quote 1.0.47 | SPDX: MIT OR Apache-2.0
+- cargo-ryu-1.0.23 | ryu 1.0.23 | SPDX: Apache-2.0 OR BSL-1.0
+- cargo-serde-1.0.219 | serde 1.0.219 | SPDX: MIT OR Apache-2.0
+- cargo-serde_derive-1.0.219 | serde_derive 1.0.219 | SPDX: MIT OR Apache-2.0
+- cargo-serde_json-1.0.140 | serde_json 1.0.140 | SPDX: MIT OR Apache-2.0
+- cargo-smallvec-1.15.1 | smallvec 1.15.1 | SPDX: MIT OR Apache-2.0
+- cargo-spdx-0.13.5 | spdx 0.13.5 | SPDX: Apache-2.0
+- cargo-syn-2.0.119 | syn 2.0.119 | SPDX: MIT OR Apache-2.0
+- cargo-unicode-ident-1.0.24 | unicode-ident 1.0.24 | SPDX: (MIT OR Apache-2.0) AND Unicode-3.0
+
+Source imports
+--------------
+(none)
