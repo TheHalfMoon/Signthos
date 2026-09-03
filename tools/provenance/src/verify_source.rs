@@ -37,6 +37,7 @@ pub(crate) fn verify_source(
     let root = SourceRoot::open(source_root)?;
     let git = GitAdapter::new(root.command_directory());
 
+    git.ensure_repository_root()?;
     let head = git.head()?;
     if head != facts.commit {
         return Err(VerifySourceError::Verification(format!(
@@ -313,6 +314,17 @@ impl GitAdapter {
         }
     }
 
+    fn ensure_repository_root(&self) -> Result<(), VerifySourceError> {
+        let output = self.capture(GitOperation::RepositoryPrefix, "SOURCE_GIT_ROOT")?;
+        if output.is_empty() || output == b"\n" {
+            return Ok(());
+        }
+        Err(VerifySourceError::Verification(
+            "SOURCE_ROOT_NOT_REPOSITORY_ROOT: source root must be the local Git checkout root"
+                .to_owned(),
+        ))
+    }
+
     fn head(&self) -> Result<String, VerifySourceError> {
         let output = self.capture(GitOperation::Head, "SOURCE_GIT_HEAD")?;
         let head = canonical_single_line(&output, "SOURCE_GIT_HEAD")?;
@@ -446,15 +458,16 @@ impl GitAdapter {
 
     fn command(&self, operation: GitOperation) -> Command {
         let mut command = Command::new(&self.executable);
+        for (key, _) in std::env::vars_os() {
+            if git_environment_key(&key) {
+                command.env_remove(key);
+            }
+        }
         command
             .current_dir(&self.root)
             .env("GIT_TERMINAL_PROMPT", "0")
             .env("GIT_OPTIONAL_LOCKS", "0")
             .env("GIT_CONFIG_NOSYSTEM", "1")
-            .env_remove("GIT_DIR")
-            .env_remove("GIT_WORK_TREE")
-            .env_remove("GIT_OBJECT_DIRECTORY")
-            .env_remove("GIT_ALTERNATE_OBJECT_DIRECTORIES")
             .args(operation.args());
         command
     }
@@ -462,6 +475,7 @@ impl GitAdapter {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum GitOperation {
+    RepositoryPrefix,
     Head,
     OriginUrl,
     TreeEntry { commit: String, path: String },
@@ -471,6 +485,7 @@ enum GitOperation {
 impl GitOperation {
     fn args(&self) -> Vec<OsString> {
         match self {
+            Self::RepositoryPrefix => vec!["rev-parse".into(), "--show-prefix".into()],
             Self::Head => vec![
                 "rev-parse".into(),
                 "--verify".into(),
@@ -495,6 +510,12 @@ impl GitOperation {
             }
         }
     }
+}
+
+fn git_environment_key(key: &std::ffi::OsStr) -> bool {
+    key.to_string_lossy()
+        .get(..4)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("GIT_"))
 }
 
 fn map_git_spawn_error(error: std::io::Error) -> VerifySourceError {
@@ -642,6 +663,7 @@ mod tests {
     #[test]
     fn git_operation_surface_has_no_network_mutating_verbs() {
         let operations = [
+            GitOperation::RepositoryPrefix,
             GitOperation::Head,
             GitOperation::OriginUrl,
             GitOperation::TreeEntry {
@@ -661,6 +683,16 @@ mod tests {
                 rendered.first().map(String::as_str),
                 Some("rev-parse" | "config" | "ls-tree" | "cat-file")
             ));
+        }
+    }
+
+    #[test]
+    fn git_environment_filter_is_case_insensitive() {
+        for key in ["GIT_DIR", "git_common_dir", "Git_Config_Count"] {
+            assert!(git_environment_key(OsStr::new(key)), "{key}");
+        }
+        for key in ["PATH", "HOME", "SIGNTHOS_GIT_TEST"] {
+            assert!(!git_environment_key(OsStr::new(key)), "{key}");
         }
     }
 
