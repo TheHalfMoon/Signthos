@@ -5,6 +5,7 @@ mod repository_alignment;
 mod validation;
 
 use std::io::Read;
+use std::path::{Component, Path, PathBuf};
 
 pub use validation::{
     CanonicalRecord, ComponentRegistryRecord, Diagnostic, MAX_RECORD_BYTES, MAX_TOTAL_BYTES,
@@ -43,6 +44,10 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
 }
 
 pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
+    for path in paths {
+        validate_repository_relative_path(path)?;
+    }
+
     let mut canonical_paths = paths.to_vec();
     canonical_paths.sort();
     canonical_paths.dedup();
@@ -90,7 +95,74 @@ pub fn validate_paths(paths: &[String]) -> Result<ValidationReport, String> {
     Ok(report)
 }
 
+fn validate_repository_relative_path(path: &str) -> Result<(), String> {
+    if path.is_empty()
+        || Path::new(path).is_absolute()
+        || path.starts_with('\\')
+        || has_windows_drive_prefix(path)
+        || path.contains('\\')
+        || path
+            .split('/')
+            .any(|segment| segment.is_empty() || segment == "." || segment == "..")
+        || Path::new(path)
+            .components()
+            .any(|component| !matches!(component, Component::Normal(_)))
+    {
+        return Err(format!(
+            "IO_PATH: {path}: canonical validation requires a normalized repository-relative POSIX path"
+        ));
+    }
+    Ok(())
+}
+
+fn has_windows_drive_prefix(path: &str) -> bool {
+    let bytes = path.as_bytes();
+    bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':'
+}
+
+fn ensure_no_symlink_components(path: &str) -> Result<(), String> {
+    let components: Vec<_> = Path::new(path).components().collect();
+    let mut current = PathBuf::new();
+
+    for (index, component) in components.iter().enumerate() {
+        let Component::Normal(segment) = component else {
+            return Err(format!("IO_PATH: {path}: non-normal path component"));
+        };
+        current.push(segment);
+        let metadata = std::fs::symlink_metadata(&current)
+            .map_err(|error| format!("IO_METADATA: {}: {error}", current.display()))?;
+        if metadata.file_type().is_symlink() {
+            return Err(format!(
+                "IO_SYMLINK: {}: canonical validation does not follow symlinks",
+                current.display()
+            ));
+        }
+        if index + 1 < components.len() && !metadata.is_dir() {
+            return Err(format!("IO_NOT_DIR: {}", current.display()));
+        }
+    }
+
+    Ok(())
+}
+
+fn ensure_repository_containment(path: &str) -> Result<(), String> {
+    let repository_root = std::fs::canonicalize(".")
+        .map_err(|error| format!("IO_CANONICALIZE: .: {error}"))?;
+    let resolved = std::fs::canonicalize(path)
+        .map_err(|error| format!("IO_CANONICALIZE: {path}: {error}"))?;
+    if !resolved.starts_with(&repository_root) {
+        return Err(format!(
+            "IO_PATH_ESCAPE: {path}: resolved path leaves the repository root"
+        ));
+    }
+    Ok(())
+}
+
 fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
+    validate_repository_relative_path(path)?;
+    ensure_no_symlink_components(path)?;
+    ensure_repository_containment(path)?;
+
     let metadata =
         std::fs::symlink_metadata(path).map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
     if metadata.file_type().is_symlink() {
@@ -122,8 +194,6 @@ fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
     use std::fs::OpenOptions;
     use std::os::unix::fs::OpenOptionsExt;
 
-    // Linux O_NOFOLLOW makes the open itself reject a symlink, closing the
-    // replacement window after the informational symlink_metadata check.
     const O_NOFOLLOW: i32 = 0o400000;
     OpenOptions::new()
         .read(true)
@@ -137,8 +207,6 @@ fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
     use std::fs::OpenOptions;
     use std::os::unix::fs::OpenOptionsExt;
 
-    // Darwin O_NOFOLLOW. Keep the platform constant local so Grain C does not
-    // add a native libc dependency solely for one fail-closed open flag.
     const O_NOFOLLOW: i32 = 0x0000_0100;
     OpenOptions::new()
         .read(true)
@@ -152,9 +220,6 @@ fn open_record_nofollow(path: &str) -> Result<std::fs::File, String> {
     use std::fs::OpenOptions;
     use std::os::windows::fs::{MetadataExt, OpenOptionsExt};
 
-    // Open the reparse point itself rather than following it, then reject any
-    // reparse-point handle. This binds the check to the opened object and
-    // closes the check/open replacement race without adding a native crate.
     const FILE_FLAG_OPEN_REPARSE_POINT: u32 = 0x0020_0000;
     const FILE_ATTRIBUTE_REPARSE_POINT: u32 = 0x0000_0400;
 
@@ -257,6 +322,7 @@ fn default_validation_paths() -> Result<Vec<String>, String> {
     let mut paths = Vec::new();
 
     for candidate in candidates {
+        validate_repository_relative_path(candidate)?;
         let metadata = match std::fs::symlink_metadata(candidate) {
             Ok(metadata) => metadata,
             Err(error) if error.kind() == std::io::ErrorKind::NotFound => continue,
@@ -283,6 +349,10 @@ fn default_validation_paths() -> Result<Vec<String>, String> {
 }
 
 fn collect_json_files(directory: &str, paths: &mut Vec<String>) -> Result<(), String> {
+    validate_repository_relative_path(directory)?;
+    ensure_no_symlink_components(directory)?;
+    ensure_repository_containment(directory)?;
+
     let entries = std::fs::read_dir(directory)
         .map_err(|error| format!("IO_READ_DIR: {directory}: {error}"))?;
     for entry in entries {
@@ -298,7 +368,7 @@ fn collect_json_files(directory: &str, paths: &mut Vec<String>) -> Result<(), St
             ));
         }
         if file_type.is_dir() {
-            collect_json_files(&path.to_string_lossy(), paths)?;
+            collect_json_files(&path.to_string_lossy().replace('\\', "/"), paths)?;
         } else if file_type.is_file()
             && path
                 .extension()
@@ -350,7 +420,6 @@ fn io_error(message: &str) -> CliResult {
 mod tests {
     use super::*;
     use std::fs;
-    use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_root(label: &str) -> PathBuf {
@@ -358,7 +427,17 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("system clock must be after Unix epoch")
             .as_nanos();
-        std::env::temp_dir().join(format!("signthos-{label}-{}-{nonce}", std::process::id()))
+        PathBuf::from(format!(
+            ".signthos-test-{label}-{}-{nonce}",
+            std::process::id()
+        ))
+    }
+
+    fn write_fixture(root: &Path, name: &str, bytes: &[u8]) -> String {
+        fs::create_dir_all(root).expect("temporary directory is created");
+        let path = root.join(name);
+        fs::write(&path, bytes).expect("temporary fixture is written");
+        path.to_string_lossy().replace('\\', "/")
     }
 
     #[test]
@@ -390,32 +469,55 @@ mod tests {
     }
 
     #[test]
+    fn validate_paths_rejects_non_relative_or_noncanonical_paths_before_io() {
+        for path in [
+            "/record.json",
+            "C:/record.json",
+            "C:record.json",
+            "\\record.json",
+            "dir\\record.json",
+            "../record.json",
+            "dir/../record.json",
+            "./record.json",
+            "dir//record.json",
+        ] {
+            let error = validate_paths(&[path.to_owned()]).unwrap_err();
+            assert!(error.starts_with("IO_PATH:"), "{path}: {error}");
+        }
+    }
+
+    #[test]
     fn explicit_duplicate_path_order_is_deterministic() {
-        let fixtures =
-            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../provenance/fixtures/multi");
-        let first = fixtures
-            .join("duplicate-destination-a.json")
-            .to_string_lossy()
-            .into_owned();
-        let second = fixtures
-            .join("duplicate-destination-b.json")
-            .to_string_lossy()
-            .into_owned();
+        let root = temp_root("duplicate-order");
+        let first = write_fixture(
+            &root,
+            "a.json",
+            include_bytes!("../../../provenance/fixtures/multi/duplicate-destination-a.json"),
+        );
+        let second = write_fixture(
+            &root,
+            "b.json",
+            include_bytes!("../../../provenance/fixtures/multi/duplicate-destination-b.json"),
+        );
 
         let forward = validate_paths(&[first.clone(), second.clone()]).unwrap();
         let reverse = validate_paths(&[second, first]).unwrap();
+        let _ = fs::remove_dir_all(&root);
         assert_eq!(forward, reverse);
     }
 
     #[test]
     fn repeated_explicit_path_is_idempotent() {
-        let fixture = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("../../provenance/fixtures/valid/source-import.json")
-            .to_string_lossy()
-            .into_owned();
+        let root = temp_root("repeat");
+        let fixture = write_fixture(
+            &root,
+            "record.json",
+            include_bytes!("../../../provenance/fixtures/valid/source-import.json"),
+        );
 
         let once = validate_paths(std::slice::from_ref(&fixture)).unwrap();
         let repeated = validate_paths(&[fixture.clone(), fixture]).unwrap();
+        let _ = fs::remove_dir_all(&root);
         assert_eq!(once, repeated);
         assert!(repeated.is_valid(), "{}", repeated.render_text());
     }
@@ -429,7 +531,7 @@ mod tests {
         for index in 0..4 {
             let path = root.join(format!("oversized-{index}.json"));
             fs::write(&path, &bytes).expect("temporary oversized fixture is written");
-            paths.push(path.to_string_lossy().into_owned());
+            paths.push(path.to_string_lossy().replace('\\', "/"));
         }
 
         let report = validate_paths(&paths).expect("temporary fixtures are readable");
@@ -449,5 +551,26 @@ mod tests {
                 .iter()
                 .any(|diagnostic| diagnostic.code == "SIZE_TOTAL")
         );
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn explicit_parent_symlink_is_rejected() {
+        use std::os::unix::fs::symlink;
+
+        let root = temp_root("parent-symlink");
+        let external = temp_root("external");
+        fs::create_dir_all(&root).expect("temporary directory is created");
+        fs::create_dir_all(&external).expect("external directory is created");
+        fs::write(external.join("record.json"), b"{}")
+            .expect("external fixture is written");
+        symlink(&external, root.join("linked"))
+            .expect("directory symlink is created");
+
+        let path = root.join("linked/record.json").to_string_lossy().replace('\\', "/");
+        let error = validate_paths(&[path]).unwrap_err();
+        let _ = fs::remove_dir_all(&root);
+        let _ = fs::remove_dir_all(&external);
+        assert!(error.starts_with("IO_SYMLINK:"));
     }
 }
