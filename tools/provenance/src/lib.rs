@@ -1,6 +1,7 @@
 mod alignment;
 mod claims;
 mod component_review_alignment;
+mod notice;
 mod repository_alignment;
 mod restricted_policy;
 mod secure_io;
@@ -20,7 +21,7 @@ pub const EXIT_USAGE_ERROR: u8 = 2;
 pub const EXIT_LOCAL_IO_UNAVAILABLE: u8 = 3;
 pub const EXIT_INTERNAL_INVARIANT: u8 = 4;
 
-pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]  Validate canonical provenance records\n  verify-source                 Verify a record against a caller-supplied local checkout\n  notice                        Generate or check deterministic NOTICE output\n  explain                       Explain a canonical provenance record\n\nGrain E adds restricted-path and permission-scope policy validation. Other commands arrive in their owning Spec 001 grains.\n";
+pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]  Validate canonical provenance records\n  verify-source                 Verify a record against a caller-supplied local checkout\n  notice [--check]              Generate or byte-check deterministic NOTICE output\n  explain                       Explain a canonical provenance record\n\nGrain G implements deterministic NOTICE generation/checking. Other reserved commands arrive in their owning Spec 001 grains.\n";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliResult {
@@ -134,10 +135,46 @@ pub fn run(args: &[&str]) -> CliResult {
         )),
         [] => usage("CLI_USAGE: a command is required; use --help\n"),
         ["validate", rest @ ..] => run_validate(rest),
-        ["verify-source", ..] | ["notice", ..] | ["explain", ..] => usage(
+        ["notice", rest @ ..] => run_notice(rest),
+        ["verify-source", ..] | ["explain", ..] => usage(
             "CLI_BOOTSTRAP_UNAVAILABLE: command is reserved but not implemented in this grain\n",
         ),
         _ => usage("CLI_USAGE: unknown command or arguments; use --help\n"),
+    }
+}
+
+fn run_notice(args: &[&str]) -> CliResult {
+    let check = match args {
+        [] => false,
+        ["--check"] => true,
+        _ => return usage("CLI_USAGE: notice accepts only optional --check\n"),
+    };
+
+    let expected = match notice::generate_canonical_notice() {
+        Ok(expected) => expected,
+        Err(notice::NoticeError::Validation(report)) => {
+            return CliResult {
+                code: EXIT_VALIDATION_FAILURE,
+                stdout: String::new(),
+                stderr: report.render_text(),
+            };
+        }
+        Err(notice::NoticeError::Io(message)) => return io_error(&format!("{message}\n")),
+    };
+
+    if !check {
+        return success(&expected);
+    }
+
+    match notice::notice_is_current(&expected) {
+        Ok(true) => success("NOTICE_CURRENT\n"),
+        Ok(false) => CliResult {
+            code: EXIT_VALIDATION_FAILURE,
+            stdout: String::new(),
+            stderr: "NOTICE_DRIFT: NOTICE differs from deterministic canonical projection\n"
+                .to_owned(),
+        },
+        Err(message) => io_error(&format!("{message}\n")),
     }
 }
 
@@ -311,6 +348,7 @@ mod tests {
         let result = run(&["--help"]);
         assert_eq!(result.code, EXIT_SUCCESS);
         assert!(result.stdout.contains("validate"));
+        assert!(result.stdout.contains("notice [--check]"));
     }
 
     #[test]
@@ -318,6 +356,13 @@ mod tests {
         let result = run(&["verify-source"]);
         assert_eq!(result.code, EXIT_USAGE_ERROR);
         assert!(result.stderr.contains("CLI_BOOTSTRAP_UNAVAILABLE"));
+    }
+
+    #[test]
+    fn notice_rejects_unknown_arguments() {
+        let result = run(&["notice", "--write"]);
+        assert_eq!(result.code, EXIT_USAGE_ERROR);
+        assert!(result.stderr.contains("notice accepts only optional --check"));
     }
 
     #[test]
