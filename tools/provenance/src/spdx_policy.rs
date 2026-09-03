@@ -2,8 +2,7 @@ use crate::{Diagnostic, ValidationReport};
 use serde_json::{Map, Value};
 use spdx::{Expression, LicenseItem};
 
-const LICENSE_POLICY_JSON: &str =
-    include_str!("../../../provenance/policy/license-policy.json");
+const LICENSE_POLICY_JSON: &str = include_str!("../../../provenance/policy/license-policy.json");
 
 pub(crate) fn augment_bytes(path: &str, bytes: &[u8], report: &mut ValidationReport) {
     let Ok(Value::Object(record)) = serde_json::from_slice::<Value>(bytes) else {
@@ -192,13 +191,7 @@ fn policy_rejects(expression: &str) -> Result<bool, &'static str> {
     }))
 }
 
-fn push(
-    report: &mut ValidationReport,
-    path: &str,
-    code: &'static str,
-    field: &str,
-    message: &str,
-) {
+fn push(report: &mut ValidationReport, path: &str, code: &'static str, field: &str, message: &str) {
     report.diagnostics.push(Diagnostic {
         path: path.to_owned(),
         code,

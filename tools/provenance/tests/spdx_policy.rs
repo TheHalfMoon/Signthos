@@ -3,7 +3,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 fn repo_path(relative: &str) -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR")).join("../..").join(relative)
+    Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../..")
+        .join(relative)
 }
 
 fn read(relative: &str) -> Vec<u8> {
