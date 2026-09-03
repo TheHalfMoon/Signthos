@@ -120,6 +120,104 @@ fn trailing_slash_path_remains_invalid() {
 }
 
 #[test]
+fn source_import_repository_dot_segments_are_rejected() {
+    for repository in ["../bad", "./bad", "owner/.", "owner/.."] {
+        let mut record = source_import("repository-dot", "src/repository.rs", "2024-02-29");
+        record["upstream"]["repository"] = Value::String(repository.to_owned());
+        let bytes = serde_json::to_vec(&record).expect("JSON serializes");
+        let report = validate_bytes("repository-dot.json", &bytes);
+        assert!(
+            report.diagnostics.iter().any(|diagnostic| {
+                diagnostic.code == "SOURCE_REPOSITORY"
+                    && diagnostic.field == "$.upstream.repository"
+            }),
+            "{repository}: {}",
+            report.render_text()
+        );
+    }
+}
+
+#[test]
+fn policy_repository_dot_segments_are_rejected() {
+    for repository in ["../bad", "owner/.", "./repo", "owner/.."] {
+        let record = json!({
+            "schema_version": 1,
+            "kind": "policy",
+            "id": "policy-one",
+            "policy_type": "restricted_paths",
+            "policy_version": 1,
+            "rules": [{
+                "id": "rule-one",
+                "effect": "deny",
+                "repository": repository
+            }]
+        });
+        let bytes = serde_json::to_vec(&record).expect("JSON serializes");
+        let report = validate_bytes("policy-dot.json", &bytes);
+        assert!(
+            report.diagnostics.iter().any(|diagnostic| {
+                diagnostic.code == "SOURCE_REPOSITORY"
+                    && diagnostic.field == "$.rules[0].repository"
+            }),
+            "{repository}: {}",
+            report.render_text()
+        );
+    }
+}
+
+#[test]
+fn component_repository_dot_segments_are_rejected() {
+    for repository in [
+        "https://github.com/../bad",
+        "https://github.com/owner/.",
+        "https://github.com/./repo",
+        "https://github.com/owner/..",
+    ] {
+        let record = json!({
+            "schema_version": 1,
+            "kind": "component_registry",
+            "components": [{
+                "schema_version": 1,
+                "kind": "component",
+                "id": "component-one",
+                "ecosystem": "cargo",
+                "component_type": "library",
+                "name": "example",
+                "version": "1.0.0",
+                "source": {
+                    "repository": repository,
+                    "revision": "0123456789abcdef0123456789abcdef01234567"
+                },
+                "package_checksum": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                "license": {
+                    "classification": "spdx",
+                    "spdx": "MIT",
+                    "evidence": ["LICENSE"]
+                },
+                "artifact_form": "source",
+                "distribution_surfaces": ["server"],
+                "notice_requirement": "not_required",
+                "derives_from": [],
+                "distribution_review": {
+                    "state": "not_applicable",
+                    "evidence": []
+                }
+            }]
+        });
+        let bytes = serde_json::to_vec(&record).expect("JSON serializes");
+        let report = validate_bytes("component-dot.json", &bytes);
+        assert!(
+            report.diagnostics.iter().any(|diagnostic| {
+                diagnostic.code == "COMPONENT_SOURCE"
+                    && diagnostic.field == "$.components[0].source.repository"
+            }),
+            "{repository}: {}",
+            report.render_text()
+        );
+    }
+}
+
+#[test]
 fn empty_component_distribution_review_evidence_item_is_rejected() {
     let record = json!({
         "schema_version": 1,
