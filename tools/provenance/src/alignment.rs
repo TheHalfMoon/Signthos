@@ -17,6 +17,16 @@ pub(crate) fn augment_bytes(path: &str, bytes: &[u8], report: &mut ValidationRep
 
 fn source_import(path: &str, record: &Map<String, Value>, report: &mut ValidationReport) {
     if let Some(upstream) = object(record, "upstream") {
+        match upstream.get("repository") {
+            Some(Value::String(repository)) if !repository_id(repository) => push(
+                report,
+                path,
+                "SOURCE_REPOSITORY",
+                "$.upstream.repository",
+                "expected owner/repository",
+            ),
+            _ => {}
+        }
         bounded_string(
             path,
             upstream,
@@ -120,6 +130,19 @@ fn component_registry(path: &str, record: &Map<String, Value>, report: &mut Vali
             report,
         );
 
+        if let Some(source) = object(component, "source") {
+            match source.get("repository") {
+                Some(Value::String(repository)) if !github_repository(repository) => push(
+                    report,
+                    path,
+                    "COMPONENT_SOURCE",
+                    &format!("{base}.source.repository"),
+                    "expected canonical GitHub URL",
+                ),
+                _ => {}
+            }
+        }
+
         if let Some(license) = object(component, "license") {
             if let Some("spdx") = license.get("classification").and_then(Value::as_str) {
                 bounded_string(
@@ -208,6 +231,17 @@ fn policy(path: &str, record: &Map<String, Value>, report: &mut ValidationReport
             &format!("{base}.path_prefix"),
             report,
         );
+
+        match rule.get("repository") {
+            Some(Value::String(repository)) if !repository_id(repository) => push(
+                report,
+                path,
+                "SOURCE_REPOSITORY",
+                &format!("{base}.repository"),
+                "invalid repository",
+            ),
+            _ => {}
+        }
 
         if rule.contains_key("expression") {
             bounded_string(
@@ -386,6 +420,32 @@ fn canonical_id(value: &str, lowercase: bool) -> bool {
         && (!lowercase || value.bytes().all(|byte| !byte.is_ascii_uppercase()))
 }
 
+fn repository_id(value: &str) -> bool {
+    if !value.is_ascii() || value.contains('\\') {
+        return false;
+    }
+    let mut parts = value.split('/');
+    matches!(
+        (parts.next(), parts.next(), parts.next()),
+        (Some(owner), Some(repository), None)
+            if repository_segment(owner) && repository_segment(repository)
+    )
+}
+
+fn repository_segment(value: &str) -> bool {
+    !value.is_empty()
+        && !matches!(value, "." | "..")
+        && value
+            .bytes()
+            .all(|byte| byte.is_ascii_alphanumeric() || matches!(byte, b'.' | b'_' | b'-'))
+}
+
+fn github_repository(value: &str) -> bool {
+    value
+        .strip_prefix("https://github.com/")
+        .is_some_and(repository_id)
+}
+
 fn push(report: &mut ValidationReport, path: &str, code: &'static str, field: &str, message: &str) {
     report.diagnostics.push(Diagnostic {
         path: path.to_owned(),
@@ -406,6 +466,16 @@ mod tests {
         assert!(drive_qualified("z:/repo/file"));
         assert!(!drive_qualified("c:repo/file"));
         assert!(!drive_qualified("repo/file"));
+    }
+
+    #[test]
+    fn repository_dot_segments_are_rejected() {
+        for repository in ["../bad", "./bad", "owner/.", "owner/..", "./."] {
+            assert!(!repository_id(repository), "{repository}");
+        }
+        assert!(repository_id("owner/repository"));
+        assert!(github_repository("https://github.com/owner/repository"));
+        assert!(!github_repository("https://github.com/owner/.."));
     }
 
     #[test]
