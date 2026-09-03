@@ -3,14 +3,14 @@ use std::process::{Command, Output};
 
 fn invoke(args: &[&str]) -> Output {
     Command::new(env!("CARGO_BIN_EXE_signthos-provenance"))
+        .current_dir(env!("CARGO_MANIFEST_DIR"))
         .args(args)
         .output()
         .expect("provenance CLI must execute")
 }
 
 fn fixture(relative: &str) -> String {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../provenance/fixtures/grain-c")
+    PathBuf::from("../../provenance/fixtures/grain-c")
         .join(relative)
         .to_string_lossy()
         .into_owned()
@@ -81,6 +81,23 @@ fn validate_json_is_machine_readable_and_uses_stdout() {
             .iter()
             .any(|item| item["code"] == "DATE_INVALID")
     );
+}
+
+#[test]
+fn absolute_validate_path_is_rejected_without_host_path_output() {
+    let absolute = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../provenance/fixtures/grain-c/invalid/date-impossible.json");
+    let absolute = absolute.to_string_lossy().into_owned();
+    let output = invoke(&["validate", "--json", &absolute]);
+
+    assert_eq!(output.status.code(), Some(2));
+    assert!(output.stdout.is_empty());
+    let stderr = String::from_utf8(output.stderr).expect("stderr must be UTF-8");
+    assert_eq!(
+        stderr,
+        "CLI_USAGE: validate paths must be repository-relative\n"
+    );
+    assert!(!stderr.contains(&absolute));
 }
 
 #[test]
