@@ -31,7 +31,7 @@ pub struct CliResult {
 
 pub fn dependency_sanity() -> bool {
     spdx::Expression::parse("MIT OR Apache-2.0").is_ok()
-        && serde_json::from_str::<serde_json::Value>(r#"{\"ok\":true}"#).is_ok()
+        && serde_json::from_str::<serde_json::Value>(r#"{"ok":true}"#).is_ok()
 }
 
 pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
