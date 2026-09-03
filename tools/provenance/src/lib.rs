@@ -146,10 +146,10 @@ fn ensure_no_symlink_components(path: &str) -> Result<(), String> {
 }
 
 fn ensure_repository_containment(path: &str) -> Result<(), String> {
-    let repository_root = std::fs::canonicalize(".")
-        .map_err(|error| format!("IO_CANONICALIZE: .: {error}"))?;
-    let resolved = std::fs::canonicalize(path)
-        .map_err(|error| format!("IO_CANONICALIZE: {path}: {error}"))?;
+    let repository_root =
+        std::fs::canonicalize(".").map_err(|error| format!("IO_CANONICALIZE: .: {error}"))?;
+    let resolved =
+        std::fs::canonicalize(path).map_err(|error| format!("IO_CANONICALIZE: {path}: {error}"))?;
     if !resolved.starts_with(&repository_root) {
         return Err(format!(
             "IO_PATH_ESCAPE: {path}: resolved path leaves the repository root"
@@ -562,12 +562,13 @@ mod tests {
         let external = temp_root("external");
         fs::create_dir_all(&root).expect("temporary directory is created");
         fs::create_dir_all(&external).expect("external directory is created");
-        fs::write(external.join("record.json"), b"{}")
-            .expect("external fixture is written");
-        symlink(&external, root.join("linked"))
-            .expect("directory symlink is created");
+        fs::write(external.join("record.json"), b"{}").expect("external fixture is written");
+        symlink(&external, root.join("linked")).expect("directory symlink is created");
 
-        let path = root.join("linked/record.json").to_string_lossy().replace('\\', "/");
+        let path = root
+            .join("linked/record.json")
+            .to_string_lossy()
+            .replace('\\', "/");
         let error = validate_paths(&[path]).unwrap_err();
         let _ = fs::remove_dir_all(&root);
         let _ = fs::remove_dir_all(&external);
