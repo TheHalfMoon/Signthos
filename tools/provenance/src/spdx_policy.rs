@@ -1,6 +1,6 @@
 use crate::{Diagnostic, ValidationReport};
 use serde_json::{Map, Value};
-use spdx::{Expression, LicenseItem};
+use spdx::{Expression, LicenseItem, ParseMode};
 
 const LICENSE_POLICY_JSON: &str = include_str!("../../../provenance/policy/license-policy.json");
 
@@ -78,13 +78,13 @@ fn license_policy(path: &str, record: &Map<String, Value>, report: &mut Validati
         if expression == "AGPL-3.0" {
             rejects_bare_agpl = true;
         }
-        if Expression::parse(expression).is_err() {
+        if Expression::parse(expression).is_err() && parse_allow_deprecated(expression).is_err() {
             push(
                 report,
                 path,
                 "SPDX_POLICY_RULE",
                 &format!("$.rules[{index}].expression"),
-                "reject_expression rule must name a strict SPDX expression",
+                "reject_expression rule must name a recognized SPDX expression",
             );
         }
     }
@@ -138,16 +138,28 @@ fn validate_expression(
 
     let parsed = match Expression::parse(expression) {
         Ok(parsed) => parsed,
-        Err(_) => {
-            push(
-                report,
-                path,
-                "SPDX_PARSE",
-                field,
-                "invalid syntax or unknown SPDX identifier",
-            );
-            return;
-        }
+        Err(_) => match parse_allow_deprecated(expression) {
+            Ok(parsed) if has_deprecated_identifier(&parsed) => {
+                push(
+                    report,
+                    path,
+                    "SPDX_DEPRECATED",
+                    field,
+                    "deprecated SPDX shorthand is prohibited; use explicit current semantics",
+                );
+                return;
+            }
+            _ => {
+                push(
+                    report,
+                    path,
+                    "SPDX_PARSE",
+                    field,
+                    "invalid syntax or unknown SPDX identifier",
+                );
+                return;
+            }
+        },
     };
 
     for requirement in parsed.requirements() {
@@ -175,6 +187,25 @@ fn validate_expression(
             _ => {}
         }
     }
+}
+
+fn parse_allow_deprecated(expression: &str) -> Result<Expression, spdx::ParseError> {
+    Expression::parse_mode(
+        expression,
+        ParseMode {
+            allow_deprecated: true,
+            ..ParseMode::STRICT
+        },
+    )
+}
+
+fn has_deprecated_identifier(expression: &Expression) -> bool {
+    expression.requirements().any(|requirement| {
+        matches!(
+            &requirement.req.license,
+            LicenseItem::Spdx { id, .. } if id.is_deprecated()
+        )
+    })
 }
 
 fn policy_rejects(expression: &str) -> Result<bool, &'static str> {
