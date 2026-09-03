@@ -149,13 +149,49 @@ fn file_matches_expected_bounded(path: &str, expected: &[u8]) -> Result<bool, St
         return Ok(false);
     }
 
-    let file =
-        std::fs::File::open(path).map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
+    let file = open_notice_nofollow(path)?;
+    let opened_metadata = file
+        .metadata()
+        .map_err(|error| format!("IO_NOTICE_METADATA: {path}: {error}"))?;
+    if !opened_metadata.is_file() {
+        return Err(format!("IO_NOTICE_NOT_FILE: {path}"));
+    }
+    if opened_metadata.len() != expected_len {
+        return Ok(false);
+    }
+
     let mut actual = Vec::with_capacity(expected.len());
     file.take(expected_len.saturating_add(1))
         .read_to_end(&mut actual)
         .map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
     Ok(actual == expected)
+}
+
+#[cfg(target_os = "linux")]
+fn open_notice_nofollow(path: &str) -> Result<std::fs::File, String> {
+    use std::fs::OpenOptions;
+    use std::os::unix::fs::OpenOptionsExt as _;
+
+    const O_NOFOLLOW: i32 = 0o400000;
+
+    OpenOptions::new()
+        .read(true)
+        .custom_flags(O_NOFOLLOW)
+        .open(path)
+        .map_err(|error| {
+            if error.raw_os_error() == Some(40) {
+                format!("IO_NOTICE_SYMLINK: {path}: canonical NOTICE must not be a symlink")
+            } else {
+                format!("IO_NOTICE_READ: {path}: {error}")
+            }
+        })
+}
+
+#[cfg(not(target_os = "linux"))]
+fn open_notice_nofollow(path: &str) -> Result<std::fs::File, String> {
+    Err(format!(
+        "IO_NOTICE_SECURE_OPEN_UNAVAILABLE: {path}: this platform lacks the approved no-follow NOTICE open"
+    ))
 }
 
 fn canonical_projection_paths() -> Result<Vec<String>, String> {
@@ -458,6 +494,22 @@ mod tests {
         std::fs::write(&path, b"abcdeg").expect("temporary NOTICE fixture is replaced");
         assert!(!file_matches_expected_bounded(&path, b"abcdef").unwrap());
         std::fs::remove_file(&path).expect("temporary NOTICE fixture is removed");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn nofollow_open_rejects_notice_symlink() {
+        use std::os::unix::fs::symlink;
+
+        let target = temp_notice_path("target");
+        let link = temp_notice_path("symlink");
+        std::fs::write(&target, b"expected").expect("temporary target is written");
+        symlink(&target, &link).expect("temporary NOTICE symlink is created");
+
+        let error = open_notice_nofollow(&link).expect_err("symlink must fail closed");
+        let _ = std::fs::remove_file(&link);
+        let _ = std::fs::remove_file(&target);
+        assert!(error.starts_with("IO_NOTICE_SYMLINK:"), "{error}");
     }
 
     #[test]
