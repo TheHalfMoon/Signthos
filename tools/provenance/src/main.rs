@@ -5,7 +5,7 @@ use std::process::ExitCode;
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     if has_absolute_validate_path(&args) {
-        eprint!("CLI_USAGE: validate paths must be repository-relative\n");
+        eprintln!("CLI_USAGE: validate paths must be repository-relative");
         let _ = io::stderr().flush();
         return ExitCode::from(signthos_provenance::EXIT_USAGE_ERROR);
     }
