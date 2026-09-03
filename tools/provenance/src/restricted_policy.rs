@@ -59,13 +59,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     let rules = match load_rules() {
         Ok(rules) => rules,
         Err(message) => {
-            push(
-                report,
-                path,
-                "RESTRICTED_PATH_POLICY_CONFIG",
-                "$",
-                message,
-            );
+            push(report, path, "RESTRICTED_PATH_POLICY_CONFIG", "$", message);
             return;
         }
     };
@@ -122,7 +116,10 @@ fn restricted_policy(path: &str, record: &Map<String, Value>, report: &mut Valid
             );
         }
 
-        let effect = rule.get("effect").and_then(Value::as_str).unwrap_or_default();
+        let effect = rule
+            .get("effect")
+            .and_then(Value::as_str)
+            .unwrap_or_default();
         if !matches!(effect, "allow" | "deny" | "require_permission") {
             push(
                 report,
@@ -339,13 +336,7 @@ fn permission_artifact_ref(value: &str) -> bool {
     })
 }
 
-fn push(
-    report: &mut ValidationReport,
-    path: &str,
-    code: &'static str,
-    field: &str,
-    message: &str,
-) {
+fn push(report: &mut ValidationReport, path: &str, code: &'static str, field: &str, message: &str) {
     report.diagnostics.push(Diagnostic {
         path: path.to_owned(),
         code,
