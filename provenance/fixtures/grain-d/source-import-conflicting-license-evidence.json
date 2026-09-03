@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-d-conflicting-license-evidence",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/signthos-fixture",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/conflicting-license-evidence.txt",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "MIT",
+    "evidence": [
+      "fixture:license:mit",
+      "spdx-expression:Apache-2.0"
+    ]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-d/conflicting-license-evidence.txt",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Synthetic conflicting evidence fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}
