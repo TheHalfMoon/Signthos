@@ -315,6 +315,15 @@ impl GitAdapter {
     }
 
     fn ensure_repository_root(&self) -> Result<(), VerifySourceError> {
+        let bare_output = self.capture(GitOperation::RepositoryBare, "SOURCE_GIT_ROOT")?;
+        let bare = canonical_single_line(&bare_output, "SOURCE_GIT_ROOT")?;
+        if bare != "false" {
+            return Err(VerifySourceError::Verification(
+                "SOURCE_ROOT_BARE_REPOSITORY: source root must be a non-bare local Git checkout"
+                    .to_owned(),
+            ));
+        }
+
         let output = self.capture(GitOperation::RepositoryPrefix, "SOURCE_GIT_ROOT")?;
         if output.is_empty() || output == b"\n" {
             return Ok(());
@@ -475,6 +484,7 @@ impl GitAdapter {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum GitOperation {
+    RepositoryBare,
     RepositoryPrefix,
     Head,
     OriginUrl,
@@ -485,6 +495,7 @@ enum GitOperation {
 impl GitOperation {
     fn args(&self) -> Vec<OsString> {
         match self {
+            Self::RepositoryBare => vec!["rev-parse".into(), "--is-bare-repository".into()],
             Self::RepositoryPrefix => vec!["rev-parse".into(), "--show-prefix".into()],
             Self::Head => vec![
                 "rev-parse".into(),
@@ -663,6 +674,7 @@ mod tests {
     #[test]
     fn git_operation_surface_has_no_network_mutating_verbs() {
         let operations = [
+            GitOperation::RepositoryBare,
             GitOperation::RepositoryPrefix,
             GitOperation::Head,
             GitOperation::OriginUrl,
