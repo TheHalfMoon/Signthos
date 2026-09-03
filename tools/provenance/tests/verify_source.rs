@@ -318,6 +318,48 @@ fn source_root_symlink_fails_closed() {
 }
 
 #[test]
+fn nested_source_root_is_rejected() {
+    let fixture = Fixture::new();
+    let nested = fixture.source.join("src").to_string_lossy().into_owned();
+    let output = fixture.invoke(&[
+        "verify-source",
+        "--record",
+        RECORD_ID,
+        "--source-root",
+        &nested,
+    ]);
+    assert_eq!(output.status.code(), Some(1));
+    assert!(
+        String::from_utf8_lossy(&output.stderr).contains("SOURCE_ROOT_NOT_REPOSITORY_ROOT")
+    );
+}
+
+#[test]
+fn inherited_git_environment_cannot_redirect_checkout() {
+    let fixture = Fixture::new();
+    let source = fixture.source.to_string_lossy().into_owned();
+    let poison = fixture.workspace.join("poison-git-dir");
+    let output = Command::new(binary())
+        .current_dir(&fixture.workspace)
+        .env("GIT_DIR", &poison)
+        .env("GIT_COMMON_DIR", &poison)
+        .env("GIT_CONFIG_COUNT", "1")
+        .env("GIT_CONFIG_KEY_0", "core.repositoryformatversion")
+        .env("GIT_CONFIG_VALUE_0", "999")
+        .args([
+            "verify-source",
+            "--record",
+            RECORD_ID,
+            "--source-root",
+            &source,
+        ])
+        .output()
+        .expect("provenance binary executes with poisoned inherited Git environment");
+    assert_eq!(output.status.code(), Some(0));
+    assert!(output.stderr.is_empty());
+}
+
+#[test]
 fn canonical_validate_does_not_invoke_local_git() {
     let fixture = Fixture::new();
     let fake_bin = fixture.workspace.join("fake-bin");
