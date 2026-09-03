@@ -67,7 +67,10 @@ fn validate_license_object(
     validate_expression(path, expression, source_import, field, report);
 
     if !source_import
-        && license.get("classification").and_then(Value::as_str).is_some_and(|value| value != "spdx")
+        && license
+            .get("classification")
+            .and_then(Value::as_str)
+            .is_some_and(|value| value != "spdx")
     {
         report.diagnostics.push(Diagnostic {
             path: path.to_owned(),
@@ -86,18 +89,7 @@ fn validate_expression(
     field: &str,
     report: &mut ValidationReport,
 ) {
-    if spdx::Expression::parse(expression).is_err() {
-        report.diagnostics.push(Diagnostic {
-            path: path.to_owned(),
-            code: "SPDX_INVALID_EXPRESSION",
-            field: format!("{field}.spdx"),
-            message: "license expression is not valid SPDX syntax with known identifiers".to_owned(),
-        });
-        return;
-    }
-
-    let rejected = canonical_rejected_expressions();
-    match rejected {
+    match canonical_rejected_expressions() {
         Ok(expressions) => {
             if expressions
                 .iter()
@@ -118,6 +110,15 @@ fn validate_expression(
             field: "$.policy".to_owned(),
             message: "canonical embedded license policy is invalid".to_owned(),
         }),
+    }
+
+    if spdx::Expression::parse(expression).is_err() {
+        report.diagnostics.push(Diagnostic {
+            path: path.to_owned(),
+            code: "SPDX_INVALID_EXPRESSION",
+            field: format!("{field}.spdx"),
+            message: "license expression is not valid SPDX syntax with known identifiers".to_owned(),
+        });
     }
 
     if source_import && expression.contains("LicenseRef-") {
