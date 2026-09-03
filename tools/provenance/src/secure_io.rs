@@ -5,7 +5,7 @@ use crate::MAX_RECORD_BYTES;
 
 pub(crate) fn read_record_bounded(path: &str) -> Result<Vec<u8>, String> {
     validate_relative_components(path)?;
-    let mut file = open_record_beneath_repository(path)?;
+    let file = open_record_beneath_repository(path)?;
     let metadata = file
         .metadata()
         .map_err(|error| format!("IO_METADATA: {path}: {error}"))?;
@@ -226,7 +226,6 @@ fn collect_json_files_beneath_repository(
 mod tests {
     use super::*;
     use std::fs;
-    use std::io::Read as _;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_root(label: &str) -> PathBuf {

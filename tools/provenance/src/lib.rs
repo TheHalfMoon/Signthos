@@ -5,7 +5,7 @@ mod repository_alignment;
 mod secure_io;
 mod validation;
 
-use std::path::{Component, Path, PathBuf};
+use std::path::{Component, Path};
 
 pub use validation::{
     CanonicalRecord, ComponentRegistryRecord, Diagnostic, MAX_RECORD_BYTES, MAX_TOTAL_BYTES,
@@ -267,6 +267,7 @@ fn io_error(message: &str) -> CliResult {
 mod tests {
     use super::*;
     use std::fs;
+    use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
 
     fn temp_root(label: &str) -> PathBuf {
