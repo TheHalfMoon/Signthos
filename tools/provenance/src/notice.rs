@@ -1,4 +1,4 @@
-use crate::{secure_io, validate_paths, ValidationReport};
+use crate::{ValidationReport, secure_io, validate_paths};
 use serde_json::Value;
 use std::fmt::Write as _;
 
@@ -89,8 +89,8 @@ fn canonical_projection_paths() -> Result<Vec<String>, String> {
 }
 
 fn project_record(path: &str, bytes: &[u8], entries: &mut Vec<NoticeEntry>) -> Result<(), String> {
-    let value: Value = serde_json::from_slice(bytes)
-        .map_err(|error| format!("NOTICE_JSON: {path}: {error}"))?;
+    let value: Value =
+        serde_json::from_slice(bytes).map_err(|error| format!("NOTICE_JSON: {path}: {error}"))?;
     let record = value
         .as_object()
         .ok_or_else(|| format!("NOTICE_RECORD: {path}: expected object"))?;
@@ -98,7 +98,9 @@ fn project_record(path: &str, bytes: &[u8], entries: &mut Vec<NoticeEntry>) -> R
     match record.get("kind").and_then(Value::as_str) {
         Some("component_registry") => project_components(path, record, entries),
         Some("source_import") => project_source_import(path, record, entries),
-        Some(kind) => Err(format!("NOTICE_KIND: {path}: unsupported projection kind `{kind}`")),
+        Some(kind) => Err(format!(
+            "NOTICE_KIND: {path}: unsupported projection kind `{kind}`"
+        )),
         None => Err(format!("NOTICE_KIND: {path}: missing kind")),
     }
 }
