@@ -39,8 +39,16 @@ fn canonical_notice_is_byte_current_and_repeatable() {
         .output()
         .expect("notice command repeats");
 
-    assert!(first.status.success(), "{}", String::from_utf8_lossy(&first.stderr));
-    assert!(second.status.success(), "{}", String::from_utf8_lossy(&second.stderr));
+    assert!(
+        first.status.success(),
+        "{}",
+        String::from_utf8_lossy(&first.stderr)
+    );
+    assert!(
+        second.status.success(),
+        "{}",
+        String::from_utf8_lossy(&second.stderr)
+    );
     assert_eq!(first.stdout, second.stdout);
     assert_eq!(first.stdout, include_bytes!("../../../NOTICE"));
     assert!(!first.stdout.contains(&b'\r'));
@@ -54,7 +62,11 @@ fn notice_check_accepts_canonical_bytes() {
         .output()
         .expect("notice check executes");
 
-    assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
     assert_eq!(output.stdout, b"NOTICE_CURRENT\n");
     assert!(output.stderr.is_empty());
 }
