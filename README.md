@@ -40,6 +40,22 @@ Signthos is not intended to be a cosmetic fork of either project. The target is 
 - Signthos CLI
 - Signthos Verify
 
+## Provenance validation
+
+Specification 001 provides the standalone `signthos-provenance` control-plane tool under `tools/provenance/`. Run canonical checks from the repository root:
+
+```sh
+cargo fmt --manifest-path tools/provenance/Cargo.toml -- --check
+cargo clippy --locked --manifest-path tools/provenance/Cargo.toml --all-targets --all-features -- -D warnings
+cargo test --locked --manifest-path tools/provenance/Cargo.toml --all-targets --all-features
+cargo run --locked --manifest-path tools/provenance/Cargo.toml -- validate
+cargo run --locked --manifest-path tools/provenance/Cargo.toml -- notice --check
+```
+
+`validate` is local and offline. `verify-source --record <id> --source-root <path>` may inspect only a caller-supplied local Git checkout and verifies source facts only; it does not authorize an import or grant rights.
+
+Future source-import records belong under `provenance/imports/` and remain fail-closed unless all canonical record, permission, live review, exact-head qualification, and expected-head merge gates are satisfied. Do not place copied upstream product source, credentials, or confidential permission artifacts in provenance metadata directories.
+
 ## License
 
 The final repository licensing model is intentionally not declared yet. Imported or derived upstream code must retain all applicable upstream obligations unless Signthos holds explicit written rights permitting different treatment. The foundation specification must resolve this before any upstream code import.
