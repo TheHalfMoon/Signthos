@@ -139,8 +139,7 @@ mod tests {
             "upstream": { "repository": "owner/." }
         }));
         assert!(report.diagnostics.iter().any(|diagnostic| {
-            diagnostic.code == "SOURCE_REPOSITORY"
-                && diagnostic.field == "$.upstream.repository"
+            diagnostic.code == "SOURCE_REPOSITORY" && diagnostic.field == "$.upstream.repository"
         }));
     }
 
@@ -151,8 +150,7 @@ mod tests {
             "rules": [{ "repository": "./repo" }]
         }));
         assert!(report.diagnostics.iter().any(|diagnostic| {
-            diagnostic.code == "SOURCE_REPOSITORY"
-                && diagnostic.field == "$.rules[0].repository"
+            diagnostic.code == "SOURCE_REPOSITORY" && diagnostic.field == "$.rules[0].repository"
         }));
     }
 
