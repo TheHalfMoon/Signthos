@@ -2,12 +2,24 @@ use serde_json::{Value, json};
 use signthos_provenance::{MAX_RECORD_BYTES, MAX_TOTAL_BYTES, validate_bytes, validate_paths};
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 fn repo_fixture(relative: &str) -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
         .join("../..")
         .join("provenance/fixtures")
         .join(relative)
+}
+
+fn relative_temp_root(label: &str) -> PathBuf {
+    let nonce = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .expect("system clock must be after Unix epoch")
+        .as_nanos();
+    PathBuf::from(format!(
+        ".signthos-integration-{label}-{}-{nonce}",
+        std::process::id()
+    ))
 }
 
 fn read(relative: &str) -> Vec<u8> {
@@ -212,15 +224,18 @@ fn legacy_combined_invalid_fixtures_remain_fail_closed() {
 
 #[test]
 fn duplicate_destination_is_detected_across_records() {
-    let paths = [
-        repo_fixture("multi/duplicate-destination-a.json"),
-        repo_fixture("multi/duplicate-destination-b.json"),
-    ];
-    let paths: Vec<String> = paths
+    let root = relative_temp_root("duplicate-destination");
+    fs::create_dir_all(&root).expect("temporary fixture directory");
+    let first = root.join("a.json");
+    let second = root.join("b.json");
+    fs::write(&first, read("multi/duplicate-destination-a.json")).expect("write first fixture");
+    fs::write(&second, read("multi/duplicate-destination-b.json")).expect("write second fixture");
+    let paths = [first, second]
         .iter()
-        .map(|path| path.to_string_lossy().into_owned())
-        .collect();
+        .map(|path| path.to_string_lossy().replace('\\', "/"))
+        .collect::<Vec<_>>();
     let report = validate_paths(&paths).expect("fixture files must be readable");
+    let _ = fs::remove_dir_all(&root);
     assert!(
         report
             .diagnostics
@@ -241,8 +256,7 @@ fn per_record_limit_is_enforced_before_json_parsing() {
 
 #[test]
 fn total_run_limit_is_enforced() {
-    let unique = format!("signthos-provenance-size-{}", std::process::id());
-    let root = std::env::temp_dir().join(unique);
+    let root = relative_temp_root("size");
     fs::create_dir_all(&root).expect("temp fixture dir");
     let payload = vec![b' '; MAX_RECORD_BYTES as usize];
     let mut paths = Vec::new();
@@ -250,7 +264,7 @@ fn total_run_limit_is_enforced() {
     for index in 0..file_count {
         let path = root.join(format!("{index}.json"));
         fs::write(&path, &payload).expect("write temp fixture");
-        paths.push(path.to_string_lossy().into_owned());
+        paths.push(path.to_string_lossy().replace('\\', "/"));
     }
     let report = validate_paths(&paths).expect("temp fixture paths are readable");
     let _ = fs::remove_dir_all(&root);
