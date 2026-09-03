@@ -37,9 +37,19 @@ jobs:
     env:
       RUSTUP_TOOLCHAIN: "1.85.0"
       CARGO_TERM_COLOR: always
+      EXPECTED_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
     steps:
       - name: Checkout exact candidate
-        uses: actions/checkout@v4
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: ${{ env.EXPECTED_SHA }}
+
+      - name: Verify exact revision identity
+        run: |
+          actual_sha="$(git rev-parse HEAD)"
+          printf 'expected SHA: %s\n' "$EXPECTED_SHA"
+          printf 'actual SHA:   %s\n' "$actual_sha"
+          test "$actual_sha" = "$EXPECTED_SHA"
 
       - name: Install Rust 1.85.0
         run: rustup toolchain install 1.85.0 --profile minimal --component rustfmt,clippy
