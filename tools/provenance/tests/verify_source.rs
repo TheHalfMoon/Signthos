@@ -329,9 +329,7 @@ fn nested_source_root_is_rejected() {
         &nested,
     ]);
     assert_eq!(output.status.code(), Some(1));
-    assert!(
-        String::from_utf8_lossy(&output.stderr).contains("SOURCE_ROOT_NOT_REPOSITORY_ROOT")
-    );
+    assert!(String::from_utf8_lossy(&output.stderr).contains("SOURCE_ROOT_NOT_REPOSITORY_ROOT"));
 }
 
 #[test]
