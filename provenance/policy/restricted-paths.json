@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "kind": "policy",
+  "id": "signthos-restricted-paths-v1",
+  "policy_type": "restricted_paths",
+  "policy_version": 1,
+  "rules": [
+    {
+      "id": "documenso-packages-default",
+      "effect": "allow",
+      "repository": "documenso/documenso",
+      "path_prefix": "packages"
+    },
+    {
+      "id": "documenso-enterprise-edition",
+      "effect": "require_permission",
+      "repository": "documenso/documenso",
+      "path_prefix": "packages/ee",
+      "permission_scopes": [
+        "copy",
+        "modify",
+        "create_derivative",
+        "redistribute",
+        "publish_source",
+        "sublicense"
+      ]
+    },
+    {
+      "id": "stirling-app-default",
+      "effect": "allow",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "app"
+    },
+    {
+      "id": "stirling-app-proprietary",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "app/proprietary"
+    },
+    {
+      "id": "stirling-app-saas",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "app/saas"
+    },
+    {
+      "id": "stirling-engine",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "engine"
+    },
+    {
+      "id": "stirling-frontend-default",
+      "effect": "allow",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend"
+    },
+    {
+      "id": "stirling-editor-proprietary",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/proprietary"
+    },
+    {
+      "id": "stirling-editor-desktop",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/desktop"
+    },
+    {
+      "id": "stirling-editor-saas",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/saas"
+    },
+    {
+      "id": "stirling-editor-cloud",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/cloud"
+    },
+    {
+      "id": "stirling-editor-prototypes",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/prototypes"
+    },
+    {
+      "id": "stirling-editor-portal",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/portal"
+    },
+    {
+      "id": "stirling-editor-portal-saas",
+      "effect": "deny",
+      "repository": "Stirling-Tools/Stirling-PDF",
+      "path_prefix": "frontend/editor/src/portal-saas"
+    }
+  ]
+}

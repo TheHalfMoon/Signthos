@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-e-documenso-community",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "documenso/documenso",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "packages/lib/src/example.ts",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "MIT",
+    "evidence": ["fixture:license:mit"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-e/documenso-community.ts",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Synthetic metadata fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}
