@@ -172,11 +172,12 @@ fn open_notice_nofollow(path: &str) -> Result<std::fs::File, String> {
     use std::fs::OpenOptions;
     use std::os::unix::fs::OpenOptionsExt as _;
 
+    const O_NONBLOCK: i32 = 0o4000;
     const O_NOFOLLOW: i32 = 0o400000;
 
     OpenOptions::new()
         .read(true)
-        .custom_flags(O_NOFOLLOW)
+        .custom_flags(O_NOFOLLOW | O_NONBLOCK)
         .open(path)
         .map_err(|error| {
             if error.raw_os_error() == Some(40) {
@@ -510,6 +511,44 @@ mod tests {
         let _ = std::fs::remove_file(&link);
         let _ = std::fs::remove_file(&target);
         assert!(error.starts_with("IO_NOTICE_SYMLINK:"), "{error}");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn nofollow_open_does_not_block_on_notice_fifo() {
+        use std::os::unix::fs::FileTypeExt as _;
+        use std::time::{Duration, Instant};
+
+        let fifo = temp_notice_path("fifo");
+        let status = std::process::Command::new("mkfifo")
+            .arg(&fifo)
+            .status()
+            .expect("mkfifo must be available on the Linux qualification host");
+        assert!(status.success(), "mkfifo failed with {status}");
+
+        let writer_path = fifo.clone();
+        let writer = std::thread::spawn(move || {
+            std::thread::sleep(Duration::from_secs(1));
+            std::fs::OpenOptions::new()
+                .write(true)
+                .open(&writer_path)
+                .expect("FIFO writer opens while the nonblocking reader remains alive")
+        });
+
+        let started = Instant::now();
+        let file = open_notice_nofollow(&fifo).expect("FIFO open must return without blocking");
+        let elapsed = started.elapsed();
+        assert!(
+            elapsed < Duration::from_millis(500),
+            "secure NOTICE open blocked on FIFO for {elapsed:?}"
+        );
+        let metadata = file.metadata().expect("opened FIFO metadata is readable");
+        assert!(metadata.file_type().is_fifo());
+
+        let writer_file = writer.join().expect("FIFO writer thread must complete");
+        drop(writer_file);
+        drop(file);
+        std::fs::remove_file(&fifo).expect("temporary FIFO fixture is removed");
     }
 
     #[test]
