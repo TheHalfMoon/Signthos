@@ -109,5 +109,5 @@ fn missing_input_is_local_io_unavailable() {
     let output = invoke(&["validate", "definitely-not-a-record.json"]);
     assert_eq!(output.status.code(), Some(3));
     let stderr = String::from_utf8(output.stderr).unwrap();
-    assert!(stderr.contains("IO_METADATA"));
+    assert!(stderr.contains("IO_SECURE_OPEN"));
 }
