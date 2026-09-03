@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-e-documenso-ee-insufficient-scope",
+  "classification": "separate_permission_required",
+  "upstream": {
+    "repository": "documenso/documenso",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "packages/ee/src/example.ts",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "MIT",
+    "evidence": ["fixture:license:synthetic"]
+  },
+  "permission": {
+    "artifact": "permission-artifact:synthetic-documenso-ee-v1",
+    "scope": [
+      "copy",
+      "modify",
+      "create_derivative",
+      "redistribute",
+      "publish_source"
+    ]
+  },
+  "import": {
+    "destination": "fixtures/grain-e/documenso-ee-insufficient.ts",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "adapted",
+    "notes": "Synthetic metadata fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}

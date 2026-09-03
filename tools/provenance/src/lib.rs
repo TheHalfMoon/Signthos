@@ -2,6 +2,7 @@ mod alignment;
 mod claims;
 mod component_review_alignment;
 mod repository_alignment;
+mod restricted_policy;
 mod secure_io;
 mod spdx_policy;
 mod validation;
@@ -19,7 +20,7 @@ pub const EXIT_USAGE_ERROR: u8 = 2;
 pub const EXIT_LOCAL_IO_UNAVAILABLE: u8 = 3;
 pub const EXIT_INTERNAL_INVARIANT: u8 = 4;
 
-pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]  Validate canonical provenance records\n  verify-source                 Verify a record against a caller-supplied local checkout\n  notice                        Generate or check deterministic NOTICE output\n  explain                       Explain a canonical provenance record\n\nGrain D adds canonical SPDX/license policy validation. Other commands arrive in their owning Spec 001 grains.\n";
+pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]  Validate canonical provenance records\n  verify-source                 Verify a record against a caller-supplied local checkout\n  notice                        Generate or check deterministic NOTICE output\n  explain                       Explain a canonical provenance record\n\nGrain E adds restricted-path and permission-scope policy validation. Other commands arrive in their owning Spec 001 grains.\n";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliResult {
@@ -40,6 +41,7 @@ pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
         component_review_alignment::augment_bytes(path, bytes, &mut report);
         repository_alignment::augment_bytes(path, bytes, &mut report);
         spdx_policy::augment_bytes(path, bytes, &mut report);
+        restricted_policy::augment_bytes(path, bytes, &mut report);
     }
     sort_report(&mut report);
     report

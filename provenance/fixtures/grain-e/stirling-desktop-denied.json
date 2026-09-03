@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-e-stirling-desktop-denied",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "Stirling-Tools/Stirling-PDF",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "frontend/editor/src/desktop/example.ts",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "MIT",
+    "evidence": ["fixture:license:mit"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-e/stirling-desktop.ts",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2026-09-03"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Synthetic metadata fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}
