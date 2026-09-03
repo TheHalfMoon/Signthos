@@ -4,7 +4,7 @@
   "id":"x",
   "classification":"oss_permitted",
   "unexpected":true,
-  "upstream":{"repository":"../bad","commit":"ABC123","path":"../src\\example.txt","sha256":"ABC","copyright_holder":""},
+  "upstream":{"repository":"bad","commit":"ABC123","path":"../src\\example.txt","sha256":"ABC","copyright_holder":""},
   "license":{"spdx":"MIT","evidence":[]},
   "permission":null,
   "import":{"destination":"/absolute/path","sha256":"ABC","date":"2026-2-01"},
