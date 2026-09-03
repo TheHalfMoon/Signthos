@@ -362,7 +362,11 @@ mod tests {
     fn notice_rejects_unknown_arguments() {
         let result = run(&["notice", "--write"]);
         assert_eq!(result.code, EXIT_USAGE_ERROR);
-        assert!(result.stderr.contains("notice accepts only optional --check"));
+        assert!(
+            result
+                .stderr
+                .contains("notice accepts only optional --check")
+        );
     }
 
     #[test]
