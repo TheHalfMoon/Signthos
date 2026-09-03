@@ -34,7 +34,7 @@ pub struct CliResult {
 
 pub fn dependency_sanity() -> bool {
     spdx::Expression::parse("MIT OR Apache-2.0").is_ok()
-        && serde_json::from_str::<serde_json::Value>(r#"{"ok":true}"#).is_ok()
+        && serde_json::from_str::<serde_json::Value>(r#"{\"ok\":true}"#).is_ok()
 }
 
 pub fn validate_bytes(path: &str, bytes: &[u8]) -> ValidationReport {
@@ -150,9 +150,7 @@ fn run_verify_source(args: &[&str]) -> CliResult {
     let (record_id, source_root) = match args {
         ["--record", record_id, "--source-root", source_root] => (*record_id, *source_root),
         _ => {
-            return usage(
-                "CLI_USAGE: verify-source requires --record <id> --source-root <path>\n",
-            );
+            return usage("CLI_USAGE: verify-source requires --record <id> --source-root <path>\n");
         }
     };
 
@@ -385,13 +383,7 @@ mod tests {
         for args in [
             vec!["verify-source"],
             vec!["verify-source", "--record", "record"],
-            vec![
-                "verify-source",
-                "--source-root",
-                ".",
-                "--record",
-                "record",
-            ],
+            vec!["verify-source", "--source-root", ".", "--record", "record"],
         ] {
             let result = run(&args);
             assert_eq!(result.code, EXIT_USAGE_ERROR);
