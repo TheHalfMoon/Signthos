@@ -29,14 +29,32 @@ fn has_absolute_validate_path(args: &[String]) -> bool {
     matches!(args.first().map(String::as_str), Some("validate"))
         && args.iter().skip(1).any(|arg| {
             !arg.starts_with('-')
-                && (Path::new(arg).is_absolute() || drive_absolute(arg) || arg.starts_with("\\\\"))
+                && (Path::new(arg).is_absolute()
+                    || drive_qualified(arg)
+                    || arg.starts_with('\\'))
         })
 }
 
-fn drive_absolute(value: &str) -> bool {
+fn drive_qualified(value: &str) -> bool {
     let bytes = value.as_bytes();
-    bytes.len() >= 3
-        && bytes[0].is_ascii_alphabetic()
-        && bytes[1] == b':'
-        && matches!(bytes[2], b'/' | b'\\')
+    bytes.len() >= 2 && bytes[0].is_ascii_alphabetic() && bytes[1] == b':'
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn args(path: &str) -> Vec<String> {
+        vec!["validate".to_owned(), path.to_owned()]
+    }
+
+    #[test]
+    fn rejects_platform_qualified_validate_paths() {
+        assert!(has_absolute_validate_path(&args("/record.json")));
+        assert!(has_absolute_validate_path(&args("C:\\record.json")));
+        assert!(has_absolute_validate_path(&args("C:record.json")));
+        assert!(has_absolute_validate_path(&args("\\record.json")));
+        assert!(has_absolute_validate_path(&args("\\\\server\\share\\record.json")));
+        assert!(!has_absolute_validate_path(&args("provenance/record.json")));
+    }
 }
