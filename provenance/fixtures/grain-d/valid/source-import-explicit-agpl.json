@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "fixture-grain-d-explicit-agpl",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "example/signthos-fixture",
+    "commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "path": "src/example.txt",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "copyright_holder": "Synthetic Fixture"
+  },
+  "license": {
+    "spdx": "AGPL-3.0-only",
+    "evidence": ["fixture:license:agpl-3.0-only"]
+  },
+  "permission": null,
+  "import": {
+    "destination": "fixtures/grain-d-explicit-agpl.txt",
+    "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "date": "2024-02-29"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Synthetic fixture only",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 1,
+    "evidence": ["github:issue-comment:1"]
+  }
+}
