@@ -9,8 +9,8 @@ fn temp_root(label: &str) -> PathBuf {
         .duration_since(UNIX_EPOCH)
         .expect("system clock must be after Unix epoch")
         .as_nanos();
-    std::env::temp_dir().join(format!(
-        "signthos-grain-c-{label}-{}-{nonce}",
+    PathBuf::from(format!(
+        ".signthos-grain-c-{label}-{}-{nonce}",
         std::process::id()
     ))
 }
@@ -59,6 +59,10 @@ fn write_json(path: &Path, value: &Value) {
     .expect("temporary fixture writes");
 }
 
+fn relative(path: &Path) -> String {
+    path.to_string_lossy().replace('\\', "/")
+}
+
 #[test]
 fn duplicate_claim_is_reported_even_when_another_record_is_invalid() {
     let root = temp_root("duplicate-with-invalid");
@@ -82,7 +86,7 @@ fn duplicate_claim_is_reported_even_when_another_record_is_invalid() {
 
     let paths = [&invalid, &first, &second]
         .iter()
-        .map(|path| path.to_string_lossy().into_owned())
+        .map(|path| relative(path))
         .collect::<Vec<_>>();
     let report = validate_paths(&paths).expect("temporary fixtures are readable");
     let _ = fs::remove_dir_all(&root);
@@ -272,9 +276,10 @@ fn explicit_file_symlink_is_rejected() {
         &target,
         &source_import("direct-symlink", "src/direct.rs", "2024-02-29"),
     );
+    let target = fs::canonicalize(&target).expect("target canonicalizes");
     symlink(&target, &link).expect("create symlink");
 
-    let result = validate_paths(&[link.to_string_lossy().into_owned()]);
+    let result = validate_paths(&[relative(&link)]);
     let _ = fs::remove_dir_all(&root);
     assert!(result.is_err());
     assert!(result.unwrap_err().contains("IO_SYMLINK"));
@@ -295,6 +300,7 @@ fn recursive_default_discovery_rejects_symlink() {
         &target,
         &source_import("recursive-symlink", "src/recursive.rs", "2024-02-29"),
     );
+    let target = fs::canonicalize(&target).expect("target canonicalizes");
     symlink(&target, &link).expect("create symlink");
 
     let output = Command::new(env!("CARGO_BIN_EXE_signthos-provenance"))
