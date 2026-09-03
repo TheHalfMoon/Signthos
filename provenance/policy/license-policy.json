@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "kind": "policy",
+  "id": "license-policy-v1",
+  "policy_type": "license",
+  "policy_version": 1,
+  "rules": [
+    {
+      "id": "reject-bare-agpl-3.0",
+      "effect": "reject_expression",
+      "expression": "AGPL-3.0"
+    }
+  ]
+}
