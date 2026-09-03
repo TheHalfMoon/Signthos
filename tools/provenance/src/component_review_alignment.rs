@@ -30,9 +30,7 @@ pub(crate) fn augment_bytes(path: &str, bytes: &[u8], report: &mut ValidationRep
             report.diagnostics.push(Diagnostic {
                 path: path.to_owned(),
                 code: "SCHEMA_LENGTH",
-                field: format!(
-                    "$.components[{component_index}].distribution_review.evidence"
-                ),
+                field: format!("$.components[{component_index}].distribution_review.evidence"),
                 message: "approved_with_evidence requires at least one evidence item".to_owned(),
             });
         }
