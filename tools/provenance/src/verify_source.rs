@@ -1,6 +1,6 @@
 use crate::{secure_io, sha256};
 use serde_json::Value;
-use std::ffi::{OsStr, OsString};
+use std::ffi::OsString;
 use std::io::Read as _;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
@@ -14,14 +14,6 @@ pub(crate) enum VerifySourceError {
     Io(String),
 }
 
-impl VerifySourceError {
-    pub(crate) fn message(&self) -> &str {
-        match self {
-            Self::Verification(message) | Self::Io(message) => message,
-        }
-    }
-}
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 struct SourceFacts {
     id: String,
@@ -31,7 +23,10 @@ struct SourceFacts {
     sha256: String,
 }
 
-pub(crate) fn verify_source(record_id: &str, source_root: &str) -> Result<String, VerifySourceError> {
+pub(crate) fn verify_source(
+    record_id: &str,
+    source_root: &str,
+) -> Result<String, VerifySourceError> {
     if !canonical_record_id(record_id) {
         return Err(VerifySourceError::Verification(
             "SOURCE_RECORD_ID: record id is not canonical".to_owned(),
@@ -39,8 +34,8 @@ pub(crate) fn verify_source(record_id: &str, source_root: &str) -> Result<String
     }
 
     let facts = find_source_record(record_id)?;
-    let root = validate_source_root(source_root)?;
-    let git = GitAdapter::new(&root);
+    let root = SourceRoot::open(source_root)?;
+    let git = GitAdapter::new(root.command_directory());
 
     let head = git.head()?;
     if head != facts.commit {
@@ -110,14 +105,16 @@ fn find_source_record(record_id: &str) -> Result<SourceFacts, VerifySourceError>
     }
 
     let mut paths = Vec::new();
-    secure_io::collect_json_files(IMPORT_DIRECTORY, &mut paths)
-        .map_err(|_| VerifySourceError::Io("SOURCE_RECORD_IO: import records are unreadable".to_owned()))?;
+    secure_io::collect_json_files(IMPORT_DIRECTORY, &mut paths).map_err(|_| {
+        VerifySourceError::Io("SOURCE_RECORD_IO: import records are unreadable".to_owned())
+    })?;
     paths.sort();
 
     let mut found = None;
     for path in paths {
-        let bytes = secure_io::read_record_bounded(&path)
-            .map_err(|_| VerifySourceError::Io("SOURCE_RECORD_IO: import record is unreadable".to_owned()))?;
+        let bytes = secure_io::read_record_bounded(&path).map_err(|_| {
+            VerifySourceError::Io("SOURCE_RECORD_IO: import record is unreadable".to_owned())
+        })?;
         let value: Value = serde_json::from_slice(&bytes).map_err(|_| {
             VerifySourceError::Verification(format!(
                 "SOURCE_RECORD_JSON: canonical import record `{path}` is invalid JSON"
@@ -184,16 +181,15 @@ fn source_facts(
     })
 }
 
-fn field(
-    object: &serde_json::Map<String, Value>,
-    key: &str,
-) -> Result<String, VerifySourceError> {
+fn field(object: &serde_json::Map<String, Value>, key: &str) -> Result<String, VerifySourceError> {
     object
         .get(key)
         .and_then(Value::as_str)
         .filter(|value| !value.is_empty())
         .map(str::to_owned)
-        .ok_or_else(|| VerifySourceError::Verification(format!("SOURCE_RECORD_FIELD: missing `{key}`")))
+        .ok_or_else(|| {
+            VerifySourceError::Verification(format!("SOURCE_RECORD_FIELD: missing `{key}`"))
+        })
 }
 
 fn record_field_error(record_id: &str, field: &str) -> VerifySourceError {
@@ -202,28 +198,90 @@ fn record_field_error(record_id: &str, field: &str) -> VerifySourceError {
     ))
 }
 
-fn validate_source_root(source_root: &str) -> Result<PathBuf, VerifySourceError> {
-    if source_root.is_empty() {
-        return Err(VerifySourceError::Io(
-            "SOURCE_ROOT_IO: source root is unavailable".to_owned(),
-        ));
+struct SourceRoot {
+    command_directory: PathBuf,
+    #[cfg(target_os = "linux")]
+    _directory: std::fs::File,
+}
+
+impl SourceRoot {
+    fn open(source_root: &str) -> Result<Self, VerifySourceError> {
+        if source_root.is_empty() {
+            return Err(VerifySourceError::Io(
+                "SOURCE_ROOT_IO: source root is unavailable".to_owned(),
+            ));
+        }
+        let path = Path::new(source_root);
+        let metadata = std::fs::symlink_metadata(path).map_err(|_| {
+            VerifySourceError::Io("SOURCE_ROOT_IO: source root is unavailable".to_owned())
+        })?;
+        if metadata.file_type().is_symlink() {
+            return Err(VerifySourceError::Verification(
+                "SOURCE_ROOT_SYMLINK: source root must not be a symlink".to_owned(),
+            ));
+        }
+        if !metadata.is_dir() {
+            return Err(VerifySourceError::Verification(
+                "SOURCE_ROOT_NOT_DIRECTORY: source root must be a directory".to_owned(),
+            ));
+        }
+        Self::open_platform(path)
     }
-    let path = Path::new(source_root);
-    let metadata = std::fs::symlink_metadata(path).map_err(|_| {
-        VerifySourceError::Io("SOURCE_ROOT_IO: source root is unavailable".to_owned())
-    })?;
-    if metadata.file_type().is_symlink() {
-        return Err(VerifySourceError::Verification(
-            "SOURCE_ROOT_SYMLINK: source root must not be a symlink".to_owned(),
-        ));
+
+    #[cfg(target_os = "linux")]
+    fn open_platform(path: &Path) -> Result<Self, VerifySourceError> {
+        use std::fs::OpenOptions;
+        use std::os::fd::AsRawFd as _;
+        use std::os::unix::fs::OpenOptionsExt as _;
+
+        const O_DIRECTORY: i32 = 0o200000;
+        const O_NOFOLLOW: i32 = 0o400000;
+
+        let directory = OpenOptions::new()
+            .read(true)
+            .custom_flags(O_DIRECTORY | O_NOFOLLOW)
+            .open(path)
+            .map_err(|_| {
+                VerifySourceError::Io(
+                    "SOURCE_ROOT_IO: source root could not be opened without following symlinks"
+                        .to_owned(),
+                )
+            })?;
+        let metadata = directory.metadata().map_err(|_| {
+            VerifySourceError::Io("SOURCE_ROOT_IO: source root metadata is unavailable".to_owned())
+        })?;
+        if !metadata.is_dir() {
+            return Err(VerifySourceError::Verification(
+                "SOURCE_ROOT_NOT_DIRECTORY: source root must be a directory".to_owned(),
+            ));
+        }
+        let command_directory = PathBuf::from(format!("/proc/self/fd/{}", directory.as_raw_fd()));
+        Ok(Self {
+            command_directory,
+            _directory: directory,
+        })
     }
-    if !metadata.is_dir() {
-        return Err(VerifySourceError::Verification(
-            "SOURCE_ROOT_NOT_DIRECTORY: source root must be a directory".to_owned(),
-        ));
+
+    #[cfg(not(target_os = "linux"))]
+    fn open_platform(path: &Path) -> Result<Self, VerifySourceError> {
+        let command_directory = std::fs::canonicalize(path).map_err(|_| {
+            VerifySourceError::Io("SOURCE_ROOT_IO: source root is unavailable".to_owned())
+        })?;
+        let metadata = std::fs::symlink_metadata(&command_directory).map_err(|_| {
+            VerifySourceError::Io("SOURCE_ROOT_IO: source root metadata is unavailable".to_owned())
+        })?;
+        if metadata.file_type().is_symlink() || !metadata.is_dir() {
+            return Err(VerifySourceError::Verification(
+                "SOURCE_ROOT_NOT_DIRECTORY: source root must resolve to a regular directory"
+                    .to_owned(),
+            ));
+        }
+        Ok(Self { command_directory })
     }
-    std::fs::canonicalize(path)
-        .map_err(|_| VerifySourceError::Io("SOURCE_ROOT_IO: source root is unavailable".to_owned()))
+
+    fn command_directory(&self) -> &Path {
+        &self.command_directory
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -290,7 +348,9 @@ impl GitAdapter {
                 "SOURCE_PATH_MISSING: upstream path does not exist at pinned revision".to_owned(),
             ));
         }
-        let mut records = output.split(|byte| *byte == 0).filter(|record| !record.is_empty());
+        let mut records = output
+            .split(|byte| *byte == 0)
+            .filter(|record| !record.is_empty());
         let record = records.next().ok_or_else(|| {
             VerifySourceError::Verification(
                 "SOURCE_GIT_TREE: local Git returned an invalid tree entry".to_owned(),
@@ -301,7 +361,7 @@ impl GitAdapter {
                 "SOURCE_GIT_TREE: local Git returned multiple exact-path entries".to_owned(),
             ));
         }
-        parse_tree_entry(record)
+        parse_tree_entry(record, path)
     }
 
     fn blob_sha256(&self, object: &str) -> Result<String, VerifySourceError> {
@@ -319,11 +379,20 @@ impl GitAdapter {
         let stdout = child.stdout.take().ok_or_else(|| {
             VerifySourceError::Io("SOURCE_BLOB_READ: local Git stdout is unavailable".to_owned())
         })?;
-        let digest = sha256::digest_reader(stdout).map_err(|_| {
-            VerifySourceError::Io("SOURCE_BLOB_READ: local Git blob output is unreadable".to_owned())
-        })?;
+        let digest = match sha256::digest_reader(stdout) {
+            Ok(digest) => digest,
+            Err(_) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                return Err(VerifySourceError::Io(
+                    "SOURCE_BLOB_READ: local Git blob output is unreadable".to_owned(),
+                ));
+            }
+        };
         let status = child.wait().map_err(|_| {
-            VerifySourceError::Io("SOURCE_BLOB_READ: local Git process could not be joined".to_owned())
+            VerifySourceError::Io(
+                "SOURCE_BLOB_READ: local Git process could not be joined".to_owned(),
+            )
         })?;
         if !status.success() {
             return Err(VerifySourceError::Verification(
@@ -355,17 +424,21 @@ impl GitAdapter {
             .map_err(|_| {
                 VerifySourceError::Io(format!("{failure_code}: local Git output is unreadable"))
             })?;
+        if output.len() as u64 > SMALL_GIT_OUTPUT_LIMIT {
+            let _ = child.kill();
+            let _ = child.wait();
+            return Err(VerifySourceError::Verification(format!(
+                "{failure_code}: local Git output exceeded the bounded limit"
+            )));
+        }
         let status = child.wait().map_err(|_| {
-            VerifySourceError::Io(format!("{failure_code}: local Git process could not be joined"))
+            VerifySourceError::Io(format!(
+                "{failure_code}: local Git process could not be joined"
+            ))
         })?;
         if !status.success() {
             return Err(VerifySourceError::Verification(format!(
                 "{failure_code}: local Git command failed"
-            )));
-        }
-        if output.len() as u64 > SMALL_GIT_OUTPUT_LIMIT {
-            return Err(VerifySourceError::Verification(format!(
-                "{failure_code}: local Git output exceeded the bounded limit"
             )));
         }
         Ok(output)
@@ -377,6 +450,11 @@ impl GitAdapter {
             .current_dir(&self.root)
             .env("GIT_TERMINAL_PROMPT", "0")
             .env("GIT_OPTIONAL_LOCKS", "0")
+            .env("GIT_CONFIG_NOSYSTEM", "1")
+            .env_remove("GIT_DIR")
+            .env_remove("GIT_WORK_TREE")
+            .env_remove("GIT_OBJECT_DIRECTORY")
+            .env_remove("GIT_ALTERNATE_OBJECT_DIRECTORIES")
             .args(operation.args());
         command
     }
@@ -393,24 +471,37 @@ enum GitOperation {
 impl GitOperation {
     fn args(&self) -> Vec<OsString> {
         match self {
-            Self::Head => vec!["rev-parse".into(), "--verify".into(), "HEAD^{commit}".into()],
-            Self::OriginUrl => vec!["remote".into(), "get-url".into(), "origin".into()],
+            Self::Head => vec![
+                "rev-parse".into(),
+                "--verify".into(),
+                "HEAD^{commit}".into(),
+            ],
+            Self::OriginUrl => vec![
+                "config".into(),
+                "--local".into(),
+                "--get".into(),
+                "remote.origin.url".into(),
+            ],
             Self::TreeEntry { commit, path } => vec![
                 "ls-tree".into(),
                 "-z".into(),
                 "--full-tree".into(),
-                commit.into(),
+                commit.as_str().into(),
                 "--".into(),
-                format!(":(literal){path}").into(),
+                format!(":(top,literal){path}").into(),
             ],
-            Self::CatBlob(object) => vec!["cat-file".into(), "blob".into(), object.into()],
+            Self::CatBlob(object) => {
+                vec!["cat-file".into(), "blob".into(), object.as_str().into()]
+            }
         }
     }
 }
 
 fn map_git_spawn_error(error: std::io::Error) -> VerifySourceError {
     if error.kind() == std::io::ErrorKind::NotFound {
-        VerifySourceError::Io("SOURCE_GIT_UNAVAILABLE: local git executable is unavailable".to_owned())
+        VerifySourceError::Io(
+            "SOURCE_GIT_UNAVAILABLE: local git executable is unavailable".to_owned(),
+        )
     } else {
         VerifySourceError::Io("SOURCE_GIT_IO: local git process could not be started".to_owned())
     }
@@ -421,7 +512,11 @@ fn canonical_single_line(bytes: &[u8], code: &'static str) -> Result<String, Ver
         VerifySourceError::Verification(format!("{code}: local Git output is not UTF-8"))
     })?;
     let line = text.strip_suffix('\n').unwrap_or(text);
-    if line.is_empty() || line.contains(['\n', '\r', '\0']) {
+    if line.is_empty()
+        || line
+            .chars()
+            .any(|character| matches!(character, '\n' | '\r' | '\0'))
+    {
         return Err(VerifySourceError::Verification(format!(
             "{code}: local Git output is not one canonical line"
         )));
@@ -429,24 +524,29 @@ fn canonical_single_line(bytes: &[u8], code: &'static str) -> Result<String, Ver
     Ok(line.to_owned())
 }
 
-fn parse_tree_entry(record: &[u8]) -> Result<TreeEntry, VerifySourceError> {
-    let tab = record.iter().position(|byte| *byte == b'\t').ok_or_else(|| {
-        VerifySourceError::Verification(
-            "SOURCE_GIT_TREE: local Git returned an invalid tree entry".to_owned(),
-        )
-    })?;
+fn parse_tree_entry(record: &[u8], expected_path: &str) -> Result<TreeEntry, VerifySourceError> {
+    let tab = record
+        .iter()
+        .position(|byte| *byte == b'\t')
+        .ok_or_else(|| {
+            VerifySourceError::Verification(
+                "SOURCE_GIT_TREE: local Git returned an invalid tree entry".to_owned(),
+            )
+        })?;
     let header = std::str::from_utf8(&record[..tab]).map_err(|_| {
         VerifySourceError::Verification(
             "SOURCE_GIT_TREE: local Git returned a non-UTF-8 tree header".to_owned(),
         )
     })?;
+    if &record[tab + 1..] != expected_path.as_bytes() {
+        return Err(VerifySourceError::Verification(
+            "SOURCE_GIT_TREE: local Git returned a non-exact path".to_owned(),
+        ));
+    }
     let mut fields = header.split(' ');
-    let (Some(mode), Some(kind), Some(object), None) = (
-        fields.next(),
-        fields.next(),
-        fields.next(),
-        fields.next(),
-    ) else {
+    let (Some(mode), Some(kind), Some(object), None) =
+        (fields.next(), fields.next(), fields.next(), fields.next())
+    else {
         return Err(VerifySourceError::Verification(
             "SOURCE_GIT_TREE: local Git returned an invalid tree header".to_owned(),
         ));
@@ -537,6 +637,7 @@ fn lower_hex(value: &str, length: usize) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::ffi::OsStr;
 
     #[test]
     fn git_operation_surface_has_no_network_mutating_verbs() {
@@ -556,6 +657,10 @@ mod tests {
                 .map(|arg| arg.to_string_lossy().into_owned())
                 .collect();
             assert!(!rendered.iter().any(|arg| arg == "fetch" || arg == "clone"));
+            assert!(matches!(
+                rendered.first().map(String::as_str),
+                Some("rev-parse" | "config" | "ls-tree" | "cat-file")
+            ));
         }
     }
 
@@ -567,7 +672,10 @@ mod tests {
             "git@github.com:example/repository.git",
             "ssh://git@github.com/example/repository.git",
         ] {
-            assert_eq!(normalize_repository_url(value).as_deref(), Some("example/repository"));
+            assert_eq!(
+                normalize_repository_url(value).as_deref(),
+                Some("example/repository")
+            );
         }
         for value in [
             "https://example.com/example/repository.git",
@@ -583,10 +691,18 @@ mod tests {
     fn tree_entry_parser_preserves_mode_kind_and_object() {
         let object = "b".repeat(40);
         let record = format!("100644 blob {object}\tsrc/example.txt");
-        let entry = parse_tree_entry(record.as_bytes()).unwrap();
+        let entry = parse_tree_entry(record.as_bytes(), "src/example.txt").unwrap();
         assert_eq!(entry.mode, "100644");
         assert_eq!(entry.kind, "blob");
         assert_eq!(entry.object, object);
+    }
+
+    #[test]
+    fn tree_entry_parser_rejects_non_exact_path() {
+        let object = "b".repeat(40);
+        let record = format!("100644 blob {object}\tsrc/other.txt");
+        let error = parse_tree_entry(record.as_bytes(), "src/example.txt").unwrap_err();
+        assert!(matches!(error, VerifySourceError::Verification(_)));
     }
 
     #[test]
@@ -596,7 +712,13 @@ mod tests {
             OsStr::new("definitely-not-a-real-signthos-git-executable"),
         );
         let error = adapter.head().unwrap_err();
-        assert!(matches!(error, VerifySourceError::Io(_)));
-        assert!(error.message().starts_with("SOURCE_GIT_UNAVAILABLE:"));
+        match error {
+            VerifySourceError::Io(message) => {
+                assert!(message.starts_with("SOURCE_GIT_UNAVAILABLE:"));
+            }
+            VerifySourceError::Verification(message) => {
+                panic!("missing git must be I/O failure, got {message}");
+            }
+        }
     }
 }
