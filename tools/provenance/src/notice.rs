@@ -1,4 +1,7 @@
-use crate::{ValidationReport, secure_io, validate_paths};
+use crate::{
+    Diagnostic, MAX_RECORD_BYTES, MAX_TOTAL_BYTES, ValidationReport, claims, secure_io,
+    validate_bytes,
+};
 use serde_json::Value;
 use std::fmt::Write as _;
 
@@ -21,19 +24,83 @@ struct NoticeEntry {
 
 pub(crate) fn generate_canonical_notice() -> Result<String, NoticeError> {
     let paths = canonical_projection_paths().map_err(NoticeError::Io)?;
-    let report = validate_paths(&paths).map_err(NoticeError::Io)?;
+    let snapshots = snapshot_records(&paths).map_err(NoticeError::Io)?;
+    generate_from_snapshots(&snapshots)
+}
+
+fn generate_from_snapshots(snapshots: &[(String, Vec<u8>)]) -> Result<String, NoticeError> {
+    let report = validate_snapshots(snapshots);
     if !report.is_valid() {
         return Err(NoticeError::Validation(report));
     }
 
     let mut entries = Vec::new();
-    for path in paths {
-        let bytes = secure_io::read_record_bounded(&path).map_err(NoticeError::Io)?;
-        project_record(&path, &bytes, &mut entries).map_err(NoticeError::Io)?;
+    for (path, bytes) in snapshots {
+        project_record(path, bytes, &mut entries).map_err(NoticeError::Io)?;
     }
     entries.sort();
     entries.dedup();
     Ok(render(&entries))
+}
+
+fn snapshot_records(paths: &[String]) -> Result<Vec<(String, Vec<u8>)>, String> {
+    paths
+        .iter()
+        .map(|path| {
+            secure_io::read_record_bounded(path).map(|bytes| (path.to_owned(), bytes))
+        })
+        .collect()
+}
+
+fn validate_snapshots(snapshots: &[(String, Vec<u8>)]) -> ValidationReport {
+    let mut report = ValidationReport {
+        diagnostics: Vec::new(),
+    };
+    let mut total = 0_u64;
+    let mut claim_tracker = claims::ClaimTracker::default();
+
+    for (path, bytes) in snapshots {
+        let size = bytes.len() as u64;
+        total = total.saturating_add(size);
+
+        if size > MAX_RECORD_BYTES {
+            report.diagnostics.push(Diagnostic {
+                path: path.to_owned(),
+                code: "SIZE_RECORD",
+                field: "$".to_owned(),
+                message: format!("record exceeds {MAX_RECORD_BYTES} byte limit"),
+            });
+        }
+
+        if total > MAX_TOTAL_BYTES {
+            report.diagnostics.push(Diagnostic {
+                path: path.to_owned(),
+                code: "SIZE_TOTAL",
+                field: "$".to_owned(),
+                message: format!("run exceeds {MAX_TOTAL_BYTES} bytes"),
+            });
+            break;
+        }
+
+        if size > MAX_RECORD_BYTES {
+            continue;
+        }
+
+        let mut current = validate_bytes(path, bytes);
+        report.diagnostics.append(&mut current.diagnostics);
+        claim_tracker.observe(path, bytes, &mut report);
+    }
+
+    report.diagnostics.sort_by(|left, right| {
+        (&left.path, left.code, &left.field, &left.message).cmp(&(
+            &right.path,
+            right.code,
+            &right.field,
+            &right.message,
+        ))
+    });
+    report.diagnostics.dedup();
+    report
 }
 
 pub(crate) fn notice_is_current(expected: &str) -> Result<bool, String> {
@@ -209,10 +276,22 @@ fn license_label(path: &str, license: &serde_json::Map<String, Value>) -> Result
 }
 
 fn one_line(value: &str) -> String {
-    value
-        .replace('\\', "\\\\")
-        .replace('\r', "\\r")
-        .replace('\n', "\\n")
+    let mut escaped = String::with_capacity(value.len());
+    for character in value.chars() {
+        match character {
+            '\\' => escaped.push_str("\\\\"),
+            '\r' => escaped.push_str("\\r"),
+            '\n' => escaped.push_str("\\n"),
+            '\u{2028}' => escaped.push_str("\\u{2028}"),
+            '\u{2029}' => escaped.push_str("\\u{2029}"),
+            character if character.is_control() => {
+                write!(escaped, "\\u{{{:04X}}}", character as u32)
+                    .expect("writing escaped control character to String cannot fail");
+            }
+            character => escaped.push(character),
+        }
+    }
+    escaped
 }
 
 fn render(entries: &[NoticeEntry]) -> String {
@@ -304,6 +383,20 @@ mod tests {
 
     #[test]
     fn control_characters_are_escaped_into_single_lines() {
-        assert_eq!(one_line("a\r\nb\\c"), "a\\r\\nb\\\\c");
+        assert_eq!(
+            one_line("a\r\nb\\c\u{2028}d\u{2029}e\u{0085}f\u{000B}g"),
+            "a\\r\\nb\\\\c\\u{2028}d\\u{2029}e\\u{0085}f\\u{000B}g"
+        );
+    }
+
+    #[test]
+    fn canonical_registry_snapshot_is_validated_and_projected_without_reread() {
+        let snapshots = vec![(
+            COMPONENT_REGISTRY.to_owned(),
+            include_bytes!("../../../provenance/components/registry.json").to_vec(),
+        )];
+        let output = generate_from_snapshots(&snapshots).expect("canonical snapshot must render");
+        assert!(output.contains("cargo-spdx-0.13.5"));
+        assert!(output.ends_with("(none)\n"));
     }
 }
