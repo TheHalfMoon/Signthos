@@ -42,21 +42,52 @@ fn canonical_policy_contains_foundation_boundaries() {
         ("Stirling-Tools/Stirling-PDF", "app/proprietary", "deny"),
         ("Stirling-Tools/Stirling-PDF", "app/saas", "deny"),
         ("Stirling-Tools/Stirling-PDF", "engine", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/proprietary", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/desktop", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/saas", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/cloud", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/prototypes", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/portal", "deny"),
-        ("Stirling-Tools/Stirling-PDF", "frontend/editor/src/portal-saas", "deny"),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/proprietary",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/desktop",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/saas",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/cloud",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/prototypes",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/portal",
+            "deny",
+        ),
+        (
+            "Stirling-Tools/Stirling-PDF",
+            "frontend/editor/src/portal-saas",
+            "deny",
+        ),
     ];
 
     for (repository, prefix, effect) in expected {
-        assert!(rules.iter().any(|rule| {
-            rule["repository"] == repository
-                && rule["path_prefix"] == prefix
-                && rule["effect"] == effect
-        }), "missing canonical boundary {repository}:{prefix}:{effect}");
+        assert!(
+            rules.iter().any(|rule| {
+                rule["repository"] == repository
+                    && rule["path_prefix"] == prefix
+                    && rule["effect"] == effect
+            }),
+            "missing canonical boundary {repository}:{prefix}:{effect}"
+        );
     }
 }
 
@@ -116,7 +147,11 @@ fn restricted_and_unknown_classifications_fail_closed() {
         "provenance/fixtures/grain-e/restricted-classification.json",
         "provenance/fixtures/grain-e/unknown-classification.json",
     ] {
-        assert_code(relative, "RESTRICTED_PATH_CLASSIFICATION", "$.classification");
+        assert_code(
+            relative,
+            "RESTRICTED_PATH_CLASSIFICATION",
+            "$.classification",
+        );
     }
 }
 
