@@ -142,14 +142,15 @@ fn file_matches_expected_bounded(path: &str, expected: &[u8]) -> Result<bool, St
         return Err(format!("IO_NOTICE_NOT_FILE: {path}"));
     }
 
-    let expected_len = u64::try_from(expected.len())
-        .map_err(|_| format!("IO_NOTICE_SIZE: {path}: expected NOTICE length is not representable"))?;
+    let expected_len = u64::try_from(expected.len()).map_err(|_| {
+        format!("IO_NOTICE_SIZE: {path}: expected NOTICE length is not representable")
+    })?;
     if metadata.len() != expected_len {
         return Ok(false);
     }
 
-    let file = std::fs::File::open(path)
-        .map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
+    let file =
+        std::fs::File::open(path).map_err(|error| format!("IO_NOTICE_READ: {path}: {error}"))?;
     let mut actual = Vec::with_capacity(expected.len());
     file.take(expected_len.saturating_add(1))
         .read_to_end(&mut actual)
@@ -385,10 +386,7 @@ mod tests {
             .duration_since(UNIX_EPOCH)
             .expect("system clock must be after Unix epoch")
             .as_nanos();
-        format!(
-            ".signthos-notice-{label}-{}-{nonce}",
-            std::process::id()
-        )
+        format!(".signthos-notice-{label}-{}-{nonce}", std::process::id())
     }
 
     #[test]
