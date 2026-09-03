@@ -281,7 +281,8 @@ mod tests {
         let components = normal_segments(root).expect("test root is canonical relative path");
         let mut handle = open_repository_root().expect("repository root opens");
         for segment in &components {
-            handle = open_child_directory(&handle, segment, root).expect("test root opens securely");
+            handle =
+                open_child_directory(&handle, segment, root).expect("test root opens securely");
         }
         open_child_directory(&handle, std::ffi::OsStr::new(child), child)
             .expect("test parent opens securely")
