@@ -45,8 +45,8 @@ fn unknown_command_is_usage_error() {
 }
 
 #[test]
-fn future_command_stays_fail_closed() {
-    let output = invoke(&["verify-source"]);
+fn future_explain_command_stays_fail_closed() {
+    let output = invoke(&["explain"]);
     assert_eq!(output.status.code(), Some(2));
     let stderr = String::from_utf8(output.stderr).expect("stderr must be UTF-8");
     assert!(stderr.contains("CLI_BOOTSTRAP_UNAVAILABLE"));
