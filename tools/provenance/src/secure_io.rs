@@ -1,5 +1,7 @@
 use std::io::Read as _;
-use std::path::{Component, Path, PathBuf};
+use std::path::{Component, Path};
+#[cfg(target_os = "linux")]
+use std::path::PathBuf;
 
 use crate::MAX_RECORD_BYTES;
 
@@ -225,9 +227,12 @@ fn collect_json_files_beneath_repository(
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[cfg(target_os = "linux")]
     use std::fs;
+    #[cfg(target_os = "linux")]
     use std::time::{SystemTime, UNIX_EPOCH};
 
+    #[cfg(target_os = "linux")]
     fn temp_root(label: &str) -> PathBuf {
         let nonce = SystemTime::now()
             .duration_since(UNIX_EPOCH)
