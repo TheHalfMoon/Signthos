@@ -1,0 +1,13 @@
+{
+  "schema_version":1,
+  "kind":"source_import",
+  "id":"x",
+  "classification":"oss_permitted",
+  "unexpected":true,
+  "upstream":{"repository":"../bad","commit":"ABC123","path":"../src\\example.txt","sha256":"ABC","copyright_holder":""},
+  "license":{"spdx":"MIT","evidence":[]},
+  "permission":null,
+  "import":{"destination":"/absolute/path","sha256":"ABC","date":"2026-2-01"},
+  "transformation":{"kind":"copied","notes":"Synthetic invalid fixture","derives_from":[]},
+  "review":{"status":"qualified_exact_head","pull_request":1,"evidence":["github:issue-comment:1"]}
+}
