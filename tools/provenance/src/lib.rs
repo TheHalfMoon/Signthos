@@ -5,8 +5,10 @@ mod notice;
 mod repository_alignment;
 mod restricted_policy;
 mod secure_io;
+mod sha256;
 mod spdx_policy;
 mod validation;
+mod verify_source;
 
 use std::path::{Component, Path};
 
@@ -21,7 +23,7 @@ pub const EXIT_USAGE_ERROR: u8 = 2;
 pub const EXIT_LOCAL_IO_UNAVAILABLE: u8 = 3;
 pub const EXIT_INTERNAL_INVARIANT: u8 = 4;
 
-pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]  Validate canonical provenance records\n  verify-source                 Verify a record against a caller-supplied local checkout\n  notice [--check]              Generate or byte-check deterministic NOTICE output\n  explain                       Explain a canonical provenance record\n\nGrain G implements deterministic NOTICE generation/checking. Other reserved commands arrive in their owning Spec 001 grains.\n";
+pub const HELP: &str = "Usage: signthos-provenance <COMMAND>\n\nCommands:\n  validate [--json] [PATH ...]                 Validate canonical provenance records\n  verify-source --record <id> --source-root <path>  Verify source facts against a caller-supplied local checkout\n  notice [--check]                             Generate or byte-check deterministic NOTICE output\n  explain                                      Explain a canonical provenance record\n\nGrain H implements offline local source verification without fetch or clone. The explain command remains reserved for a later owning grain.\n";
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CliResult {
@@ -135,11 +137,31 @@ pub fn run(args: &[&str]) -> CliResult {
         )),
         [] => usage("CLI_USAGE: a command is required; use --help\n"),
         ["validate", rest @ ..] => run_validate(rest),
+        ["verify-source", rest @ ..] => run_verify_source(rest),
         ["notice", rest @ ..] => run_notice(rest),
-        ["verify-source", ..] | ["explain", ..] => usage(
+        ["explain", ..] => usage(
             "CLI_BOOTSTRAP_UNAVAILABLE: command is reserved but not implemented in this grain\n",
         ),
         _ => usage("CLI_USAGE: unknown command or arguments; use --help\n"),
+    }
+}
+
+fn run_verify_source(args: &[&str]) -> CliResult {
+    let (record_id, source_root) = match args {
+        ["--record", record_id, "--source-root", source_root] => (*record_id, *source_root),
+        _ => {
+            return usage("CLI_USAGE: verify-source requires --record <id> --source-root <path>\n");
+        }
+    };
+
+    match verify_source::verify_source(record_id, source_root) {
+        Ok(message) => success(&message),
+        Err(verify_source::VerifySourceError::Verification(message)) => CliResult {
+            code: EXIT_VALIDATION_FAILURE,
+            stdout: String::new(),
+            stderr: format!("{message}\n"),
+        },
+        Err(verify_source::VerifySourceError::Io(message)) => io_error(&format!("{message}\n")),
     }
 }
 
@@ -348,14 +370,25 @@ mod tests {
         let result = run(&["--help"]);
         assert_eq!(result.code, EXIT_SUCCESS);
         assert!(result.stdout.contains("validate"));
+        assert!(
+            result
+                .stdout
+                .contains("verify-source --record <id> --source-root <path>")
+        );
         assert!(result.stdout.contains("notice [--check]"));
     }
 
     #[test]
-    fn future_command_is_fail_closed() {
-        let result = run(&["verify-source"]);
-        assert_eq!(result.code, EXIT_USAGE_ERROR);
-        assert!(result.stderr.contains("CLI_BOOTSTRAP_UNAVAILABLE"));
+    fn verify_source_requires_exact_arguments() {
+        for args in [
+            vec!["verify-source"],
+            vec!["verify-source", "--record", "record"],
+            vec!["verify-source", "--source-root", ".", "--record", "record"],
+        ] {
+            let result = run(&args);
+            assert_eq!(result.code, EXIT_USAGE_ERROR);
+            assert!(result.stderr.contains("verify-source requires"));
+        }
     }
 
     #[test]
