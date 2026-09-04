@@ -141,6 +141,6 @@ While this document remains non-canonical:
 - `IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT`;
 - no 002A1 source-import branch may be created.
 
-If and only if this exact authorization unit receives independent substantive exact-head review, reconciles all material findings, has zero unresolved material review threads, merges guarded with the reviewed exact head, and passes post-merge verification, the full-license and deterministic NOTICE prerequisite surfaces become authorized for 002A1.
+If and only if this exact authorization unit receives independent substantive exact-head review, reconciles all material findings, has zero unresolved material review threads, merges guarded with the reviewed exact head, passes post-merge verification, and S2-T033 is separately proven effective on `main`, the full-license and deterministic NOTICE prerequisite surfaces become authorized for 002A1.
 
 S2-T033 must still separately reread canonical governance and prove the combined PR #42 Stage R authorization plus this distribution-artifact/NOTICE amendment are effective before any source-import branch exists.
