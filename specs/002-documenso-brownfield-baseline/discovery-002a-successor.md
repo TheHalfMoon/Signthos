@@ -114,6 +114,21 @@ Before any later Stage R decision it must, at minimum:
 
 A qualification result may legitimately conclude that exact-copy admission is too broad. Such a result must block/refine 002A2 rather than silently adapt the upstream manifest or weaken provenance requirements.
 
+## Exact-head workflow and review accounting
+
+This discovery PR changes only `specs/002-documenso-brownfield-baseline/discovery-002a-successor.md`.
+
+For an exact head with only this Spec 002 documentation surface:
+
+- GitHub Actions workflow runs are `NO_APPLICABLE_RUN` because the canonical `.github/workflows/provenance.yml` pull-request path filters do not include `specs/002-documenso-brownfield-baseline/**`;
+- `NO_APPLICABLE_RUN` is an absence-of-applicable-workflow state, not PASS;
+- the Cubic check is `NEUTRAL / PLAN_LIMIT_REACHED` and does not satisfy an independent-review or qualification gate;
+- Qodo is billing-blocked and does not satisfy an independent-review or qualification gate;
+- a successful status/check without substantive review content must not be substituted for the required independent substantive review;
+- after any amendment, the amended exact head must receive fresh independent substantive re-review before guarded merge.
+
+The initial independent review of this discovery candidate identified the missing exact-head workflow accounting as a material finding and found no other material issue in the reviewed scope. This amendment addresses only that finding; it does not claim that the amended head is reviewed or qualified. Qualification remains pending fresh independent re-review of the amended exact head.
+
 ## Current authority and non-grants
 
 Current authority after this discovery candidate remains planning-only.
