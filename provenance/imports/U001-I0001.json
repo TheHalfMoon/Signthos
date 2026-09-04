@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "kind": "source_import",
+  "id": "U001-I0001",
+  "classification": "oss_permitted",
+  "upstream": {
+    "repository": "documenso/documenso",
+    "commit": "2cac63a000e22422bdea449f68b8025e709aa73a",
+    "path": ".npmrc",
+    "sha256": "409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d",
+    "copyright_holder": "Upstream file does not state a copyright holder; not inferred from commit authorship."
+  },
+  "license": {
+    "spdx": "AGPL-3.0-only",
+    "evidence": [
+      "documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:apps/docs/content/docs/policies/licenses.mdx#blob=a8fc5d78e373d552f6cc926221edd790d707512a",
+      "documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:apps/docs/content/docs/policies/community-edition.mdx#blob=2cd1c06fd38adf17201acf31f38b017d7d14a1dc",
+      "TheHalfMoon/Signthos@a97c937456d57569c633c21b2bfc943f7ee9039a:specs/002-documenso-brownfield-baseline/qualification-002a1-l002.md"
+    ]
+  },
+  "permission": null,
+  "import": {
+    "destination": ".npmrc",
+    "sha256": "409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d",
+    "date": "2026-09-04"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Exact byte-for-byte copy from the pinned upstream .npmrc; no adaptation.",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 46,
+    "evidence": [
+      "github:issue-comment:5540873733"
+    ]
+  }
+}
