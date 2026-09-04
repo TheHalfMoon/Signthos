@@ -1,14 +1,17 @@
-# Specification 001 — Grain J Closeout Evidence
+# Specification 001 — Canonical Closeout Evidence
 
-Status: CANDIDATE
+Status: CLOSED_CANONICAL
 Issue: #4
-Canonical base: `821201d2d6f7c87d9a4c7ab8f567ea889addbee6`
+Canonical authorization: `2144b7765595a206e691f43aefd122aa5a150a1b`
+Grain J guarded merge: `64e1db6e1b44a1513f51ec6f1a809e5ed7a721bc`
 
-This record is Specification 001 Grain J evidence bookkeeping only. It does not import upstream product/application source, grant restricted/commercial rights, authorize Specification 002, or change runtime/tool/policy behavior.
+This file is post-Grain-J evidence bookkeeping. On a non-canonical branch, the `CLOSED_CANONICAL` status above is only a candidate statement. It becomes canonical only if this exact bookkeeping head passes the required Provenance workflow, receives fresh independent substantive exact-head review, has zero unresolved material threads, merges with expected-head protection, and the resulting `main` passes post-merge verification.
+
+This record does not import upstream product/application source, grant restricted/commercial rights, waive any blocker, authorize Specification 002, or change runtime/tool/policy behavior.
 
 ## Authority reread
 
-The candidate was prepared only after re-reading canonical post-Grain-I truth, including:
+The post-Grain-J reconciliation re-read:
 
 - `.specify/memory/constitution.md`;
 - `AGENTS.md`;
@@ -17,114 +20,96 @@ The candidate was prepared only after re-reading canonical post-Grain-I truth, i
 - `specs/001-provenance-import-system/spec.md`;
 - `specs/001-provenance-import-system/plan.md`;
 - `specs/001-provenance-import-system/tasks.md`;
-- Foundation provenance/licensing inputs referenced by Issue #4.
+- this closeout record;
+- live Signthos `main`, PR state, reviews/threads/checks/rulesets;
+- live `TheHalfMoon/Coddev` state.
 
-The canonical ledger authorizes Grain J only for Spec 001 evidence/task bookkeeping before the final closeout merge unless a genuine implementation defect requires reopening the owning grain.
+The Constitution requires canonical task/roadmap reconciliation after post-merge verification. `AGENTS.md` likewise requires canonical task-ledger reconciliation and forbids treating skipped/unavailable review as approval.
 
-## Grain I canonical predecessor
+## Grain J canonical evidence
 
-Grain I closed canonically before this candidate was created.
+Grain J closed its implementation/closeout merge line through PR #35:
 
-- PR: #34
-- exact qualified/reviewed head: `fc7b4c47f651a029d92f3846681ccc72a17d2fa5`
-- guarded merge: `821201d2d6f7c87d9a4c7ab8f567ea889addbee6`
-- merge tree: `dab18e54a7714247694564e751ecbfe2356321d9`
-- ordered parents:
-  1. `9acd25872e380a35b27382acf7a7e64aaee4d70e`
-  2. `fc7b4c47f651a029d92f3846681ccc72a17d2fa5`
-- GitHub commit verification: `verified=true`, `reason=valid`
-- exact-head PR workflow run: `33819924370` — SUCCESS
-- post-merge `main` push workflow run: `33827770232` — SUCCESS
-- independent substantive exact-head review: PASS, no actionable material finding
+- PR: #35 `docs(001): close out canonical provenance specification`
+- canonical base: `821201d2d6f7c87d9a4c7ab8f567ea889addbee6`
+- exact qualified/reviewed head: `884385b8f90aa8b15ed151edcd23a1eeaca7a808`
+- exact-head Provenance run: `33827963750` — SUCCESS
+- independent exact-head review: CodeRabbit run `72e4ab7c-ee3c-4838-9b92-dfc3467f66ea`
+- review result: no actionable findings; minimal merge risk / ready to merge
 - unresolved material review threads before merge: zero
+- guarded expected-head merge: `64e1db6e1b44a1513f51ec6f1a809e5ed7a721bc`
+- merge tree: `bfd103e738016d60a504e8b99778ca7959d582dd`
+- ordered parents:
+  1. `821201d2d6f7c87d9a4c7ab8f567ea889addbee6`
+  2. `884385b8f90aa8b15ed151edcd23a1eeaca7a808`
+- GitHub commit verification: `verified=true`, `reason=valid`
+- post-merge push Provenance run: `33836244076` — SUCCESS on exact `main` `64e1db6e1b44a1513f51ec6f1a809e5ed7a721bc`
 
-Historical predecessor heads/runs/reviews for Grain I remain reconciliation evidence only and do not qualify the final head.
+The post-merge workflow succeeded across exact revision identity, Rust `1.85.0`, locked dependency graph, formatting, strict Clippy, full tests, doctests, canonical `validate`, and deterministic `notice --check`.
 
-## S1-T085 — canonical authority reread
+## Complete Spec 001 surface reconciliation
 
-PASS for this Grain J candidate preparation.
+The complete Spec 001 lineage remains bounded to governance/documentation, provenance schemas/policy/fixtures/component records, the standalone Rust provenance tool, deterministic `NOTICE`, and the canonical provenance workflow.
 
-Canonical governance continues to require exact-head qualification, independent substantive review, expected-head merge protection, post-merge verification, and separate successor authorization. General founder approval does not substitute for restricted-source rights, relicensing evidence, credentials, regulated-signature evidence, or other explicitly gated facts.
+`provenance/imports/` contains only its contributor `README.md`; no canonical source-import JSON record or imported upstream product/application source exists.
 
-## S1-T086 — complete Spec 001 surface reconciliation
+No Documenso EE/commercial product source or Stirling restricted product source entered Specification 001.
 
-The canonical post-Grain-I repository tree was inspected before this candidate.
+## Dependency/component reconciliation
 
-Observed Specification 001-controlled surfaces remain bounded to governance/documentation, provenance records/policy/fixtures, the standalone Rust provenance tool, deterministic NOTICE, and the canonical provenance workflow.
+`tools/provenance/Cargo.lock` contains the standalone package plus twelve locked external packages, all represented by canonical component provenance with exact version, checksum, source revision and SPDX-classified license evidence.
 
-`provenance/imports/` contains only `README.md`; there are no source-import JSON records and no imported upstream product/application source.
+Pending NOTICE/distribution-review metadata remains pending where encoded. Specification 001 closeout does not convert those states into rights grants or distribution approval.
 
-No Documenso EE/commercial product source or Stirling restricted product source is introduced by this candidate.
+## Task-ledger reconciliation
 
-## S1-T087 — dependency/component reconciliation
+`tasks.md` is reconciled in this same bounded bookkeeping candidate to represent the proven Grain C through Grain J canonical history rather than the stale pre-Grain-C checkbox state.
 
-`tools/provenance/Cargo.lock` contains the standalone package plus these twelve locked external packages:
+Historical detailed evidence remains preserved in PRs #23 through #35 and Issue #4; the reconciled ledger is intentionally compact and does not erase those GitHub records.
 
-- `itoa 1.0.18`
-- `memchr 2.8.3`
-- `proc-macro2 1.0.107`
-- `quote 1.0.47`
-- `ryu 1.0.23`
-- `serde 1.0.219`
-- `serde_derive 1.0.219`
-- `serde_json 1.0.140`
-- `smallvec 1.15.1`
-- `spdx 0.13.5`
-- `syn 2.0.119`
-- `unicode-ident 1.0.24`
-
-The canonical component registry represents the same dependency set with exact version, package checksum, pinned source-repository revision, SPDX-classified license expression, and immutable evidence references. No dependency has an unknown/restricted license classification in the registry.
-
-Pending NOTICE/distribution-review metadata remains pending where encoded and is not promoted by this closeout record. Those states do not become rights grants.
-
-## S1-T088 — executable qualification baseline
-
-The exact Grain J candidate must independently pass the canonical `Provenance` workflow before merge. The required workflow includes:
-
-- exact candidate checkout and revision identity assertion;
-- Rust `1.85.0`;
-- locked dependency fetch and offline graph verification;
-- `cargo fmt --check`;
-- strict Clippy with `-D warnings`;
-- complete all-target/all-feature tests;
-- documentation tests;
-- canonical `validate`;
-- deterministic `notice --check`.
-
-The successful Grain I/post-merge runs above are predecessor evidence only; they do not qualify this new Grain J head.
-
-## S1-T089 through S1-T093 — closeout gates
-
-Before Grain J may become canonical:
-
-1. the exact candidate head must complete the canonical Provenance workflow successfully;
-2. a fresh independent substantive semantic review must cover the complete exact Spec 001 closeout candidate, including schemas, code, policy, fixtures, component records, NOTICE, CI, and authority boundaries;
-3. every material finding must be reconciled and any amended exact head must be re-qualified/re-reviewed;
-4. unresolved material review threads must be zero;
-5. the exact qualified/reviewed head must merge with `expected_head_sha` protection;
-6. canonical `main` must then be post-merge verified for exact ancestry/tree, validation/NOTICE state, and continued source-import absence.
-
-No pre-merge status in this file claims those gates have already passed.
+The old lifecycle headers in `spec.md` (`Status: ACTIVE`) and `plan.md` (`Status: SHAPING_RECONCILIATION`) are historical document-phase labels, not the canonical completion ledger after this reconciliation. This file plus `tasks.md` controls the post-closeout status without rewriting the substantive specification or implementation plan merely to change historical header text.
 
 ## S1-T094 — bookkeeping boundary
 
-Issue #4 and the canonical task ledger may be marked `CLOSED_CANONICAL` only after the final Grain J merge and post-merge evidence exist. If a repository bookkeeping mutation is still required after that merge, it must be handled as separately reviewed closeout bookkeeping rather than by retroactively claiming pre-merge completion.
+The Grain J merge and post-merge evidence required by S1-T094 now exist. This separate bookkeeping candidate is the required repository reconciliation unit.
 
-## S1-T095 — successor boundary
+Its `CLOSED_CANONICAL` statements are non-canonical until this exact bookkeeping head itself completes Diffciplane qualification and merge. After that merge and post-merge verification, Issue #4 may be reconciled to `CLOSED_CANONICAL` without another repository-content mutation.
 
-Specification 002 remains `UNAUTHORIZED` in this candidate.
+## S1-T095 — successor determination
 
-After Grain J canonical closeout, governance must be re-read from the new canonical `main` and successor authority must be determined separately. Completion of Specification 001 alone is not successor authorization.
+Post-Grain-J governance has been re-read.
+
+`ROADMAP.md` places Specification 002 after Specification 001 in dependency order, but explicitly states that specification numbers describe canonical dependency order and **do not authorize implementation by themselves**.
+
+No separate canonical Specification 002 authorization exists in live repository/GitHub truth at this reconciliation point.
+
+Therefore:
+
+**Specification 002 remains `UNAUTHORIZED`.**
+
+Completion of Specification 001 is a prerequisite, not successor authorization.
 
 ## Preserved external blockers / non-grants
 
-This closeout candidate does not resolve or waive:
+This closeout does not resolve or waive:
 
-- B001 — Documenso EE/commercial rights;
-- B002 — exact Signthos/component/repository license compatibility where broader repository licensing remains separately governed;
+- B001 — Documenso EE/commercial rights evidence;
+- B002 — exact Signthos component/repository licensing compatibility before derived/imported product-code release;
 - B003 — Stirling restricted-source rights;
-- B004 — desktop/mobile/App Store/Play distribution compatibility;
+- B004 — exact desktop/mobile/App Store/Play distribution compatibility against the shipped dependency/derivation graph;
 - B005 — signing/PAdES/regulatory capability evidence;
-- B006 — reproducible pricing/market evidence.
+- B006 — reproducible market/pricing evidence for hard business gates.
 
 No confidential permission artifact, credential, paid-service configuration, upstream product source, legal conclusion, compliance claim, mobile-store compatibility claim, signing-validity claim, or Specification 002 implementation is introduced here.
+
+## Bookkeeping PR qualification contract
+
+Before this reconciliation may become canonical:
+
+1. the exact bookkeeping candidate head must pass the canonical Provenance workflow;
+2. a fresh independent substantive review must cover the exact bookkeeping delta and verify that it records proven history without authority inflation;
+3. every material finding must be reconciled and any amended head must be re-qualified/re-reviewed;
+4. unresolved material review threads must be zero;
+5. the exact qualified/reviewed head must merge with `expected_head_sha` protection;
+6. resulting canonical `main` must pass post-merge Provenance verification;
+7. Issue #4 may then be closed as `CLOSED_CANONICAL` with exact merge/post-merge evidence.
