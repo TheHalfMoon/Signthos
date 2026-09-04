@@ -1,14 +1,16 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `POST_SHAPING_RECONCILIATION_CANDIDATE / PLANNING_ONLY`
+Status: `STAGE_Q_002A1_QUALIFICATION_CANDIDATE / PLANNING_ONLY`
 Issue: #5
 Canonical shaping base: `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167`
 Canonical shaping merge: `24c2494e70cfad9e4771d9be676363561726c0fc`
+Canonical Stage P reconciliation merge: `80ae1410b3065768e031eecaffda5b6a216ebd13`
 
 Legend:
 
-- `[x]` — canonically satisfied by the evidence identified in this ledger or its linked closeout record once this bookkeeping reconciliation itself is canonical.
-- `[ ]` — not yet complete or deliberately blocked by a later authorization/evidence dependency.
+- `[x]` in Stage P is canonically satisfied by merged evidence.
+- `[x]` in the active Stage Q candidate means the evidence exists in this qualification PR and becomes canonical only if the exact qualified head is independently reviewed, guarded-merged, and post-merge verified.
+- `[ ]` means not yet complete or deliberately blocked by a later authorization/evidence dependency.
 
 A checked planning task never implies source-import authorization.
 
@@ -33,62 +35,48 @@ A checked planning task never implies source-import authorization.
 - [x] `S2-T017` Record exact-head shaping qualification accurately: GitHub Actions for final head were `NO_APPLICABLE_RUN`; later CodeRabbit full-review availability was `UNAVAILABLE / RATE_LIMITED`; Cubic exact-head review was `UNAVAILABLE / NEUTRAL / PLAN_LIMIT_REACHED`; none of those unavailable states was represented as PASS.
 - [x] `S2-T018` Confirm zero unresolved material review threads and unchanged expected base/head immediately before merge. PR #37 remained mergeable with base `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167` and head `052e6df02de146c315ab9d169deac391f310300e`.
 - [x] `S2-T019` Merge the exact qualified shaping head with `expected_head_sha` protection. PR #37 merged by the repository's normal merge-commit method as `24c2494e70cfad9e4771d9be676363561726c0fc`.
-- [x] `S2-T020` Post-merge verify canonical `main`, exact ancestry/surface, Issue #5/governance, and that source import remains unauthorized. Merge parents are `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167` and `052e6df02de146c315ab9d169deac391f310300e`; the merged surface is exactly the four Spec 002 planning files; Issue #5 remains `PLANNING_ONLY`; post-merge checks/workflows are `NO_APPLICABLE_RUN`.
+- [x] `S2-T020` Post-merge verify canonical `main`, exact ancestry/surface, Issue #5/governance, and that source import remains unauthorized. Stage P bookkeeping was then independently reviewed, guarded-merged in PR #38, and post-merge verified as canonical `main` `80ae1410b3065768e031eecaffda5b6a216ebd13` with zero upstream-derived bytes and zero source-import records.
 
-Canonical Stage P evidence is summarized in `shaping-closeout.md`. Stage P completion authorizes only continuation into Stage Q planning/evidence work; it does not authorize source import.
-
-### Shaping path allowlist
-
-Only:
-
-- `specs/002-documenso-brownfield-baseline/spec.md`
-- `specs/002-documenso-brownfield-baseline/plan.md`
-- `specs/002-documenso-brownfield-baseline/tasks.md`
-- `specs/002-documenso-brownfield-baseline/snapshot.md`
-- Issue #5 comments/metadata for evidence/status only
-
-Explicitly prohibited during shaping:
-
-- Documenso source files;
-- Signthos product/runtime source;
-- source-import JSON records;
-- dependency manifests/lockfiles;
-- workflows/CI configuration changes;
-- `NOTICE` changes;
-- credentials/paid services;
-- permission-rights promotion;
-- Specification 003 implementation.
+Canonical Stage P evidence is summarized in `shaping-closeout.md` and the PR #38 post-merge Issue #5 evidence record. Stage P is `CLOSED_CANONICAL`. This authorizes only continuation into Stage Q planning/evidence work; it does not authorize source import.
 
 ## S2-Q — first pre-import qualification packet
 
 Dependency: `S2-T020`.
 
-This stage remains planning/evidence-only and may proceed only if live governance continues to permit planning.
+This stage remains planning/evidence-only under Issue #5 `PLANNING_ONLY` authority.
 
 **Stage Q admits zero upstream-derived bytes and zero source-import records.** Its separately reviewed allowlist may contain only explicitly named Signthos-authored qualification/evidence documents. Upstream facts may be referenced by immutable repository/path/SHA/digest/license identifiers and independently authored descriptions, but no copied, adapted, vendored, embedded, generated-from, or otherwise upstream-derived source, test, manifest, lockfile, configuration, asset, schema, patch, fixture, license copy, or other upstream file content may be committed before Stage R authorization.
 
-- [ ] `S2-T021` Select one first proposed grain, expected to be a recursively refined subset of 002A, without authorizing import.
-- [ ] `S2-T022` Reconfirm or canonically amend the exact upstream snapshot before building the packet.
-- [ ] `S2-T023` Produce an exact file-level upstream allowlist candidate and Signthos destination map for that one proposed grain as Signthos-authored evidence only, without admitting listed upstream bytes.
-- [ ] `S2-T024` Classify the most-specific license, notices, copyright/provenance, generated/vendor/third-party state, and transformation for every candidate path using evidence references/independently authored analysis only.
-- [ ] `S2-T025` Exclude every `packages/ee/**`, restricted, unknown, conflicting, or insufficiently evidenced path unless a separate accepted rights artifact applies to that exact path/action.
-- [ ] `S2-T026` Identify the minimum workspace/dependency/build surface required for reproducible characterization; reject unrelated upstream configuration without copying any candidate configuration.
-- [ ] `S2-T027` Define independently authored characterization tests first; identify any upstream test files proposed for later import as separately provenance-controlled paths without copying/adapting them in Stage Q.
-- [ ] `S2-T028` Define exact source/destination digest generation and the pending-to-qualified authorization delta workflow for the proposed grain without creating canonical source-import records.
-- [ ] `S2-T029` Validate only Signthos-authored qualification/evidence artifacts with applicable canonical tooling; do not commit any upstream-derived bytes or any source-import record before Stage R authorization.
+Stage Q candidate change allowlist for 002A1:
+
+- `specs/002-documenso-brownfield-baseline/qualification-002a1-npm-policy.md`
+- `specs/002-documenso-brownfield-baseline/tasks.md`
+- Issue #5 comments/metadata for evidence/status only.
+
+- [x] `S2-T021` Select one first proposed grain without authorizing import: `002A1 — npm project-resolution policy seed`.
+- [x] `S2-T022` Reconfirm the exact upstream snapshot. Live `documenso/documenso/main` was re-read during Stage Q and remained exactly `2cac63a000e22422bdea449f68b8025e709aa73a`; no snapshot amendment is proposed.
+- [x] `S2-T023` Produce an exact file-level candidate map as Signthos-authored evidence only: upstream `.npmrc` blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, candidate destination `.npmrc`, proposed future transformation `COPY_EXACT`. Current Stage-R-eligible allowlist remains `EMPTY`.
+- [x] `S2-T024` Classify the most-specific current license/notice/provenance evidence without copying it. No file-local license/copyright/generated/vendor marker is present; root/community evidence identifies AGPL version 3 family treatment but canonical L002 remains unresolved between `AGPL-3.0-only` and `AGPL-3.0-or-later`. Copyright holder is not inferred from commit authorship.
+- [x] `S2-T025` Exclude every insufficiently evidenced/restricted path. The sole 002A1 candidate remains `BLOCKED_PENDING_L002` and is excluded from the Stage-R-eligible import allowlist; `packages/ee/**` remains separately `RESTRICTED / NOT_IMPORT_AUTHORIZED`.
+- [x] `S2-T026` Identify the minimum workspace/dependency/build surface. 002A1 is configuration-only and requires no install/build/service; broad root `package.json`, `package-lock.json`, `turbo.json`, application/package trees, deployment/configuration, patches, scripts, tests, and EE paths are explicitly excluded.
+- [x] `S2-T027` Define independently authored characterization before any import. No upstream test file is proposed; future authorized characterization will verify exact path/digest equality, npm policy semantics, absence of credentials/endpoints, local execution, and unchanged imported bytes across any manifest-only authorization delta.
+- [x] `S2-T028` Define source/destination digest and pending-to-qualified review flow without creating a source-import record. Exact candidate SHA-256 is `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`; future authorized import must reverify source blob/SHA-256, require destination equality, keep review pending, and prove destination bytes unchanged across the manifest authorization delta.
+- [x] `S2-T029` Validate only Signthos-authored Stage Q evidence. The candidate change surface is the two named planning/evidence documents only; zero upstream-derived bytes and zero source-import records are admitted. No provenance record is syntactically validated as import authorization because none exists and L002 remains unresolved.
 - [ ] `S2-T030` Obtain independent substantive exact-head review of the qualification packet and reconcile all findings.
 - [ ] `S2-T031` Merge/post-merge verify the packet under the authority then applicable, proving its exact surface contains zero upstream-derived bytes and zero source-import records.
 
 ## S2-R — separate implementation authorization
 
-Dependency: `S2-T031`.
+Dependency: `S2-T031` plus a non-empty evidence-qualified import allowlist.
 
-All tasks below are intentionally unchecked. Ordinary founder approval, roadmap order, a valid provenance schema, or completion of planning cannot satisfy them implicitly.
+All tasks below are intentionally unchecked. Ordinary founder approval, roadmap order, a valid provenance schema, completion of planning, or resolution of a license evidence question cannot satisfy them implicitly.
 
 - [ ] `S2-T032` Record a separate canonical authorization that explicitly names the first import grain, exact upstream snapshot, canonical path allowlist, allowed Signthos destination surface, rights/permission evidence where needed, and required review/qualification gates.
 - [ ] `S2-T033` Re-read canonical governance after that authorization and prove it is effective on `main` before creating any source-import branch.
 
 `IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT` until `S2-T032` and `S2-T033` are canonically satisfied.
+
+For 002A1 specifically, Stage R cannot be satisfied while the Stage-R-eligible import allowlist is empty.
 
 ## S2-A — repository/workspace baseline
 
@@ -115,11 +103,10 @@ Future tasks are placeholders for the authorized ledger refinement. They do not 
 - `S2-B005` No source-import record may treat syntactic validator PASS as proof of review independence, rights, or canonical authorization.
 - `S2-B006` No app/mobile/signing/compliance/distribution claim follows from brownfield baseline import.
 - `S2-B007` No implementation of Specification 003 is authorized by shaping or baseline characterization.
+- `S2-B008` 002A1 remains `BLOCKED_PENDING_L002` until canonical evidence resolves the exact Documenso community SPDX option for the candidate path or a separately accepted exact-scope permission artifact supplies an independent rights basis. Neither event alone substitutes for Stage R authorization.
 
-## Candidate next frontier
+## Current candidate frontier
 
-After this bookkeeping reconciliation itself becomes canonical, the next frontier is:
+`S2-T030` — obtain independent substantive exact-head review of the Stage Q 002A1 qualification packet and reconcile all findings.
 
-`S2-T021` — select the first recursively refined 002A candidate for Stage Q qualification without authorizing import.
-
-Until then, live `main` remains the authority and implementation/source import remains unauthorized.
+Source import remains unauthorized. Current Stage-R-eligible 002A1 import allowlist is `EMPTY`.
