@@ -1,19 +1,23 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `STAGE_Q_002A1_CLOSED_CANONICAL / PLANNING_ONLY / IMPORT_BLOCKED`
+Status: `STAGE_R_002A1_EFFECTIVE_CANONICAL / LEDGER_RECONCILIATION_CANDIDATE`
 Issue: #5
 Canonical shaping base: `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167`
 Canonical shaping merge: `24c2494e70cfad9e4771d9be676363561726c0fc`
 Canonical Stage P reconciliation merge: `80ae1410b3065768e031eecaffda5b6a216ebd13`
 Canonical 002A1 Stage Q merge: `b83f934a72fec111c27964a45cd79dccc489b4bf`
 Canonical 002A1 Stage Q reconciliation merge: `fb1c0c57c594a1f148167de3d2e2bac071601d6e`
+Canonical 002A1 L002 merge: `a97c937456d57569c633c21b2bfc943f7ee9039a`
+Canonical 002A1 Stage R authorization merge: `ea9022423563153951616b1a7c12fc4f255cc462`
+Canonical 002A1 distribution-artifact prerequisite merge: `6d947ab78ea56312785de7761154e1a5c7bfd9e7`
+Canonical 002A1 Stage R effectiveness merge: `e13aa50fad6ed24b2f031a078d74b4c798db147a`
 
 Legend:
 
 - `[x]` — canonically satisfied by merged and post-merge-verified evidence identified here or in the linked closeout records.
 - `[ ]` — not yet complete or deliberately blocked by a later authorization/evidence dependency.
 
-A checked planning task never implies source-import authorization.
+A checked planning or authorization task never implies authority beyond its exact canonical scope.
 
 ## S2-P — shaping and snapshot truth
 
@@ -46,7 +50,7 @@ Dependency: `S2-T020`.
 
 This stage remains planning/evidence-only under Issue #5 `PLANNING_ONLY` authority.
 
-**Stage Q admits zero upstream-derived bytes and zero source-import records.** Its separately reviewed allowlist may contain only explicitly named Signthos-authored qualification/evidence documents. Upstream facts may be referenced by immutable repository/path/SHA/digest/license identifiers and independently authored descriptions, but no copied, adapted, vendored, embedded, generated-from, or otherwise upstream-derived source, test, manifest, lockfile, configuration, asset, schema, patch, fixture, license copy, or other upstream file content may be committed before Stage R authorization.
+**Stage Q admits zero upstream-derived bytes and zero source-import records.** Its separately reviewed allowlist may contain only explicitly named, Signthos-authored qualification/evidence documents. Upstream facts may be referenced by immutable repository/path/SHA/digest/license identifiers and independently authored descriptions, but no copied, adapted, vendored, embedded, generated-from, or otherwise upstream-derived source, test, manifest, lockfile, configuration, asset, schema, patch, fixture, license copy, or other upstream file content may be committed before Stage R authorization.
 
 The canonical 002A1 Stage Q packet is:
 
@@ -58,23 +62,21 @@ The canonical 002A1 Stage Q packet is:
 
 - [x] `S2-T021` Select one first proposed grain without authorizing import: `002A1 — npm project-resolution policy seed`.
 - [x] `S2-T022` Reconfirm the exact upstream snapshot. Live `documenso/documenso/main` was re-read during Stage Q and remained exactly `2cac63a000e22422bdea449f68b8025e709aa73a`; no snapshot amendment is proposed.
-- [x] `S2-T023` Produce an exact file-level candidate map as Signthos-authored evidence only: upstream `.npmrc` blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, candidate destination `.npmrc`, proposed future transformation `COPY_EXACT`. Current Stage-R-eligible allowlist remains `EMPTY` until the path-specific L002 evidence unit described below becomes canonical.
-- [x] `S2-T024` Classify the most-specific current license/notice/provenance evidence without copying it. No file-local license/copyright/generated/vendor marker is present; root/community evidence identifies AGPL version 3 family treatment. The path-specific L002 option is the active evidence-resolution dependency below. Copyright holder is not inferred from commit authorship.
-- [x] `S2-T025` Exclude every insufficiently evidenced/restricted path. Until the path-specific L002 evidence unit below becomes canonical, the sole 002A1 candidate remains `BLOCKED_PENDING_L002` and excluded from the Stage-R-eligible import allowlist; `packages/ee/**` remains separately `RESTRICTED / NOT_IMPORT_AUTHORIZED`.
+- [x] `S2-T023` Produce an exact file-level candidate map as Signthos-authored evidence only: upstream `.npmrc` blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, candidate destination `.npmrc`, proposed future transformation `COPY_EXACT`.
+- [x] `S2-T024` Classify the most-specific current license/notice/provenance evidence without copying it. No file-local license/copyright/generated/vendor marker is present; root/community evidence identifies AGPL version 3 family treatment. Copyright holder is not inferred from commit authorship.
+- [x] `S2-T025` Exclude every insufficiently evidenced/restricted path. `packages/ee/**` remains separately `RESTRICTED / NOT_IMPORT_AUTHORIZED`; no path other than the exact 002A1 `.npmrc` acquired Stage R authority.
 - [x] `S2-T026` Identify the minimum workspace/dependency/build surface. 002A1 is configuration-only and requires no install/build/service; broad root `package.json`, `package-lock.json`, `turbo.json`, application/package trees, deployment/configuration, patches, scripts, tests, and EE paths are explicitly excluded.
-- [x] `S2-T027` Define independently authored characterization before any import. No upstream test file is proposed; future authorized characterization will verify exact path/digest equality, npm policy semantics, absence of credentials/endpoints, local execution, and unchanged imported bytes across any manifest-only authorization delta.
-- [x] `S2-T028` Define source/destination digest and pending-to-qualified review flow without creating a source-import record. Exact candidate SHA-256 is `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`; future authorized import must reverify source blob/SHA-256, require destination equality, keep review pending, and prove destination bytes unchanged across the manifest authorization delta.
-- [x] `S2-T029` Validate only Signthos-authored Stage Q evidence. The candidate change surface was the two named planning/evidence documents only; zero upstream-derived bytes and zero source-import records were admitted. No provenance record was syntactically validated as import authorization because none exists.
+- [x] `S2-T027` Define independently authored characterization before any import. No upstream test file is proposed; authorized characterization verifies exact path/digest equality, npm policy semantics, absence of credentials/endpoints, local execution, and unchanged imported bytes across any manifest-only authorization delta.
+- [x] `S2-T028` Define source/destination digest and pending-to-qualified review flow. Exact candidate SHA-256 is `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`; authorized import must reverify source blob/SHA-256, require destination equality, keep review pending, and prove destination bytes unchanged across the manifest authorization delta.
+- [x] `S2-T029` Validate only Signthos-authored Stage Q evidence. The Stage Q candidate change surface admitted zero upstream-derived bytes and zero source-import records.
 - [x] `S2-T030` Obtain independent substantive exact-head review of the qualification packet and reconcile all findings. CodeRabbit independently reviewed exact head `5b6c9c03ac311e4b44a3dda0d02073930bf6517a`, reported no material findings, and a subsequent full review on the same exact head generated no actionable comments with covered commit equal to the reviewed head.
-- [x] `S2-T031` Merge/post-merge verify the packet under the applicable planning authority. PR #39 merged guarded with `expected_head_sha=5b6c9c03ac311e4b44a3dda0d02073930bf6517a` as `b83f934a72fec111c27964a45cd79dccc489b4bf`; post-merge checks and Actions were `NO_APPLICABLE_RUN`, canonical `.npmrc` remained absent, `provenance/imports/` still contained only `README.md`, and Issue #5 remained `PLANNING_ONLY`. PR #40 then reconciled this closeout canonically without changing import authority.
+- [x] `S2-T031` Merge/post-merge verify the packet under the applicable planning authority. PR #39 merged guarded with `expected_head_sha=5b6c9c03ac311e4b44a3dda0d02073930bf6517a` as `b83f934a72fec111c27964a45cd79dccc489b4bf`; PR #40 then reconciled this closeout canonically without changing import authority.
 
-Canonical Stage Q evidence is summarized in `qualification-002a1-npm-policy.md`, `qualification-002a1-closeout.md`, PRs #39–#40, and the Issue #5 post-merge evidence records.
+Canonical Stage Q evidence is summarized in `qualification-002a1-npm-policy.md`, `qualification-002a1-closeout.md`, PRs #39–#40, and the Issue #5 evidence records.
 
 ## S2-L002 — exact 002A1 license-option evidence unit
 
 Dependency: canonical S2-T031 reconciliation at `fb1c0c57c594a1f148167de3d2e2bac071601d6e`.
-
-This unit is planning/evidence only. It does not import `.npmrc`, create a source-import record, grant permission rights, authorize `packages/ee/**`, satisfy Stage R, or authorize Specification 003.
 
 Evidence document:
 
@@ -84,97 +86,69 @@ Exact scope:
 
 `documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:.npmrc`
 
-The independently authored evidence packet records:
+Canonical result:
 
-- first-party Documenso licensing policy at exact blob `a8fc5d78e373d552f6cc926221edd790d707512a` describing Community as GNU AGPL version 3;
-- first-party Community Edition policy at exact blob `2cd1c06fd38adf17201acf31f38b017d7d14a1dc` describing the same version-3 Community boundary;
-- exact candidate `.npmrc` identity without embedding its bytes;
-- root AGPL v3 license blob `0ad25db4bd1d86c452db3f9602ccdbe172438f52` and observed root-license history;
-- no observed repository result for explicit `AGPL-3.0-or-later`, `AGPLv3+`, or `SPDX-License-Identifier` at the selected snapshot;
-- official SPDX distinction between `AGPL-3.0-only` and `AGPL-3.0-or-later`;
-- GNU guidance that an `or later` grant is expressed explicitly in the applicable notice.
+- path-specific classification: `AGPL-3.0-only`;
+- independent substantive exact-head review: `github:issue-comment:5539396641`;
+- guarded PR #41 merge: `a97c937456d57569c633c21b2bfc943f7ee9039a`;
+- exact candidate remains blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, SHA-256 `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`;
+- the evidence-qualified allowlist is exactly `.npmrc -> .npmrc`, SPDX `AGPL-3.0-only`, `COPY_EXACT`;
+- global Foundation L002 remains unresolved for other Documenso paths/revisions;
+- `packages/ee/**` remains `RESTRICTED / NOT_IMPORT_AUTHORIZED`.
 
-The bounded evidence conclusion candidate is:
-
-`L002/002A1/.npmrc = AGPL-3.0-only`
-
-This candidate is intentionally path-specific. It does not resolve Foundation `L002` for any other Documenso path or revision.
-
-### Canonicalization rule
-
-While this evidence document is only on a non-canonical branch or open PR:
-
-- `.npmrc = BLOCKED_PENDING_L002`;
-- `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY`;
-- `S2-T032` cannot begin.
-
-If and only if the exact two-file L002 evidence unit containing this ledger and `qualification-002a1-l002.md` receives independent substantive exact-head review, reconciles every material finding, has zero unresolved material review threads, merges guarded with its reviewed exact head, and passes post-merge verification on canonical `main`, then the path-specific L002 decision becomes canonical and the evidence-qualified **Stage-R candidate** allowlist becomes exactly:
-
-| Upstream | Destination | SPDX | Transformation |
-| --- | --- | --- | --- |
-| `.npmrc` | `.npmrc` | `AGPL-3.0-only` | `COPY_EXACT` |
-
-No other path becomes eligible.
-
-Even after that conditional transition:
-
-- `S2-T032` remains unchecked until a separate Stage R authorization unit becomes canonical;
-- `S2-T033` remains unchecked until governance is reread after that authorization;
-- `IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT`;
-- no `.npmrc` bytes may enter Signthos;
-- no source-import record may be created;
-- no dependency may be installed under this evidence authority.
-
-If independent review concludes that the evidence does not support an unambiguous `AGPL-3.0-only` classification, the unit fails closed and the empty-allowlist state remains in force.
+This L002 result did not itself create implementation authority; Stage R remained a separate gate.
 
 ## S2-R — separate implementation authorization
 
-Dependency: `S2-T031` plus a non-empty evidence-qualified import allowlist.
+Dependency: canonical S2-L002 result plus the separate Stage R chain.
 
-All tasks below are intentionally unchecked. Ordinary founder approval, roadmap order, a valid provenance schema, completion of planning, or resolution of a license evidence question cannot satisfy them implicitly.
+- [x] `S2-T032` Record a separate canonical authorization that explicitly names the first import grain, exact upstream snapshot, canonical path allowlist, allowed Signthos destination surface, rights/permission evidence where needed, and required review/qualification gates. PR #42 exact reviewed head `89c097b57caf870e8c22536e9db46940abfc39a1` received independent substantive review `github:issue-comment:5539615793` and merged guarded as `ea9022423563153951616b1a7c12fc4f255cc462`.
+- [x] `S2-T033` Re-read canonical governance after that authorization and prove it is effective on `main` before creating any source-import branch. PR #43 canonically established the bounded AGPL full-license/NOTICE prerequisite at merge `6d947ab78ea56312785de7761154e1a5c7bfd9e7`; PR #44 exact reviewed head `f1ca8c11bad1414ea9ec4fba12daded047e2140d` received independent substantive review `github:issue-comment:5540070137` with no material finding and merged guarded as `e13aa50fad6ed24b2f031a078d74b4c798db147a`. Post-merge verification recorded Issue #5 evidence `5540134732` with zero implementation bytes admitted.
 
-- [ ] `S2-T032` Record a separate canonical authorization that explicitly names the first import grain, exact upstream snapshot, canonical path allowlist, allowed Signthos destination surface, rights/permission evidence where needed, and required review/qualification gates.
-- [ ] `S2-T033` Re-read canonical governance after that authorization and prove it is effective on `main` before creating any source-import branch.
+`IMPORT_IMPLEMENTATION_AUTHORITY = EFFECTIVE_FOR_002A1_ONLY`.
 
-`IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT` until `S2-T032` and `S2-T033` are canonically satisfied.
+The complete authorized 002A1 implementation surface is exactly:
 
-For 002A1 specifically, Stage R cannot begin while the Stage-R-eligible import allowlist is empty. If the exact S2-L002 unit above becomes canonical with its proposed one-path result, the next dependency becomes a **separate** S2-T032 Stage R authorization unit; source import still remains prohibited.
+1. `.npmrc` — exact authorized Documenso bytes only;
+2. `LICENSES/AGPL-3.0-only.txt` — exact authorized SPDX license-document bytes only;
+3. `provenance/imports/U001-I0001.json` — source-import record for `.npmrc` only;
+4. `NOTICE` — only the deterministic provenance projection during the final `qualified_exact_head` phase;
+5. necessary independently authored 002A1 characterization/evidence under `specs/002-documenso-brownfield-baseline/`;
+6. evidence-backed `specs/002-documenso-brownfield-baseline/tasks.md` reconciliation.
+
+No other repository path, Documenso path/revision, dependency installation, lifecycle script, package-network access, provider, credential, paid service, deployment, EE source, relicensing action, redesign/rebrand/domain migration, or Specification 003 implementation is authorized.
 
 ## S2-A — repository/workspace baseline
 
-Dependency: `S2-T033`.
+Dependency: canonical `S2-T033` effectiveness and this canonical ledger reconciliation.
 
-Future tasks are placeholders for the authorized ledger refinement. They do not authorize source import now.
+The tasks below are authorized only for exact 002A1 and must execute in dependency order. Later 002A grains and 002B–002H remain separately blocked/refined as required.
 
-- [ ] `S2-T034` Create the authorized 002A implementation branch from exact canonical `main`.
-- [ ] `S2-T035` Import only the exact authorized workspace/community paths from the exact selected upstream SHA.
-- [ ] `S2-T036` Create canonical provenance records for every imported path and keep source-import review state pending until imported-byte review exists.
-- [ ] `S2-T037` Establish the minimum reproducible workspace/dependency baseline required by the bounded imported surface.
-- [ ] `S2-T038` Add/retain bounded characterization tests without mixing rebrand, redesign, schema migration, or license-boundary changes.
-- [ ] `S2-T039` Obtain independent imported-byte review, apply the manifest-only authorization delta, and prove imported destination bytes remain unchanged.
-- [ ] `S2-T040` Run exact-head CI/provenance/characterization qualification, resolve reviews, expected-head merge, and post-merge verify.
+- [ ] `S2-T034` Create the authorized 002A1 implementation branch from exact canonical `main`.
+- [ ] `S2-T035` Import only the exact authorized workspace/community path `.npmrc` from exact selected upstream SHA `2cac63a000e22422bdea449f68b8025e709aa73a`, plus the separately authorized exact SPDX full-license distribution artifact.
+- [ ] `S2-T036` Create `provenance/imports/U001-I0001.json` for `.npmrc` only and keep `review.status = pending` until imported-byte review exists.
+- [ ] `S2-T037` Establish the minimum reproducible 002A1 configuration baseline without dependency installation, lifecycle scripts, package-network access, credentials, providers, or external services.
+- [ ] `S2-T038` Add/retain bounded independently authored characterization evidence without mixing rebrand, redesign, schema migration, or license-boundary changes.
+- [ ] `S2-T039` Obtain independent imported-byte review, apply the manifest-only authorization delta, regenerate deterministic `NOTICE` only in that final phase, and prove imported `.npmrc` and full-license destination bytes remain unchanged.
+- [ ] `S2-T040` Run exact-head CI/provenance/NOTICE/characterization qualification, resolve reviews, expected-head merge, and post-merge verify.
 
 002B–002G must be separately refined/authorized after their true dependencies are known from canonical 002A evidence. 002H remains blocked unless exact separate rights evidence is accepted.
 
 ## Explicit blockers/non-grants
 
 - `S2-B001` `packages/ee/**` is restricted/not import-authorized without separately accepted rights covering the exact intended action.
-- `S2-B002` Non-EE paths are not authorized merely by repository-level AGPL metadata; exact path-level evidence is required.
-- `S2-B003` No generic founder approval substitutes for the separate canonical import authorization required by `S2-T032`.
+- `S2-B002` Non-EE paths are not authorized merely by repository-level AGPL metadata; exact path-level evidence is required. The only currently authorized Documenso path is exact 002A1 `.npmrc`.
+- `S2-B003` Generic founder approval did not substitute for Stage R; S2-T032/S2-T033 were satisfied only by their independently reviewed canonical authorization/effectiveness chain.
 - `S2-B004` No copied/adapted upstream code may be mechanically relicensed.
 - `S2-B005` No source-import record may treat syntactic validator PASS as proof of review independence, rights, or canonical authorization.
 - `S2-B006` No app/mobile/signing/compliance/distribution claim follows from brownfield baseline import.
 - `S2-B007` No implementation of Specification 003 is authorized by shaping or baseline characterization.
-- `S2-B008` 002A1 remains `BLOCKED_PENDING_L002` until the exact S2-L002 evidence unit becomes canonical with a review-supported unambiguous classification, or a separately accepted exact-scope permission artifact supplies an independent rights basis. Neither event alone substitutes for Stage R authorization.
+- `S2-B008` The exact 002A1 `.npmrc` L002 blocker is resolved canonically by PR #41 only for that path/revision. All other insufficiently evidenced paths remain fail-closed, and the separate Stage R scope does not expand beyond exact 002A1.
 
 ## Current frontier
 
-Until the exact S2-L002 evidence unit is canonical, the current frontier is:
+After this ledger reconciliation itself is independently reviewed, guarded-merged, and post-merge verified, the next canonical dependency is:
 
-`S2-B008 / L002 exact-head review and canonicalization` — independently challenge the proposed path-specific `AGPL-3.0-only` conclusion and fail closed if the evidence is insufficient.
+`S2-T034 — create the authorized 002A1 implementation branch from exact canonical main`.
 
-If that exact evidence unit becomes canonical with the proposed one-path result, the next frontier becomes:
-
-`S2-T032 — separate Stage R authorization for 002A1`
-
-That transition does not itself authorize source import. `S2-T033` must also become canonical before any source-import branch may be created.
+No upstream or external license bytes may enter Signthos on this reconciliation branch.
