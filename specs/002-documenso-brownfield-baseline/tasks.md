@@ -62,17 +62,19 @@ Dependency: `S2-T020`.
 
 This stage remains planning/evidence-only and may proceed only if live governance continues to permit planning.
 
+**Stage Q admits zero upstream-derived bytes and zero source-import records.** Its separately reviewed allowlist may contain only explicitly named Signthos-authored qualification/evidence documents. Upstream facts may be referenced by immutable repository/path/SHA/digest/license identifiers and independently authored descriptions, but no copied, adapted, vendored, embedded, generated-from, or otherwise upstream-derived source, test, manifest, lockfile, configuration, asset, schema, patch, fixture, license copy, or other upstream file content may be committed before Stage R authorization.
+
 - [ ] `S2-T021` Select one first proposed grain, expected to be a recursively refined subset of 002A, without authorizing import.
 - [ ] `S2-T022` Reconfirm or canonically amend the exact upstream snapshot before building the packet.
-- [ ] `S2-T023` Produce an exact file-level upstream allowlist candidate and Signthos destination map for that one proposed grain.
-- [ ] `S2-T024` Classify the most-specific license, notices, copyright/provenance, generated/vendor/third-party state, and transformation for every candidate path.
+- [ ] `S2-T023` Produce an exact file-level upstream allowlist candidate and Signthos destination map for that one proposed grain as Signthos-authored evidence only, without admitting listed upstream bytes.
+- [ ] `S2-T024` Classify the most-specific license, notices, copyright/provenance, generated/vendor/third-party state, and transformation for every candidate path using evidence references/independently authored analysis only.
 - [ ] `S2-T025` Exclude every `packages/ee/**`, restricted, unknown, conflicting, or insufficiently evidenced path unless a separate accepted rights artifact applies to that exact path/action.
-- [ ] `S2-T026` Identify the minimum workspace/dependency/build surface required for reproducible characterization; reject unrelated upstream configuration.
-- [ ] `S2-T027` Define independently authored characterization tests first; identify any upstream test files proposed for import as separately provenance-controlled paths.
-- [ ] `S2-T028` Define exact source/destination digest generation and the pending-to-qualified authorization delta workflow for the proposed grain.
-- [ ] `S2-T029` Validate the proposed provenance structure with the canonical Specification 001 tooling where applicable, without committing imported product bytes.
+- [ ] `S2-T026` Identify the minimum workspace/dependency/build surface required for reproducible characterization; reject unrelated upstream configuration without copying any candidate configuration.
+- [ ] `S2-T027` Define independently authored characterization tests first; identify any upstream test files proposed for later import as separately provenance-controlled paths without copying/adapting them in Stage Q.
+- [ ] `S2-T028` Define exact source/destination digest generation and the pending-to-qualified authorization delta workflow for the proposed grain without creating canonical source-import records.
+- [ ] `S2-T029` Validate only Signthos-authored qualification/evidence artifacts with applicable canonical tooling; do not commit any upstream-derived bytes or any source-import record before Stage R authorization.
 - [ ] `S2-T030` Obtain independent substantive exact-head review of the qualification packet and reconcile all findings.
-- [ ] `S2-T031` Merge/post-merge verify the packet under the authority then applicable.
+- [ ] `S2-T031` Merge/post-merge verify the packet under the authority then applicable, proving its exact surface contains zero upstream-derived bytes and zero source-import records.
 
 ## S2-R — separate implementation authorization
 
