@@ -267,7 +267,7 @@ This is a semantic field allowlist for **future qualification only**. It is not 
 
 No destination bytes or digest exist yet.
 
-## Rights/provenance blockers for 002A2-M1
+## Rights/provenance requirements for 002A2-M1
 
 Before any Stage R proposal for an adapted/minimal manifest, a separate qualification packet must resolve all of the following:
 
@@ -275,13 +275,19 @@ Before any Stage R proposal for an adapted/minimal manifest, a separate qualific
 2. exact source path/blob/SHA-256 binding;
 3. destination-byte design and exact destination SHA-256 only after authority exists to create the candidate;
 4. derivation-sensitive `AGPL-3.0-only` treatment unless stronger path-specific rights evidence supports another result;
-5. required permission/license obligations for modify/create-derivative/redistribute/publish-source behavior under repository policy;
-6. the canonical `copyright_holder` field required by source-import v1 without inventing file-level ownership;
+5. required license obligations for modification, derivative treatment, redistribution, and source publication under repository policy;
+6. the canonical nonempty `copyright_holder` field without inventing file-level ownership;
 7. exact Signthos root identity/version policy without copying upstream product identity merely for convenience;
 8. exact least-authority workspace membership values/patterns, including proof that no entry can match `packages/ee/**`, another restricted path, or an unauthorized workspace;
 9. independent substantive review before any Stage R authorization proposal.
 
-The current evidence does not yet provide a canonically accepted nonempty source-import `copyright_holder` value for root `package.json`. That is an explicit fail-closed provenance blocker for any later import-ready record and must be resolved from reliable first-party evidence rather than inferred from commit authorship, repository access, Enterprise-only copyright text, or generic product attribution.
+Canonical Specification 001 schema requires `upstream.copyright_holder` to be a nonempty string, but it does not require a named corporate holder. Canonical 002A1 Stage R effectiveness established the repository rule to use `copyright_holder = "unknown"` unless reliable separate evidence establishes a holder.
+
+Pinned upstream `CLA.md` reinforces why a more-specific holder must not be invented: it states that contributors retain all right, title, and interest in their Contributions while granting Documenso Inc. a perpetual, worldwide, non-exclusive, royalty-free, sublicensable license to use, modify, distribute, and otherwise exploit those Contributions. Enterprise-only copyright text and generic product attribution therefore do not prove that Documenso Inc. is the sole copyright holder of root Community `package.json`.
+
+Accordingly, `copyright_holder` is **not an unresolved schema blocker** for future M1. If no stronger path-specific holder evidence is established at that later qualification, the canonical fail-closed value is `"unknown"`. M1 must not replace `"unknown"` with a named holder based on commit authorship, repository access, Enterprise-only notices, or generic product attribution.
+
+This clarification does not create a source-import record, destination bytes, Stage R authority, or permission to derive/import the manifest.
 
 ## Shared configuration sequencing
 
