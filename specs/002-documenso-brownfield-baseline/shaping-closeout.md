@@ -98,14 +98,16 @@ Post-merge live truth established:
 
 `STAGE_P = CLOSED_CANONICAL` once this bookkeeping reconciliation itself satisfies its applicable review, merge, and post-merge gates.
 
-The next authorized work is Stage Q planning/evidence only. Stage Q must continue to admit:
+Only after this bookkeeping reconciliation itself becomes canonical is the next authorized work Stage Q planning/evidence. Stage Q must continue to admit:
 
 - zero upstream-derived bytes;
 - zero source-import records;
 - only explicitly named Signthos-authored qualification/evidence documents in its separately reviewed allowlist.
 
-## Next frontier
+## Candidate next frontier
+
+After this bookkeeping reconciliation itself becomes canonical, the next frontier is:
 
 `S2-T021` — select one recursively refined subset of 002A as the first proposed Stage Q qualification grain, without authorizing import.
 
-Stage R remains a separate canonical authorization gate. `IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT` until S2-T032 and S2-T033 are canonically satisfied.
+Until then, live `main` remains authoritative. Stage R remains a separate canonical authorization gate. `IMPORT_IMPLEMENTATION_AUTHORITY = ABSENT` until S2-T032 and S2-T033 are canonically satisfied.
