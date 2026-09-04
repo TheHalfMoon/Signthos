@@ -1,6 +1,6 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `002A1_IMPLEMENTATION_QUALIFIED_CANDIDATE / T040_FINAL_HEAD_PENDING`
+Status: `002A1_CLOSEOUT_CANDIDATE / T040_POSTMERGE_EVIDENCE_RECONCILED / SUCCESSOR_AUTHORITY_UNRESOLVED`
 Issue: #5
 Canonical shaping base: `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167`
 Canonical shaping merge: `24c2494e70cfad9e4771d9be676363561726c0fc`
@@ -12,10 +12,11 @@ Canonical 002A1 Stage R authorization merge: `ea9022423563153951616b1a7c12fc4f25
 Canonical 002A1 distribution-artifact prerequisite merge: `6d947ab78ea56312785de7761154e1a5c7bfd9e7`
 Canonical 002A1 Stage R effectiveness merge: `e13aa50fad6ed24b2f031a078d74b4c798db147a`
 Canonical 002A1 Stage R ledger reconciliation merge: `ca0409e3b5f40deba0c14987d591d1860d902ad1`
+Canonical 002A1 implementation merge: `7c10ec2a3d25f73e8cd37e6ff7bf5db41cdaf019`
 
 Legend:
 
-- `[x]` — satisfied by evidence already canonical on `main` or, for the active implementation PR, by exact evidence explicitly identified in the task text and still subject to S2-T040 guarded-merge/post-merge completion.
+- `[x]` — satisfied by exact evidence identified in this ledger. When the checked value is reconciled on an active closeout branch, it becomes canonical bookkeeping only after that closeout branch itself passes review, guarded merge, and post-merge verification.
 - `[ ]` — not yet complete or deliberately blocked by a later authorization/evidence dependency.
 
 A checked planning, evidence, or authorization task never implies authority beyond its exact canonical scope.
@@ -125,20 +126,22 @@ Dependency: canonical `S2-T033` effectiveness and canonical Stage R ledger recon
 
 The tasks below are authorized only for exact 002A1 and must execute in dependency order. Later 002A grains and 002B–002H remain separately blocked/refined as required.
 
-- [x] `S2-T034` Create the authorized 002A1 implementation branch from exact canonical `main`. Branch `import/002a1-npm-policy-seed` was created from exact canonical base `ca0409e3b5f40deba0c14987d591d1860d902ad1`; PR #46 remains based on that unchanged canonical main during this candidate phase.
-- [x] `S2-T035` Import only the exact authorized workspace/community path `.npmrc` from exact selected upstream SHA `2cac63a000e22422bdea449f68b8025e709aa73a`, plus the separately authorized exact SPDX full-license distribution artifact. `.npmrc` is Git blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, SHA-256 `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`; `LICENSES/AGPL-3.0-only.txt` is Git blob `0c97efd25b5974b974ed9a8a18207bc4f55bb338`, 34020 bytes. An earlier non-matching license artifact was rejected and repaired forward-only before `.npmrc` admission; it is absent from the qualified tree.
-- [x] `S2-T036` Create `provenance/imports/U001-I0001.json` for `.npmrc` only and keep `review.status = pending` until imported-byte review exists. The record was created against PR #46 with the exact upstream/destination SHA-256, `classification = oss_permitted`, SPDX `AGPL-3.0-only`, `permission = null`, transformation `copied`, and remained `pending` through imported-byte review.
+- [x] `S2-T034` Create the authorized 002A1 implementation branch from exact canonical `main`. Branch `import/002a1-npm-policy-seed` was created from exact canonical base `ca0409e3b5f40deba0c14987d591d1860d902ad1`; PR #46 remained based on that unchanged canonical main through its guarded merge boundary.
+- [x] `S2-T035` Import only the exact authorized workspace/community path `.npmrc` from exact selected upstream SHA `2cac63a000e22422bdea449f68b8025e709aa73a`, plus the separately authorized exact SPDX full-license distribution artifact. Canonical `.npmrc` is Git blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, 65 bytes, SHA-256 `409b452c3c544d06bf4638253ff835c5a6f00602486704953fa1df04625c0f7d`; canonical `LICENSES/AGPL-3.0-only.txt` is Git blob `0c97efd25b5974b974ed9a8a18207bc4f55bb338`, 34020 bytes, SHA-256 `d8a6cc31abc16b6748c7a21f21611f5a1ec33f67d22ca23d7da1c19b95496bee`. An earlier non-matching license artifact was rejected and repaired forward-only before `.npmrc` admission; it is absent from the qualified/canonical tree.
+- [x] `S2-T036` Create `provenance/imports/U001-I0001.json` for `.npmrc` only and keep `review.status = pending` until imported-byte review exists. The record was created against PR #46 with exact upstream/destination SHA-256, `classification = oss_permitted`, SPDX `AGPL-3.0-only`, `permission = null`, transformation `copied`, and remained `pending` through imported-byte review before the later bounded qualification delta.
 - [x] `S2-T037` Establish the minimum reproducible 002A1 configuration baseline without dependency installation, lifecycle scripts, package-network access, credentials, providers, or external services. The exact 65-byte `.npmrc` contains only `legacy-peer-deps = true`, `prefer-dedupe = true`, and `min-release-age = 7`; bounded negative characterization found no URL/registry/auth/token/credential/lifecycle/script/shell-operator content.
-- [x] `S2-T038` Add/retain bounded independently authored characterization evidence without mixing rebrand, redesign, schema migration, or license-boundary changes. `implementation-002a1-npm-policy.md` and `characterization-002a1-npm-policy.md` record the bounded Signthos-authored evidence and explicitly do not substitute for independent imported-byte review.
-- [x] `S2-T039` Obtain independent imported-byte review, apply the manifest-only authorization delta, regenerate deterministic `NOTICE` only in that final phase, and prove imported `.npmrc` and full-license destination bytes remain unchanged. CodeRabbit independently reviewed exact imported-byte head `05cffe10399722efdc060addfcf3edb8a1585ad9`, byte-compared both artifacts with pinned upstream sources, checked provenance/rights/surface, and reported no material finding in `github:issue-comment:5540873733`. The bounded delta then set `U001-I0001.review.status = qualified_exact_head`, replaced the pending self-authored marker with that independent review reference, and regenerated deterministic `NOTICE`. On qualified predecessor `27eed29b2f7c7c2d0a6d8be7cf4c79b1f65aca1f`, `.npmrc` remained blob `cbc6b6537fba6c69756ad16e69a35cc056791d99`, the full-license artifact remained blob `0c97efd25b5974b974ed9a8a18207bc4f55bb338`, and Provenance workflow run `33876780324` completed `success` through strict Clippy, complete tests, documentation tests, canonical provenance validation, and deterministic NOTICE check. Because this ledger/evidence reconciliation changes the PR head, that predecessor CI is not final-head T040 qualification.
-- [ ] `S2-T040` Run exact-head CI/provenance/NOTICE/characterization qualification on the final reconciliation head, obtain fresh independent substantive exact-head/delta re-evaluation, resolve all material review threads, prove unchanged expected base/head, merge guarded with `expected_head_sha`, and post-merge verify exact ancestry/surface/imported and license digests/provenance/NOTICE/CI/governance. This task remains unchecked until all of those operations complete.
+- [x] `S2-T038` Add/retain bounded independently authored characterization evidence without mixing rebrand, redesign, schema migration, or license-boundary changes. `implementation-002a1-npm-policy.md` and `characterization-002a1-npm-policy.md` record bounded Signthos-authored evidence and explicitly do not substitute for independent imported-byte review.
+- [x] `S2-T039` Obtain independent imported-byte review, apply the manifest-only authorization delta, regenerate deterministic `NOTICE` only in that final phase, and prove imported `.npmrc` and full-license destination bytes remain unchanged. CodeRabbit independently reviewed exact imported-byte head `05cffe10399722efdc060addfcf3edb8a1585ad9`, byte-compared both artifacts with pinned upstream sources, checked provenance/rights/surface, and reported no material finding in `github:issue-comment:5540873733`. The bounded delta then set `U001-I0001.review.status = qualified_exact_head`, replaced the pending self-authored marker with that independent review reference, and regenerated deterministic `NOTICE`; `.npmrc` and the full-license artifact remained byte-identical.
+- [x] `S2-T040` Run exact-head CI/provenance/NOTICE/characterization qualification, resolve reviews, expected-head merge, and post-merge verify. Final PR head `7be77fad7190c36b89588610627876e637827472` passed Provenance run `33878569772` through exact identity, dependency graph, formatting, strict Clippy, complete tests, documentation tests, canonical provenance validation, and deterministic NOTICE check. CodeRabbit independently re-evaluated that exact final head and reported no material finding in `github:issue-comment:5541196123`; unresolved material review threads were zero. PR #46 merged guarded with `expected_head_sha=7be77fad7190c36b89588610627876e637827472` as `7c10ec2a3d25f73e8cd37e6ff7bf5db41cdaf019`, whose ordered parents are `ca0409e3b5f40deba0c14987d591d1860d902ad1` and `7be77fad7190c36b89588610627876e637827472`. The canonical merge tree is `fecabda1ab16bfe1888c134cf8e749e142204eac`; base-to-merge surface is the same exact eight authorized paths; canonical imported/license blobs, qualified provenance, and deterministic NOTICE were reverified; post-merge Provenance push run `33878897083` completed SUCCESS with every workflow step passing. Issue #5 post-merge evidence is `github:issue-comment:5541234171`.
+
+`S2-T040` is therefore satisfied by canonical PR #46 evidence. This ledger statement is a closeout candidate until the present bookkeeping unit itself receives independent substantive review, guarded merge, and post-merge verification.
 
 002B–002G must be separately refined/authorized after their true dependencies are known from canonical 002A evidence. 002H remains blocked unless exact separate rights evidence is accepted.
 
 ## Explicit blockers/non-grants
 
 - `S2-B001` `packages/ee/**` is restricted/not import-authorized without separately accepted rights covering the exact intended action.
-- `S2-B002` Non-EE paths are not authorized merely by repository-level AGPL metadata; exact path-level evidence is required. The only currently authorized Documenso path is exact 002A1 `.npmrc`.
+- `S2-B002` Non-EE paths are not authorized merely by repository-level AGPL metadata; exact path-level evidence is required. The only currently implementation-authorized/imported Documenso path is exact 002A1 `.npmrc`.
 - `S2-B003` Generic founder approval did not substitute for Stage R; S2-T032/S2-T033 were satisfied only by their independently reviewed canonical authorization/effectiveness chain.
 - `S2-B004` No copied/adapted upstream code may be mechanically relicensed.
 - `S2-B005` No source-import record may treat syntactic validator PASS as proof of review independence, rights, or canonical authorization.
@@ -148,6 +151,18 @@ The tasks below are authorized only for exact 002A1 and must execute in dependen
 
 ## Current frontier
 
-`S2-T040 — final exact-head qualification, independent reconciliation review, guarded expected-head merge, and post-merge verification of PR #46`.
+The current bounded dependency is this closeout unit itself:
 
-No successor 002A path, 002B–002G implementation, `packages/ee/**`, or Specification 003 work is authorized merely by completion of this candidate.
+`002A1 post-import closeout — fresh independent exact-head review, guarded expected-head merge, and post-merge verification of the two-file bookkeeping surface.`
+
+If and only if that closeout becomes canonical, the next permitted activity is planning/qualification only:
+
+`002A successor discovery — determine from the pinned upstream snapshot whether another narrowly bounded repository/workspace dependency is genuinely required, or whether 002A is complete with 002A1.`
+
+No successor source import is authorized. Previously excluded broad root files such as `package.json`, `package-lock.json`, and `turbo.json` remain unqualified and unimportable unless a later exact-path qualification and separate canonical authorization prove otherwise.
+
+## 002A1 closeout rule
+
+002A1 bookkeeping becomes `CLOSED_CANONICAL` only after this closeout branch itself receives fresh independent substantive review, all material findings are reconciled, unresolved material review threads are zero, the exact final head is guarded-merged with `expected_head_sha`, and post-merge canonical truth is re-read.
+
+Completion of 002A1 does not imply completion of broader 002A, Specification 002, or authority for Specification 003.
