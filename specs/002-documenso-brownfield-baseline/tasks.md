@@ -1,13 +1,13 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `PLANNING_ACTIVE / STAGE_Q_NEXT`
+Status: `POST_SHAPING_RECONCILIATION_CANDIDATE / PLANNING_ONLY`
 Issue: #5
 Canonical shaping base: `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167`
 Canonical shaping merge: `24c2494e70cfad9e4771d9be676363561726c0fc`
 
 Legend:
 
-- `[x]` — canonically satisfied by the evidence identified in this ledger or its linked closeout record.
+- `[x]` — canonically satisfied by the evidence identified in this ledger or its linked closeout record once this bookkeeping reconciliation itself is canonical.
 - `[ ]` — not yet complete or deliberately blocked by a later authorization/evidence dependency.
 
 A checked planning task never implies source-import authorization.
@@ -116,8 +116,10 @@ Future tasks are placeholders for the authorized ledger refinement. They do not 
 - `S2-B006` No app/mobile/signing/compliance/distribution claim follows from brownfield baseline import.
 - `S2-B007` No implementation of Specification 003 is authorized by shaping or baseline characterization.
 
-## Current frontier
+## Candidate next frontier
+
+After this bookkeeping reconciliation itself becomes canonical, the next frontier is:
 
 `S2-T021` — select the first recursively refined 002A candidate for Stage Q qualification without authorizing import.
 
-Implementation/source import remains unauthorized.
+Until then, live `main` remains the authority and implementation/source import remains unauthorized.
