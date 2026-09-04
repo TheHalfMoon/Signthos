@@ -49,6 +49,16 @@ The pinned root manifest is repository-wide rather than a narrow workspace seed.
 
 Its script surface includes `postinstall`, `prepare`, install/clean/reset flows, Docker development orchestration, Prisma generate/migrate/seed/studio operations, environment-file loading, jobs, translation, build, lint and e2e execution.
 
+### Workspace membership wildcard hazard
+
+The pinned upstream `packages/*` workspace glob is not itself a safe minimum-membership value for Signthos. At the same snapshot, `packages/ee/**` is a separately restricted commercial boundary. If that directory were present in a future Signthos tree, `packages/*` would match it by directory pattern even though no EE import authority exists.
+
+Likewise, upstream `apps/*` denotes every direct child under the upstream applications directory rather than only an individually authorized application path.
+
+Therefore the future M1 question is not “copy the upstream workspace globs but drop scripts and dependencies.” It must independently derive the least-authority workspace membership set from paths that are already separately authorized or canonical at that time. No wildcard or explicit membership entry may match `packages/ee/**`, another restricted path, or an otherwise unauthorized workspace path.
+
+The upstream glob values are evidence about upstream repository structure only. They are not approved Signthos destination values.
+
 ### Root lockfile
 
 Pinned `package-lock.json`:
@@ -85,7 +95,7 @@ Pinned `packages/tsconfig/package.json`:
 - package-level license declaration: `MIT`;
 - private package;
 - only package script: `clean`;
-- published file declaration names `base.json`, `nextjs.json`, and `react-library.json`.
+- package `files` declaration names `base.json`, `nextjs.json`, and `react-library.json`.
 
 Pinned `packages/prisma/tsconfig.json` depends on `@documenso/tsconfig/react-library.json`. This proves a real later shared-config dependency, but does not grant import authority for that package or any adjacent file.
 
@@ -99,7 +109,7 @@ Is exact root `package.json`, with every field intact, the minimum repository/wo
 
 `NO`.
 
-The facts needed to establish an npm workspace baseline are materially narrower than the entire pinned root manifest. The exact file couples workspace identity to product identity/version, 33 scripts, 85 direct dependency declarations and 11 overrides spanning later subsystem grains.
+The facts needed to establish an npm workspace baseline are materially narrower than the entire pinned root manifest. The exact file couples workspace identity to product identity/version, 33 scripts, 85 direct dependency declarations and 11 overrides spanning later subsystem grains. Its exact workspace glob values are themselves broader than a least-authority future membership set because they are directory-wide patterns rather than individually authorized workspace paths.
 
 Canonical Specification 002 requires dependency-minimal bounded grains and rejects front-loading broader subsystem behavior merely because it exists upstream. Exact-copying the whole root manifest would violate that posture before 002B–002G package requirements are characterized.
 
@@ -143,7 +153,7 @@ Can the exact root manifest be treated as inert enough for Stage R despite its s
 
 The pinned manifest contains `postinstall`, `prepare`, install/reset, Docker, database, environment-loading and job-oriented scripts. The pinned lockfile independently reports the root package as `hasInstallScript: true`.
 
-A future import pipeline could technically copy a manifest without executing it, but canonical repository presence would still create a dangerous executable package surface whose ordinary npm operations could trigger behavior outside 002A authority.
+A future import pipeline could technically copy a manifest without executing it, but canonical repository presence would still create a side-effect-capable executable package surface whose ordinary npm operations could trigger behavior outside 002A authority.
 
 The safe 002A posture is therefore not merely “do not run the scripts”; it is to avoid admitting unnecessary scripts into the bounded workspace seed in the first place.
 
@@ -193,9 +203,9 @@ Would exact root-manifest admission preserve the separation between 002A and 002
 
 `NO` sufficiently for Stage R.
 
-The manifest's declarations explicitly encode later database, provider, mail, job, telemetry, UI, PDF/image, test and deployment-adjacent intent. Even without executing packages, exact-copy admission would make those declarations part of the canonical Signthos root dependency and script contract before later grains authorize them.
+The manifest's declarations explicitly encode later database, provider, mail, job, telemetry, UI, PDF/image, test and deployment-adjacent intent. Its exact workspace patterns also name broad future directory populations rather than only separately authorized workspaces. Even without executing packages, exact-copy admission would make those declarations and patterns part of the canonical Signthos root package contract before later grains authorize them.
 
-Canonical grain boundaries are about repository authority as well as runtime execution. Deferring execution does not make overbroad declarations minimal.
+Canonical grain boundaries are about repository authority as well as runtime execution. Deferring execution does not make overbroad declarations or workspace patterns minimal.
 
 Therefore:
 
@@ -242,6 +252,8 @@ The next planning packet may evaluate only these upstream semantic categories:
 - package-manager compatibility declaration;
 - Node/npm engine compatibility declarations.
 
+The semantic category `npm workspace membership declaration` does **not** preserve upstream glob values by implication. In particular, exact upstream values `apps/*` and `packages/*` are evidence inputs only and are not approved candidate destination values. M1 must prove every destination membership path or pattern from separately authorized/canonical workspaces, using least-authority matching. No destination pattern may match `packages/ee/**`, another restricted path, or any otherwise unauthorized workspace.
+
 The following upstream root categories are excluded from that candidate unless separately re-authorized:
 
 - upstream product package name;
@@ -266,9 +278,10 @@ Before any Stage R proposal for an adapted/minimal manifest, a separate qualific
 5. required permission/license obligations for modify/create-derivative/redistribute/publish-source behavior under repository policy;
 6. the canonical `copyright_holder` field required by source-import v1 without inventing file-level ownership;
 7. exact Signthos root identity/version policy without copying upstream product identity merely for convenience;
-8. independent substantive review before any Stage R authorization proposal.
+8. exact least-authority workspace membership values/patterns, including proof that no entry can match `packages/ee/**`, another restricted path, or an unauthorized workspace;
+9. independent substantive review before any Stage R authorization proposal.
 
-The current evidence does not yet provide a canonically accepted nonempty source-import `copyright_holder` value for root `package.json`. That is an explicit fail-closed provenance blocker for any later import-ready record and must be resolved from reliable first-party evidence rather than inferred from commit authorship or repository access.
+The current evidence does not yet provide a canonically accepted nonempty source-import `copyright_holder` value for root `package.json`. That is an explicit fail-closed provenance blocker for any later import-ready record and must be resolved from reliable first-party evidence rather than inferred from commit authorship, repository access, Enterprise-only copyright text, or generic product attribution.
 
 ## Shared configuration sequencing
 
@@ -284,6 +297,7 @@ This resolution imports or authorizes none of the following:
 
 - root `package.json` bytes;
 - any reduced/adapted `package.json` bytes;
+- exact upstream workspace glob values as Signthos destination membership values;
 - `package-lock.json`;
 - `turbo.json`;
 - `packages/tsconfig/**`;
