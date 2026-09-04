@@ -1,12 +1,13 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `SHAPING_CANDIDATE / PLANNING_ONLY`
+Status: `POST_SHAPING_RECONCILIATION_CANDIDATE / PLANNING_ONLY`
 Issue: #5
 Canonical shaping base: `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167`
+Canonical shaping merge: `24c2494e70cfad9e4771d9be676363561726c0fc`
 
 Legend:
 
-- `[x]` — the shaping candidate contains evidence for this bounded task; it is not canonical until the shaping PR itself satisfies review/merge/post-merge gates.
+- `[x]` — canonically satisfied by the evidence identified in this ledger or its linked closeout record once this bookkeeping reconciliation itself is canonical.
 - `[ ]` — not yet complete or deliberately blocked by a later authorization/evidence dependency.
 
 A checked planning task never implies source-import authorization.
@@ -27,12 +28,14 @@ A checked planning task never implies source-import authorization.
 - [x] `S2-T012` Define per-grain Specification 001 provenance/review/authorization-delta/expected-head/post-merge flow.
 - [x] `S2-T013` Define dependency, secret, security, characterization, mechanical-transformation, and no-relicensing boundaries.
 - [x] `S2-T014` Prove the shaping candidate change surface is limited to Spec 002 planning files and contains zero upstream product source.
-- [ ] `S2-T015` Obtain fresh independent substantive review of the exact shaping candidate.
-- [ ] `S2-T016` Reconcile every material shaping review finding and obtain exact-head/delta re-evaluation after amendments.
-- [ ] `S2-T017` Record exact-head shaping qualification accurately, including `NO_APPLICABLE_RUN` for any absent workflow rather than representing absence as PASS.
-- [ ] `S2-T018` Confirm zero unresolved material review threads and unchanged expected base/head immediately before merge.
-- [ ] `S2-T019` Merge the exact qualified shaping head with `expected_head_sha` protection.
-- [ ] `S2-T020` Post-merge verify canonical `main`, exact ancestry/surface, Issue #5/governance, and that source import remains unauthorized.
+- [x] `S2-T015` Obtain fresh independent substantive review coverage of the shaping candidate: CodeRabbit reviewed all four planning files at predecessor `60403fa2981b34432df8d1ddd669f42bf6fc1720`, then independently re-evaluated the complete bounded amendment delta on exact final head `052e6df02de146c315ab9d169deac391f310300e`.
+- [x] `S2-T016` Reconcile every material shaping review finding and obtain exact-head/delta re-evaluation after amendments. The single material Stage Q byte-admission finding was confirmed addressed on exact final head and its review thread was resolved.
+- [x] `S2-T017` Record exact-head shaping qualification accurately: GitHub Actions for final head were `NO_APPLICABLE_RUN`; later CodeRabbit full-review availability was `UNAVAILABLE / RATE_LIMITED`; Cubic exact-head review was `UNAVAILABLE / NEUTRAL / PLAN_LIMIT_REACHED`; none of those unavailable states was represented as PASS.
+- [x] `S2-T018` Confirm zero unresolved material review threads and unchanged expected base/head immediately before merge. PR #37 remained mergeable with base `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167` and head `052e6df02de146c315ab9d169deac391f310300e`.
+- [x] `S2-T019` Merge the exact qualified shaping head with `expected_head_sha` protection. PR #37 merged by the repository's normal merge-commit method as `24c2494e70cfad9e4771d9be676363561726c0fc`.
+- [x] `S2-T020` Post-merge verify canonical `main`, exact ancestry/surface, Issue #5/governance, and that source import remains unauthorized. Merge parents are `8e3a3ab8f1b889a6e13a82a5449f4a3b8c3a6167` and `052e6df02de146c315ab9d169deac391f310300e`; the merged surface is exactly the four Spec 002 planning files; Issue #5 remains `PLANNING_ONLY`; post-merge checks/workflows are `NO_APPLICABLE_RUN`.
+
+Canonical Stage P evidence is summarized in `shaping-closeout.md`. Stage P completion authorizes only continuation into Stage Q planning/evidence work; it does not authorize source import.
 
 ### Shaping path allowlist
 
@@ -113,8 +116,10 @@ Future tasks are placeholders for the authorized ledger refinement. They do not 
 - `S2-B006` No app/mobile/signing/compliance/distribution claim follows from brownfield baseline import.
 - `S2-B007` No implementation of Specification 003 is authorized by shaping or baseline characterization.
 
-## Current frontier
+## Candidate next frontier
 
-`S2-T015` — independent substantive exact-head review of the shaping candidate.
+After this bookkeeping reconciliation itself becomes canonical, the next frontier is:
 
-Implementation/source import remains unauthorized.
+`S2-T021` — select the first recursively refined 002A candidate for Stage Q qualification without authorizing import.
+
+Until then, live `main` remains the authority and implementation/source import remains unauthorized.
