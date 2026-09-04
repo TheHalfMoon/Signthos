@@ -30,10 +30,10 @@
     "derives_from": []
   },
   "review": {
-    "status": "pending",
+    "status": "qualified_exact_head",
     "pull_request": 46,
     "evidence": [
-      "github:issue-comment:5540402539"
+      "github:issue-comment:5540873733"
     ]
   }
 }
