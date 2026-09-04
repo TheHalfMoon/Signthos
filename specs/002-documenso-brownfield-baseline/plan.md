@@ -78,19 +78,19 @@ This stage is planning/evidence work, not source import.
 For the first proposed implementation grain only, prepare a canonical packet that identifies:
 
 - exact snapshot SHA;
-- exact upstream file allowlist;
-- exact Signthos destination map;
-- path-level license and copyright/notice evidence;
+- exact upstream file allowlist candidate;
+- exact Signthos destination map candidate;
+- path-level license and copyright/notice evidence references;
 - generated/vendor/third-party classification where applicable;
 - required transformation type per path;
 - dependency/build implications;
 - proposed characterization tests;
-- permission scope/evidence for any non-OSS path;
+- permission scope/evidence references for any non-OSS path;
 - explicit exclusions.
 
 The packet must be small enough for independent line-by-line review.
 
-No upstream application source may be committed in Stage Q.
+**Stage Q byte-admission rule:** Stage Q may commit only explicitly named, Signthos-authored qualification/evidence documents within its separately reviewed planning allowlist. It must not copy, adapt, vendor, embed, generate from, or otherwise commit any upstream-derived bytes of any kind—including source, tests, manifests, lockfiles, configuration, assets, schemas, generated artifacts, patches, fixtures, license copies, or other upstream file content—and it must not create canonical source-import records. Public upstream facts may be referenced by immutable repository/path/SHA/digest/license identifiers and concise independently authored descriptions only. All upstream-derived bytes and all source-import records remain prohibited until Stage R authorization is canonical.
 
 ### Stage R — separate implementation authorization
 
