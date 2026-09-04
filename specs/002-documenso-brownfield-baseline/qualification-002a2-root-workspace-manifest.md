@@ -291,21 +291,27 @@ This qualification does not authorize or import:
 
 ## Exact-head qualification accounting
 
-Before merge, the exact final head of this qualification PR must record and satisfy:
+This PR changes only:
 
-- complete changed surface limited to this Signthos-authored qualification document;
-- upstream-derived bytes committed: `0`;
-- source-import records created: `0`;
-- GitHub Actions workflow accounting for the exact head, using `NO_APPLICABLE_RUN` if the canonical path filters remain unchanged;
-- any neutral/billing-blocked/unavailable automated checks as non-PASS states;
-- fresh independent substantive review of the exact final head;
-- reconciliation of every material finding;
-- zero unresolved material review threads;
-- unchanged expected base/head immediately before guarded merge;
-- guarded merge using exact `expected_head_sha`;
-- post-merge verification before any dependency-resolution successor begins.
+`specs/002-documenso-brownfield-baseline/qualification-002a2-root-workspace-manifest.md`
 
-Current exact-head check state is intentionally not claimed in advance of PR creation and live query.
+For this Spec 002-only documentation surface:
+
+- canonical `.github/workflows/provenance.yml` pull-request path filters do not include `specs/002-documenso-brownfield-baseline/**`;
+- GitHub Actions therefore has `NO_APPLICABLE_RUN` for an exact head that preserves this one-file surface; this is absence of an applicable workflow, not PASS;
+- the first live query after PR #49 creation on head `b5b105f496bf2642fc3e727e26b589796f1ecc78` returned zero GitHub Actions workflow runs and zero check-runs;
+- any later Cubic/Qodo/other neutral, billing-blocked, skipped, rate-limited, unavailable, or summary-only state is not PASS and does not satisfy independent substantive review;
+- after this accounting amendment, the amended exact head must be live-queried again and must receive fresh independent substantive review before merge;
+- complete final changed surface must remain this one Signthos-authored qualification document;
+- upstream-derived bytes committed must remain `0`;
+- source-import records created must remain `0`;
+- every material review finding must be reconciled;
+- unresolved material review threads must be `0`;
+- base/head must remain unchanged immediately before guarded merge;
+- guarded merge must use exact `expected_head_sha`;
+- post-merge verification is required before any dependency-resolution successor begins.
+
+This section does not predict the amended head's live check state; the live query and reviewer evidence for that exact head remain mandatory external qualification evidence.
 
 ## Qualification result candidate
 
