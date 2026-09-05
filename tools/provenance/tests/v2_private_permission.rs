@@ -182,7 +182,7 @@ fn unresolved_and_noncanonical_spdx_forms_remain_fail_closed() {
         ("NONE", "SPDX_UNRESOLVED"),
         ("NOASSERTION", "SPDX_UNRESOLVED"),
         ("LicenseRef-Private", "SPDX_CUSTOM_REFERENCE"),
-        ("GPL-2.0", "SPDX_DEPRECATED"),
+        ("GPL-2.0", "SPDX_POLICY"),
         ("AGPL-3.0", "SPDX_POLICY"),
     ] {
         let mut value = base_v2_spdx();
