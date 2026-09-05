@@ -91,9 +91,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     required_scopes.extend(transformation_scopes(record));
-    if record.get("schema_version").and_then(Value::as_u64) == Some(2) {
-        required_scopes.extend(distribution_scopes(record));
-    }
+    required_scopes.extend(distribution_scopes(record));
     validate_permission(path, record, &required_scopes, report);
 }
 
@@ -280,10 +278,7 @@ fn distribution_scopes(record: &Map<String, Value>) -> BTreeSet<&str> {
                 .iter()
                 .filter_map(Value::as_str)
                 .filter(|scope| {
-                    matches!(
-                        *scope,
-                        "redistribute" | "publish_source" | "commercial_use"
-                    )
+                    matches!(*scope, "redistribute" | "publish_source" | "commercial_use")
                 })
                 .collect()
         })
