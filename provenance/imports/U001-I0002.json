@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "kind": "source_import",
+  "id": "U001-I0002",
+  "classification": "separate_permission_required",
+  "upstream": {
+    "repository": "documenso/documenso",
+    "commit": "2cac63a000e22422bdea449f68b8025e709aa73a",
+    "path": "packages/prisma/schema.prisma",
+    "sha256": "0a8a957d47c50c4b5f33df8c032cadeb54b8a1184dcc9a61ebf53cc9563a6931",
+    "copyright_holder": "Upstream file does not state a copyright holder; not inferred from commit authorship."
+  },
+  "license": {
+    "classification": "unresolved_conflict",
+    "evidence": [
+      "documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:apps/docs/content/docs/policies/community-edition.mdx#blob=2cd1c06fd38adf17201acf31f38b017d7d14a1dc",
+      "documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:apps/docs/content/docs/policies/licenses.mdx#blob=a8fc5d78e373d552f6cc926221edd790d707512a",
+      "documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:packages/prisma/package.json#blob=44992d6e4f89d73e02b5d02a36ee3668e446394c"
+    ]
+  },
+  "permission": {
+    "artifact": "permission-artifact:documenso-signthos-private-v1",
+    "scope": [
+      "copy",
+      "modify",
+      "create_derivative",
+      "redistribute",
+      "publish_source"
+    ]
+  },
+  "distribution": {
+    "state": "resolved",
+    "evidence": [
+      "github:issue-comment:5552564774",
+      "github:issue-comment:5552732328",
+      "github:issue-comment:5552760056"
+    ],
+    "required_artifacts": [],
+    "actions": [
+      "redistribute",
+      "publish_source"
+    ]
+  },
+  "import": {
+    "destination": "packages/prisma/schema.prisma",
+    "sha256": "0a8a957d47c50c4b5f33df8c032cadeb54b8a1184dcc9a61ebf53cc9563a6931",
+    "date": "2026-09-05"
+  },
+  "transformation": {
+    "kind": "copied",
+    "notes": "Exact byte-for-byte copy of the single Stage R-authorized Prisma schema at the pinned upstream commit; no normalization, adaptation, generation, migration, or adjacent Prisma source import.",
+    "derives_from": []
+  },
+  "review": {
+    "status": "qualified_exact_head",
+    "pull_request": 73,
+    "evidence": [
+      "github:issue-comment:5552771594",
+      "github:issue-comment:5553077805"
+    ]
+  }
+}
