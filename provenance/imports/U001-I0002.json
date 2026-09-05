@@ -52,10 +52,11 @@
     "derives_from": []
   },
   "review": {
-    "status": "pending",
+    "status": "qualified_exact_head",
     "pull_request": 73,
     "evidence": [
-      "github:issue-comment:5552771594"
+      "github:issue-comment:5552771594",
+      "github:issue-comment:5553077805"
     ]
   }
 }
