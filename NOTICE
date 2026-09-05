@@ -21,3 +21,4 @@ Components
 Source imports
 --------------
 - U001-I0001 | destination .npmrc | source documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:.npmrc | SPDX: AGPL-3.0-only
+- U001-I0002 | destination packages/prisma/schema.prisma | source documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:packages/prisma/schema.prisma | classification: unresolved_conflict
