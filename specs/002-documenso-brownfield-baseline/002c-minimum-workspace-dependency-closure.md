@@ -15,6 +15,12 @@ This artifact determines the narrowest future npm package/dependency contract ne
 
 This is engineering provenance and repository-governance analysis, not legal advice.
 
+## Review-history integrity
+
+The initial exact head `b61276d937e0d9bfe9996e4bb05ee396eb16be9e` received a material independent-review finding: it selected a root-workspace topology as the minimum even though the selected source pair did not prove npm workspace semantics were required. That verdict is historical evidence only and is not reused as qualification for any later head.
+
+The forward-only correction beginning at commit `4b5d18c59c961a90a11b6e4fa025571638ccc6fc` changes the planning conclusion to select the standalone nested package as the minimum supported by current evidence and defers root-workspace policy until a separate requirement proves it necessary. Every review/check bound to the superseded head is stale for the corrected candidate.
+
 ## Canonical predecessor and authority boundary
 
 Canonical PR #78 / merge `859837d45fb229de0a00b6e8d3a51cb6fe22d1fa` established:
@@ -143,8 +149,6 @@ A future Signthos-owned root workspace may still become justified if a separatel
 `002C_ROOT_WORKSPACE_MEMBERSHIP = NOT_SELECTED`
 
 `002C_ROOT_LOCKFILE_NECESSITY = NOT_ESTABLISHED`
-
-This correction resolves the prior exact-head review finding that root-workspace policy reuse had been treated as a minimum requirement without sufficient evidence.
 
 ## Minimum package-local dependency semantics
 
