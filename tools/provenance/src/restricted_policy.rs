@@ -91,7 +91,9 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     required_scopes.extend(transformation_scopes(record));
-    required_scopes.extend(distribution_scopes(record));
+    if record.get("schema_version").and_then(Value::as_u64) == Some(2) {
+        required_scopes.extend(distribution_scopes(record));
+    }
     validate_permission(path, record, &required_scopes, report);
 }
 
