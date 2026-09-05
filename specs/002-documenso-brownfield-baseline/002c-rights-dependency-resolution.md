@@ -9,7 +9,7 @@ Pinned upstream: `documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a`
 
 Resolve the exact planning/evidence-only successor authorized after canonical PR #77 for the first 002C auth contract candidate.
 
-This artifact exhausts the currently available immutable first-party public rights evidence relevant to the selected source boundary, determines the minimum faithful source dependency closure, records the current Signthos workspace/dependency prerequisite, and selects the smallest dependency-ordered planning successor that can proceed without inflating source-import authority.
+This artifact evaluates the currently qualified immutable first-party public rights evidence relevant to the selected source boundary, determines the minimum faithful source dependency closure, records the current Signthos workspace/dependency prerequisite, and selects the smallest dependency-ordered planning successor that can proceed without inflating source-import authority.
 
 It is Signthos-authored analysis only. It copies or adapts zero upstream source bytes, creates or modifies zero source-import records, installs zero dependencies, and executes no authentication, WebAuthn, database, network, provider, credential, package-manager, build, or runtime behavior.
 
@@ -77,6 +77,8 @@ The package `files` metadata is treated only as package-publication metadata. It
 
 Immutable upstream history was inspected because PR #77 explicitly permits first-party history analysis.
 
+This section records only the exact historical states directly inspected for this resolution. It does not claim that every intervening package-manifest revision or every historical repository license artifact was exhaustively inspected.
+
 ### Initial package state
 
 At upstream commit `579e1333b399fc241ac683fa7852840dc0658c27` (`project structure`, 2023-01-09), `packages/lib/package.json` existed with `private = true` and no `license` field.
@@ -97,9 +99,9 @@ This historical state therefore does not provide a package-local license artifac
 
 Upstream commit `7f5ef8690b20940be2b485f9d8d74d45c8b243f6` (`fix: further stash conflicts`, 2023-11-06) changes exactly the package manifest license value from `SEE LICENSE IN LICENSE` to `MIT` in the fetched commit diff.
 
-The commit message does not state a path-scope rule, explain the relationship between the package field and repository-level licensing, or classify the later `types/document-auth.ts` and `types/webauthn.ts` paths. Subsequent package-manifest history preserves the MIT field through the pinned snapshot.
+The commit message does not state a path-scope rule, explain the relationship between the package field and repository-level licensing, or classify the later `types/document-auth.ts` and `types/webauthn.ts` paths. The pinned snapshot independently declares the same `MIT` package metadata value. No claim is made here about every intervening manifest revision.
 
-This is meaningful first-party evidence that the package metadata was intentionally changed to `MIT`. It is not sufficient, by itself, to prove the exact legal/license scope of every later tracked `packages/lib/**` path in the presence of the pinned repository/Community AGPL statements and absent file-local or package-local license text.
+This is meaningful first-party evidence that an upstream commit intentionally changed the package metadata to `MIT`, and that `MIT` is also the pinned package metadata. It is not sufficient, by itself, to prove the exact legal/license scope of every later tracked `packages/lib/**` path in the presence of the pinned repository/Community AGPL statements and absent file-local or package-local license text.
 
 ## Public-rights resolution result
 
@@ -117,7 +119,7 @@ This resolution therefore must not:
 
 Canonical candidate result:
 
-`002C_PUBLIC_RIGHTS_EVIDENCE_STATUS = IMMUTABLE_FIRST_PARTY_PUBLIC_HISTORY_EXHAUSTED_CONFLICT_UNRESOLVED`
+`002C_PUBLIC_RIGHTS_EVIDENCE_STATUS = QUALIFIED_IMMUTABLE_FIRST_PARTY_HISTORY_REVIEWED_CONFLICT_UNRESOLVED`
 
 `002C_DOCUMENT_AUTH_LICENSE_CLASSIFICATION = CONFLICT_UNRESOLVED_AGPL_3_0_VS_PACKAGE_MIT`
 
@@ -204,7 +206,7 @@ Two independent blockers now exist before any 002C Stage R decision could become
 1. exact rights basis for both required source paths remains unresolved; and
 2. minimum Signthos workspace/dependency execution closure for `zod` is absent.
 
-The rights blocker cannot be solved from the currently exhausted immutable public evidence without new exact evidence or a separately qualified permission basis.
+The currently qualified immutable first-party public evidence does not resolve the rights blocker. New exact evidence or a separately qualified permission basis would be required for rights re-entry.
 
 The workspace/dependency blocker can still be investigated without importing source, installing dependencies, contacting upstream, or executing runtime behavior.
 
@@ -281,7 +283,7 @@ Before merge require:
 4. no workspace manifest, lockfile, package source, NOTICE, provenance schema/tool, workflow, or runtime surface changes;
 5. exact-head GitHub Actions/check accounting is recorded accurately, including `NO_APPLICABLE_RUN` where applicable;
 6. neutral, unavailable, skipped, billing-blocked, rate-limited, or summary-only provider results are not counted as PASS;
-7. fresh independent substantive review verifies the immutable package-license history, unresolved-rights conclusion, two-file minimum source closure, no-substitute baseline decision, current Signthos workspace truth, and successor bounds;
+7. fresh independent substantive review verifies the exact directly inspected immutable package-license history, unresolved-rights conclusion, two-file minimum source closure, no-substitute baseline decision, current Signthos workspace truth, and successor bounds;
 8. every material finding is reconciled and re-reviewed against the exact amended head if bytes change;
 9. unresolved material review threads are zero;
 10. exact canonical base/head remain unchanged immediately before merge;
