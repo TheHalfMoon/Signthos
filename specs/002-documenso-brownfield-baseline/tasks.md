@@ -9,10 +9,12 @@ Reconciliation base: `52ee76d5608242a0b56a550a7342fa433d44c546`
 
 This file is the canonical task-status index for Specification 002. Detailed evidence remains in the named canonical qualification, authorization, characterization, closeout, resolution, PR, CI, and Issue #5 records; this ledger does not duplicate every evidence byte.
 
-- `[x]` means the task has exact evidence identified below. When a checked item is first recorded by the active reconciliation branch, that bookkeeping becomes canonical only if this reconciliation itself receives independent substantive review, guarded expected-head merge, and post-merge verification.
+- `[x]` means the task has exact evidence identified below. When a checked item is first recorded by an active reconciliation branch, that bookkeeping becomes canonical only if the reconciliation itself receives independent substantive review, guarded expected-head merge, and post-merge verification.
 - `[ ]` means incomplete, deliberately blocked, or not yet authorized.
 - A checked planning/evidence task never creates source-import or implementation authority beyond the exact canonical artifact it cites.
-- T041–T045 are reconciliation identifiers for already-canonical successor units. Assigning those identifiers here does not retroactively expand their authority.
+- Existing canonical task identities `S2-T001` through `S2-T040` are preserved exactly.
+- Canonical successor units that occurred after `S2-T040` under separately reviewed successor authority are recorded as historical canonical units **without inventing retroactive `S2-Txxx` identities**.
+- The first newly planned task identity after this reconciliation is `S2-T041`, and it remains unchecked until its own future evidence exists.
 
 ## Canonical merge chain
 
@@ -102,13 +104,48 @@ The only implemented Documenso source path authorized by this completed chain re
 
 Canonical implementation evidence includes exact-head Provenance run `33878569772 = SUCCESS`, post-merge run `33878897083 = SUCCESS`, imported-byte review `github:issue-comment:5540873733`, final exact-head review `github:issue-comment:5541196123`, and merge `7c10ec2a3d25f73e8cd37e6ff7bf5db41cdaf019`.
 
-## S2-A successor qualification and necessity chain
+## Canonical successor units after S2-T040
 
-- [x] `S2-T041` Close 002A1 canonically through PR #47. Exact reviewed head `9b5f5db4f8bf7826dec1a8567cb6f7cfa58bd7a4`; independent review `github:issue-comment:5541333501`; guarded merge `5218e144ae800d8cd29fa52cbd0086157cb59e54`; post-merge evidence `github:issue-comment:5541382595`.
-- [x] `S2-T042` Perform planning-only 002A successor discovery through PR #48. Exact reviewed head `04eeae840fd1f4c60ffca994525ef1700c9f1c33`; guarded merge `c95bab85549ee61894436a7a800b3f62cd1ddfaf`; post-merge evidence `github:issue-comment:5547275772`. Result: 002A was not closed with `.npmrc` alone; root-manifest qualification was selected without import authority.
-- [x] `S2-T043` Qualify the pinned root `package.json` through PR #49. Exact reviewed head `f293d9ae784435154992f5de53e2d51f7a154f6f`; independent review `github:issue-comment:5547301678`; guarded merge `7c8fe436f6dcce7766ca8fffc4302646a87b7d60`; post-merge evidence `github:issue-comment:5547353086`. Result: path-level candidate `AGPL-3.0-only`; exact-copy Stage R readiness blocked by overbroad dependency/script surface; import allowlist empty.
-- [x] `S2-T044` Resolve root-manifest overbreadth through PR #50. Exact reviewed head `3d6b4c1e9bcc3069dafac1d12f9c3f247d76a750`; review finding reconciled and independently re-evaluated in `github:issue-comment:5550773402`; final metadata consistency review `github:issue-comment:5550781165`; guarded merge `9beb6e69128315cb4450f747fbb793fe9a611465`; post-merge evidence `github:issue-comment:5550792938`. Result: exact root manifest rejected as the current minimum 002A surface; M1 planning selected; no Stage R/import authority.
-- [x] `S2-T045` Execute `002A2-M1 — current root-manifest necessity qualification` through PR #51. Exact reviewed head `7d09e0ef0d1e61740504b5eceddf5c56caa1168c`; independent substantive review `github:issue-comment:5550815814 = NO_MATERIAL_FINDINGS`; guarded merge `52ee76d5608242a0b56a550a7342fa433d44c546`; post-merge evidence `github:issue-comment:5550836655`.
+The following units are already canonical. They were executed under separately reviewed successor authority after `S2-T040`; this reconciliation records their exact evidence without assigning them retroactive task identities.
+
+### 002A1 implementation closeout — PR #47
+
+- exact reviewed head: `9b5f5db4f8bf7826dec1a8567cb6f7cfa58bd7a4`;
+- independent review: `github:issue-comment:5541333501`;
+- guarded merge: `5218e144ae800d8cd29fa52cbd0086157cb59e54`;
+- post-merge evidence: `github:issue-comment:5541382595`;
+- result: `002A1 = CLOSED_CANONICAL`.
+
+### 002A successor discovery — PR #48
+
+- exact reviewed head: `04eeae840fd1f4c60ffca994525ef1700c9f1c33`;
+- guarded merge: `c95bab85549ee61894436a7a800b3f62cd1ddfaf`;
+- post-merge evidence: `github:issue-comment:5547275772`;
+- result: broader 002A did not close with `.npmrc` alone; root-manifest qualification selected; source-import authority remained absent.
+
+### 002A2 root-manifest qualification — PR #49
+
+- exact reviewed head: `f293d9ae784435154992f5de53e2d51f7a154f6f`;
+- independent review: `github:issue-comment:5547301678`;
+- guarded merge: `7c8fe436f6dcce7766ca8fffc4302646a87b7d60`;
+- post-merge evidence: `github:issue-comment:5547353086`;
+- result: path-level candidate `AGPL-3.0-only`; exact-copy Stage R readiness blocked by overbroad dependency/script surface; import allowlist empty.
+
+### 002A2 overbreadth resolution — PR #50
+
+- exact reviewed head: `3d6b4c1e9bcc3069dafac1d12f9c3f247d76a750`;
+- material review finding reconciled and re-evaluated: `github:issue-comment:5550773402`;
+- final metadata consistency review: `github:issue-comment:5550781165`;
+- guarded merge: `9beb6e69128315cb4450f747fbb793fe9a611465`;
+- post-merge evidence: `github:issue-comment:5550792938`;
+- result: exact root manifest rejected as the current minimum 002A surface; M1 planning selected; no Stage R/import authority.
+
+### 002A2-M1 current root-manifest necessity — PR #51
+
+- exact reviewed head: `7d09e0ef0d1e61740504b5eceddf5c56caa1168c`;
+- independent substantive review: `github:issue-comment:5550815814 = NO_MATERIAL_FINDINGS`;
+- guarded merge: `52ee76d5608242a0b56a550a7342fa433d44c546`;
+- post-merge evidence: `github:issue-comment:5550836655`.
 
 Canonical M1 result:
 
@@ -122,14 +159,17 @@ Canonical M1 result:
 
 M1 does not permanently prohibit a future root manifest. It requires an actual bounded workspace dependency before root workspace membership/toolchain semantics are designed.
 
-## S2-A ledger reconciliation and next dependency
+## Current reconciliation gate and next task
 
-- [x] `S2-T046` Reconcile canonical task state through completed M1 evidence. This checked value is a reconciliation candidate until the present branch itself receives independent substantive exact-head review, guarded expected-head merge, and post-merge verification. This unit changes task bookkeeping only and grants no new import or implementation authority.
-- [ ] `S2-T047` After and only after T046 becomes canonical, perform `002A3 — first 002B dependency discovery for repository/workspace prerequisites` as planning/evidence only. Select one bounded database/domain characterization candidate from the pinned snapshot and identify only its exact repository/workspace prerequisites. Commit zero upstream-derived bytes and create zero source-import records.
+This present PR is the required canonical task-ledger reconciliation after the successor chain through M1. It is not assigned a retroactive task number and does not grant implementation authority.
 
-If T047 proves that an exact workspace member/shared configuration/root manifest is required, that requirement must return to a separately reviewed 002A qualification and, where source import is proposed, a separate canonical Stage R authorization/effectiveness chain before any bytes enter Signthos.
+Until this exact reconciliation receives independent substantive exact-head review, guarded expected-head merge, and post-merge verification, the ledger may not advance to the next planned task.
 
-T047 is **not** 002B implementation. Stage B remains blocked until the required 002A repository/workspace prerequisites are canonically known and satisfied.
+- [ ] `S2-T041` After and only after this reconciliation becomes canonical, perform `002A3 — first 002B dependency discovery for repository/workspace prerequisites` as planning/evidence only. Select one bounded database/domain characterization candidate from the pinned snapshot and identify only its exact repository/workspace prerequisites. Commit zero upstream-derived bytes and create zero source-import records.
+
+If `S2-T041` later proves that an exact workspace member/shared configuration/root manifest is required, that requirement must return to a separately reviewed 002A qualification and, where source import is proposed, a separate canonical Stage R authorization/effectiveness chain before any bytes enter Signthos.
+
+`S2-T041` is **not** 002B implementation. Stage B remains blocked until the required 002A repository/workspace prerequisites are canonically known and satisfied.
 
 ## Explicit blockers and non-grants
 
@@ -145,16 +185,14 @@ T047 is **not** 002B implementation. Stage B remains blocked until the required 
 
 ## Current frontier
 
-The current bounded dependency is this reconciliation unit itself:
-
-`S2-T046 — reconcile canonical 002A task state through M1`.
+The current bounded dependency is this reconciliation PR itself.
 
 Until this exact reconciliation is independently reviewed, guarded-merged, and post-merge verified:
 
-- `S2-T047` may not open as the canonical successor branch;
+- `S2-T041` remains unchecked and may not open as the canonical successor branch;
 - `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY` for all post-002A1 successor work;
 - no root manifest or workspace package/configuration bytes may be created/imported;
 - 002B implementation remains blocked;
 - Specification 003 implementation remains blocked.
 
-If and only if T046 becomes canonical, the next permitted activity is exactly T047 planning/evidence-only dependency discovery. No source-import or implementation authority follows automatically from that transition.
+If and only if this reconciliation becomes canonical, the next permitted activity is exactly `S2-T041` planning/evidence-only dependency discovery. No source-import or implementation authority follows automatically from that transition.
