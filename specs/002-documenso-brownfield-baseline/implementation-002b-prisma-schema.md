@@ -60,20 +60,22 @@ No characterization step may execute Prisma or connect to any database/provider.
 
 ## Static characterization evidence
 
-The following counts were obtained by static inspection of the exact authorized upstream blob and are characterization evidence only. They do not assert generated-client, migration, database, application-runtime, authorization-runtime, or provider behavior.
+The following counts were obtained by static inspection of the exact authorized upstream blob and were independently re-counted during the imported-byte review. They are characterization evidence only. They do not assert generated-client, migration, database, application-runtime, authorization-runtime, or provider behavior.
 
 - generator blocks: `4` — `kysely`, `client`, `json`, `zod`;
 - datasource blocks: `1`;
 - datasource provider declaration: `postgresql`;
 - datasource environment-variable names: `NEXT_PRIVATE_DATABASE_URL`, `NEXT_PRIVATE_DIRECT_DATABASE_URL`;
-- model declarations: `47`;
-- enum declarations: `19`;
-- explicit `@relation(...)` declarations: `41`;
-- model-level `@@index(...)` declarations: `19`;
+- model declarations: `51`;
+- enum declarations: `30`;
+- explicit `@relation(...)` declarations: `64`;
+- model-level `@@index(...)` declarations: `44`;
 - model-level compound `@@unique(...)` declarations: `7`;
-- relation declarations containing `onDelete: Cascade`: `34`;
+- relation declarations containing `onDelete: Cascade`: `49`;
 - relation declarations containing `onDelete: SetNull`: `8`;
 - `@zod.import` annotations: `10`.
+
+The corrected counts above reconcile the material static-characterization finding reported by independent review `github:issue-comment:5553047221`. The imported schema bytes and provenance record were not changed by this reconciliation.
 
 Representative static contract surfaces visible in the schema include users/accounts/sessions, organisations/teams/membership, envelopes/document items/document metadata, recipients/fields/signatures, webhooks/API tokens, background jobs, email/domain configuration, and organisation/team settings. These names and relationships are recorded only as declarative schema facts; no runtime semantics are inferred from them.
 
@@ -121,9 +123,9 @@ Private-grant distribution obligations remain `RESOLVED_NONE_ADDITIONAL` with `r
 2. Create immutable pending provenance evidence on the pull request. — completed by `github:issue-comment:5552771594`.
 3. Add exact pinned schema bytes and `U001-I0002.json` together. — completed with exact schema blob `13768e34f62331474fce63b1ca67f8d5ead44854`.
 4. Verify source/destination blob, size, and SHA-256. — completed for the current candidate.
-5. Extend this Signthos-authored artifact with static characterization evidence. — completed by this revision.
+5. Extend this Signthos-authored artifact with static characterization evidence. — completed and corrected after independent review `github:issue-comment:5553047221`.
 6. Run applicable provenance/source/NOTICE/format/test/CI qualification without Prisma execution or dependency installation. — pending records are expected to fail only the import-readiness/NOTICE gate until step 7 completes.
-7. Obtain independent substantive imported-byte exact-head review.
+7. Obtain independent substantive imported-byte exact-head review. — initial review found only the corrected characterization-count issue; fresh exact-head re-review is required after this documentation-only fix.
 8. Apply only the bounded v2 review-status/evidence delta to `qualified_exact_head` after clean independent review.
 9. Prove the schema bytes are unchanged across that metadata-only delta.
 10. Re-run exact-head qualification, reconcile threads, guarded-merge, and post-merge verify.
