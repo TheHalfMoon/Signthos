@@ -140,11 +140,7 @@ impl V2Validator<'_> {
         );
         if !matches!(record.get("schema_version"), Some(Value::Number(number)) if number.as_u64() == Some(2))
         {
-            self.push(
-                "SCHEMA_VERSION",
-                "$.schema_version",
-                "expected integer 2",
-            );
+            self.push("SCHEMA_VERSION", "$.schema_version", "expected integer 2");
         }
         if record.get("kind").and_then(Value::as_str) != Some("source_import") {
             self.push("SCHEMA_VALUE", "$.kind", "expected `source_import`");
@@ -180,9 +176,7 @@ impl V2Validator<'_> {
         self.transformation(record);
         self.review(record);
 
-        if unresolved_license
-            && classification.as_deref() != Some("separate_permission_required")
-        {
+        if unresolved_license && classification.as_deref() != Some("separate_permission_required") {
             self.push(
                 "LICENSE_RIGHTS_BASIS",
                 "$.classification",
@@ -237,11 +231,8 @@ impl V2Validator<'_> {
                 );
             }
         }
-        if let Some(holder) = self.text(
-            upstream,
-            "copyright_holder",
-            "$.upstream.copyright_holder",
-        ) {
+        if let Some(holder) = self.text(upstream, "copyright_holder", "$.upstream.copyright_holder")
+        {
             let length = holder.chars().count();
             if !(1..=512).contains(&length) {
                 self.push(
@@ -337,9 +328,7 @@ impl V2Validator<'_> {
                     &["artifact", "scope"],
                     "$.permission",
                 );
-                if let Some(artifact) =
-                    self.text(permission, "artifact", "$.permission.artifact")
-                {
+                if let Some(artifact) = self.text(permission, "artifact", "$.permission.artifact") {
                     if artifact.chars().count() > 512 || !v2_permission_artifact_ref(artifact) {
                         self.push(
                             "PERMISSION_ARTIFACT",
@@ -348,13 +337,7 @@ impl V2Validator<'_> {
                         );
                     }
                 }
-                let scopes = self.string_array(
-                    permission,
-                    "scope",
-                    "$.permission.scope",
-                    1,
-                    None,
-                );
+                let scopes = self.string_array(permission, "scope", "$.permission.scope", 1, None);
                 if let Some(scopes) = scopes {
                     for (index, scope) in scopes.iter().enumerate() {
                         if !matches!(
@@ -432,15 +415,14 @@ impl V2Validator<'_> {
                 }
             }
         }
-        if let Some(actions) = self.string_array(
-            distribution,
-            "actions",
-            "$.distribution.actions",
-            1,
-            None,
-        ) {
+        if let Some(actions) =
+            self.string_array(distribution, "actions", "$.distribution.actions", 1, None)
+        {
             for (index, action) in actions.iter().enumerate() {
-                if !matches!(*action, "redistribute" | "publish_source" | "commercial_use") {
+                if !matches!(
+                    *action,
+                    "redistribute" | "publish_source" | "commercial_use"
+                ) {
                     self.push(
                         "SCHEMA_VALUE",
                         format!("$.distribution.actions[{index}]"),
@@ -491,9 +473,7 @@ impl V2Validator<'_> {
     }
 
     fn transformation(&mut self, record: &Map<String, Value>) {
-        let Some(transformation) =
-            self.object(record, "transformation", "$.transformation")
-        else {
+        let Some(transformation) = self.object(record, "transformation", "$.transformation") else {
             return;
         };
         self.keys(
@@ -570,11 +550,7 @@ impl V2Validator<'_> {
                 "$.review.status",
                 "rejected is not import-ready",
             ),
-            Some(_) => self.push(
-                "REVIEW_STATUS",
-                "$.review.status",
-                "unknown review status",
-            ),
+            Some(_) => self.push("REVIEW_STATUS", "$.review.status", "unknown review status"),
         }
         if !matches!(review.get("pull_request"), Some(Value::Number(number)) if number.as_u64().is_some_and(|value| value > 0))
         {
@@ -584,8 +560,7 @@ impl V2Validator<'_> {
                 "expected positive integer PR id",
             );
         }
-        if let Some(evidence) =
-            self.string_array(review, "evidence", "$.review.evidence", 1, None)
+        if let Some(evidence) = self.string_array(review, "evidence", "$.review.evidence", 1, None)
         {
             for (index, reference) in evidence.iter().enumerate() {
                 if !v2_review_ref(reference) {
@@ -712,12 +687,7 @@ impl V2Validator<'_> {
         Some(output)
     }
 
-    fn push(
-        &mut self,
-        code: &'static str,
-        field: impl Into<String>,
-        message: impl Into<String>,
-    ) {
+    fn push(&mut self, code: &'static str, field: impl Into<String>, message: impl Into<String>) {
         self.diagnostics.push(Diagnostic {
             path: self.path.to_owned(),
             code,
@@ -794,9 +764,7 @@ fn v2_permission_artifact_ref(value: &str) -> bool {
     bytes.first().is_some_and(u8::is_ascii_alphanumeric)
         && bytes.last().is_some_and(u8::is_ascii_alphanumeric)
         && bytes.iter().all(|byte| {
-            byte.is_ascii_lowercase()
-                || byte.is_ascii_digit()
-                || matches!(byte, b'.' | b'_' | b'-')
+            byte.is_ascii_lowercase() || byte.is_ascii_digit() || matches!(byte, b'.' | b'_' | b'-')
         })
 }
 
