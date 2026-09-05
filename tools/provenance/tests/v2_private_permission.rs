@@ -6,8 +6,7 @@ use std::process::{Command, Output};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 const CONTENT: &[u8] = b"hello\n";
-const CONTENT_SHA256: &str =
-    "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03";
+const CONTENT_SHA256: &str = "5891b5b522d5df086d0ff0b110fbd9d21bb4fc7163af34d08286a2e846f6be03";
 
 fn binary() -> &'static str {
     env!("CARGO_BIN_EXE_signthos-provenance")
@@ -285,7 +284,8 @@ fn mixed_version_duplicate_claims_fail_closed() {
 #[test]
 fn notice_projects_v1_and_v2_without_permission_secrets() {
     let root = temp_root("notice");
-    fs::create_dir_all(root.join("provenance/components")).expect("components directory is created");
+    fs::create_dir_all(root.join("provenance/components"))
+        .expect("components directory is created");
     fs::create_dir_all(root.join("provenance/imports")).expect("imports directory is created");
     fs::write(
         root.join("provenance/components/registry.json"),
