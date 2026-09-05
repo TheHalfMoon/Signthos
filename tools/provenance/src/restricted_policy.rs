@@ -91,6 +91,7 @@ fn source_import(path: &str, record: &Map<String, Value>, report: &mut Validatio
     }
 
     required_scopes.extend(transformation_scopes(record));
+    required_scopes.extend(distribution_scopes(record));
     validate_permission(path, record, &required_scopes, report);
 }
 
@@ -264,6 +265,27 @@ fn transformation_scopes(record: &Map<String, Value>) -> BTreeSet<&'static str> 
         _ => {}
     }
     scopes
+}
+
+fn distribution_scopes(record: &Map<String, Value>) -> BTreeSet<&str> {
+    record
+        .get("distribution")
+        .and_then(Value::as_object)
+        .and_then(|distribution| distribution.get("actions"))
+        .and_then(Value::as_array)
+        .map(|actions| {
+            actions
+                .iter()
+                .filter_map(Value::as_str)
+                .filter(|scope| {
+                    matches!(
+                        *scope,
+                        "redistribute" | "publish_source" | "commercial_use"
+                    )
+                })
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
 fn validate_permission(
