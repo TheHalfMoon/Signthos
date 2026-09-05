@@ -127,6 +127,7 @@ No real Documenso byte or real Documenso source-import record is allowed under t
 ### Provenance Rust implementation
 
 - `tools/provenance/src/validation.rs`;
+- `tools/provenance/src/source_import_v2.rs` — new isolated v2 source-import structural validator and dispatcher target, allowed specifically to keep historical v1 `validation.rs` source-import semantics isolated rather than branching or rewriting them in place;
 - `tools/provenance/src/spdx_policy.rs`;
 - `tools/provenance/src/restricted_policy.rs`;
 - `tools/provenance/src/notice.rs`;
@@ -259,6 +260,12 @@ A post-merge Issue #5 evidence record must explicitly state:
 `PROVENANCE_V2_AMENDMENT_AUTHORITY = EFFECTIVE_BOUNDED_IMPLEMENTATION`
 
 before the implementation branch is created.
+
+## Implementation-surface amendment
+
+After PR #65 became effective and before any implementation bytes were committed, the live v1 code was re-inspected to minimize historical v1 mutation. The preferred implementation architecture is a small dispatcher in `lib.rs` plus a new isolated `source_import_v2.rs` structural validator, while existing v1 `validation.rs` remains semantically unchanged for `schema_version = 1` source imports.
+
+This additional path is governance-only until this amendment itself is independently reviewed, guarded-merged, and post-merge verified. It does not expand any product/import authority and does not permit any other Rust source path.
 
 ## Non-grants
 
