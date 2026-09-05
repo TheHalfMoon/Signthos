@@ -108,14 +108,26 @@
     "distribution": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["state", "evidence", "required_artifacts"],
+      "required": ["state", "evidence", "required_artifacts", "actions"],
       "properties": {
-        "state": { "type": "string", "enum": ["resolved", "unresolved"] },
+        "state": {
+          "type": "string",
+          "enum": ["resolved", "unresolved", "contradictory"]
+        },
         "evidence": { "$ref": "#/$defs/evidence" },
         "required_artifacts": {
           "type": "array",
           "uniqueItems": true,
           "items": { "$ref": "#/$defs/relativePath" }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["redistribute", "publish_source", "commercial_use"]
+          }
         }
       }
     },
