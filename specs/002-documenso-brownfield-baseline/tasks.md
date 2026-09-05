@@ -1,9 +1,9 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `002A_M1_LEDGER_RECONCILIATION_CANDIDATE / ZERO_NEW_UPSTREAM_BYTES / NEXT_002A3_BLOCKED_PENDING_THIS_MERGE`
+Status: `S2_T041_POSTMERGE_LEDGER_RECONCILIATION_CANDIDATE / ZERO_NEW_UPSTREAM_BYTES / NEXT_002B_PATH_QUALIFICATION_BLOCKED_PENDING_THIS_MERGE`
 Issue: #5
 Pinned upstream snapshot: `documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a`
-Reconciliation base: `52ee76d5608242a0b56a550a7342fa433d44c546`
+Reconciliation base: `6f242e1ad7747fba7e544001e6d8c3f5bcce5d83`
 
 ## Ledger contract
 
@@ -12,9 +12,9 @@ This file is the canonical task-status index for Specification 002. Detailed evi
 - `[x]` means the task has exact evidence identified below. When a checked item is first recorded by an active reconciliation branch, that bookkeeping becomes canonical only if the reconciliation itself receives independent substantive review, guarded expected-head merge, and post-merge verification.
 - `[ ]` means incomplete, deliberately blocked, or not yet authorized.
 - A checked planning/evidence task never creates source-import or implementation authority beyond the exact canonical artifact it cites.
-- Existing canonical task identities `S2-T001` through `S2-T040` are preserved exactly.
-- Canonical successor units that occurred after `S2-T040` under separately reviewed successor authority are recorded as historical canonical units **without inventing retroactive `S2-Txxx` identities**.
-- The first newly planned task identity after this reconciliation is `S2-T041`, and it remains unchecked until its own future evidence exists.
+- Existing canonical task identities `S2-T001` through `S2-T041` are preserved exactly.
+- Canonical successor units that occurred after `S2-T040` under separately reviewed successor authority remain recorded as historical canonical units without inventing retroactive `S2-Txxx` identities.
+- No `S2-T042` identity is invented by this reconciliation. The next dependency is described only by the exact successor boundary canonically established by PR #53.
 
 ## Canonical merge chain
 
@@ -35,6 +35,8 @@ This file is the canonical task-status index for Specification 002. Detailed evi
 | 002A2 root-manifest qualification | #49 | `7c8fe436f6dcce7766ca8fffc4302646a87b7d60` | exact copy blocked as overbroad |
 | 002A2 overbreadth resolution | #50 | `9beb6e69128315cb4450f747fbb793fe9a611465` | exact-copy rejected; M1 planning selected |
 | 002A2-M1 necessity qualification | #51 | `52ee76d5608242a0b56a550a7342fa433d44c546` | no current root-manifest necessity; broader 002A remains open |
+| 002A through M1 ledger reconciliation | #52 | `3ea95d37ddf42d7c02face0e89e29ab26c3710c6` | canonical ledger reconciled; `S2-T041 / 002A3` became next planned task |
+| S2-T041 / 002A3 dependency discovery | #53 | `6f242e1ad7747fba7e544001e6d8c3f5bcce5d83` | selected static Prisma schema characterization; no workspace prerequisite established |
 
 ## S2-P — shaping and snapshot truth
 
@@ -106,7 +108,7 @@ Canonical implementation evidence includes exact-head Provenance run `3387856977
 
 ## Canonical successor units after S2-T040
 
-The following units are already canonical. They were executed under separately reviewed successor authority after `S2-T040`; this reconciliation records their exact evidence without assigning them retroactive task identities.
+The following units are canonical. Units before `S2-T041` were executed under separately reviewed successor authority after `S2-T040`; this ledger records their exact evidence without assigning retroactive task identities.
 
 ### 002A1 implementation closeout — PR #47
 
@@ -159,17 +161,43 @@ Canonical M1 result:
 
 M1 does not permanently prohibit a future root manifest. It requires an actual bounded workspace dependency before root workspace membership/toolchain semantics are designed.
 
-## Current reconciliation gate and next task
+### Post-M1 ledger reconciliation — PR #52
 
-This present PR is the required canonical task-ledger reconciliation after the successor chain through M1. It is not assigned a retroactive task number and does not grant implementation authority.
+- exact reviewed head: `99dc2147141868774afbebeb3efd7cfe558f063c`;
+- independent exact-head/delta review: canonical PR #52 review evidence;
+- guarded merge: `3ea95d37ddf42d7c02face0e89e29ab26c3710c6`;
+- result: ledger reconciliation became canonical and `S2-T041 / 002A3` became the first newly planned successor task.
 
-Until this exact reconciliation receives independent substantive exact-head review, guarded expected-head merge, and post-merge verification, the ledger may not advance to the next planned task.
+## S2-T041 — first 002B dependency discovery
 
-- [ ] `S2-T041` After and only after this reconciliation becomes canonical, perform `002A3 — first 002B dependency discovery for repository/workspace prerequisites` as planning/evidence only. Select one bounded database/domain characterization candidate from the pinned snapshot and identify only its exact repository/workspace prerequisites. Commit zero upstream-derived bytes and create zero source-import records.
+- [x] `S2-T041` Perform `002A3 — first 002B dependency discovery for repository/workspace prerequisites` as planning/evidence only. Select one bounded database/domain characterization candidate from the pinned snapshot and identify only its exact repository/workspace prerequisites. Commit zero upstream-derived bytes and create zero source-import records.
 
-If `S2-T041` later proves that an exact workspace member/shared configuration/root manifest is required, that requirement must return to a separately reviewed 002A qualification and, where source import is proposed, a separate canonical Stage R authorization/effectiveness chain before any bytes enter Signthos.
+Canonical evidence from PR #53:
 
-`S2-T041` is **not** 002B implementation. Stage B remains blocked until the required 002A repository/workspace prerequisites are canonically known and satisfied.
+- exact base: `3ea95d37ddf42d7c02face0e89e29ab26c3710c6`;
+- exact reviewed head: `1144a8ee9fd5a25642eb9224f6f22a63592d39c7`;
+- independent substantive review: `github:issue-comment:5551137715 = NO_MATERIAL_FINDINGS`;
+- guarded merge: `6f242e1ad7747fba7e544001e6d8c3f5bcce5d83`;
+- merge tree: `193cf538694736abe4506a21346340a3b7f12a89`, equal to the reviewed-head tree;
+- ordered parents: pre-merge `main` `3ea95d37ddf42d7c02face0e89e29ab26c3710c6`, then exact reviewed head `1144a8ee9fd5a25642eb9224f6f22a63592d39c7`;
+- post-merge evidence: `github:issue-comment:5551151329`;
+- post-merge GitHub Actions: `NO_APPLICABLE_RUN`, not PASS;
+- changed surface: exactly `specs/002-documenso-brownfield-baseline/002a3-prisma-schema-dependency-discovery.md`;
+- upstream-derived bytes committed: `0`;
+- source-import records created: `0`.
+
+Canonical bounded result:
+
+- selected static characterization candidate: `documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a:packages/prisma/schema.prisma`;
+- upstream blob: `13768e34f62331474fce63b1ca67f8d5ead44854`;
+- upstream size: `38099` bytes;
+- `002A3_STATIC_SCHEMA_WORKSPACE_PREREQUISITE = NONE_ESTABLISHED`;
+- no root `package.json`, root lockfile, `turbo.json`, shared TypeScript config, npm workspace resolution, dependency installation, Prisma generation, migration, database, environment, network, credential, provider, or deployment prerequisite is established for the bounded static schema-contract inventory;
+- `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY`;
+- `SOURCE_IMPORT_AUTHORITY = ABSENT`;
+- `002B_IMPLEMENTATION_AUTHORITY = ABSENT`.
+
+This result is intentionally limited to static schema characterization. Any future executable Prisma behavior must separately prove and qualify its minimum repository/workspace/toolchain/environment prerequisites.
 
 ## Explicit blockers and non-grants
 
@@ -183,16 +211,22 @@ If `S2-T041` later proves that an exact workspace member/shared configuration/ro
 - `S2-B008` The 002A1 `.npmrc` L002 result remains path/revision-specific and does not classify or authorize any other Documenso path.
 - `S2-B009` Root `package.json`, `package-lock.json`, `turbo.json`, all `apps/**`, all `packages/**` including observed `packages/tsconfig/**` and `packages/prisma/**`, dependencies/install/network/lifecycle/runtime/provider/credential/deployment activity remain unauthorized unless a later exact unit satisfies every required gate.
 
-## Current frontier
+## Current reconciliation gate and next dependency
 
-The current bounded dependency is this reconciliation PR itself.
+This branch is a bookkeeping-only post-merge reconciliation of already-canonical `S2-T041` evidence. The checked `S2-T041` value and updated frontier become canonical only if this exact reconciliation receives independent substantive exact-head review, guarded expected-head merge, and post-merge verification.
 
-Until this exact reconciliation is independently reviewed, guarded-merged, and post-merge verified:
+Until this reconciliation becomes canonical:
 
-- `S2-T041` remains unchecked and may not open as the canonical successor branch;
-- `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY` for all post-002A1 successor work;
-- no root manifest or workspace package/configuration bytes may be created/imported;
+- do not open a downstream canonical successor branch;
+- `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY`;
+- no upstream path is import-authorized;
 - 002B implementation remains blocked;
 - Specification 003 implementation remains blocked.
 
-If and only if this reconciliation becomes canonical, the next permitted activity is exactly `S2-T041` planning/evidence-only dependency discovery. No source-import or implementation authority follows automatically from that transition.
+If and only if this reconciliation becomes canonical, the next dependency is exactly the successor boundary established by PR #53:
+
+**select and prepare one separately bounded 002B path-level qualification packet for `packages/prisma/schema.prisma`.**
+
+That successor is planning/evidence only. It must include exact path-level license/provenance evidence and a proposed independently authored static characterization while preserving zero source-import authority until a later separate Stage R event. It must not infer path-level permission from repository-level metadata, must not copy/adapt the schema, and must not install dependencies or execute Prisma/database/runtime behavior.
+
+No `S2-T042` task identity is assigned by this reconciliation. A later canonical authority artifact may assign a task identity only if the repository governance genuinely requires and authorizes it.
