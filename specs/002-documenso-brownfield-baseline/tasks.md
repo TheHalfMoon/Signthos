@@ -1,9 +1,9 @@
 # Specification 002 — Canonical Task Ledger
 
-Status: `002B_PRISMA_SCHEMA_QUALIFICATION_LEDGER_RECONCILIATION_CANDIDATE / ZERO_NEW_UPSTREAM_BYTES / RIGHTS_CONFLICT_RESOLUTION_BLOCKED_PENDING_THIS_MERGE`
+Status: `POST_RIGHTS_RESOLUTION_LEDGER_RECONCILIATION_CANDIDATE / ZERO_NEW_UPSTREAM_BYTES / 002B_SUCCESSOR_FEASIBILITY_BLOCKED_PENDING_THIS_MERGE`
 Issue: #5
 Pinned upstream snapshot: `documenso/documenso@2cac63a000e22422bdea449f68b8025e709aa73a`
-Reconciliation base: `dba8940dbc9210f6f6cbff4dfa48cc605d7b9b76`
+Reconciliation base: `e37e21936b033bbabf52171cae29f3f45308d785`
 
 ## Ledger contract
 
@@ -14,7 +14,7 @@ This file is the canonical task-status index for Specification 002. Detailed evi
 - A checked planning/evidence task never creates source-import or implementation authority beyond the exact canonical artifact it cites.
 - Existing canonical task identities `S2-T001` through `S2-T041` are preserved exactly.
 - Canonical successor units after `S2-T040` that were executed under separately reviewed successor authority remain recorded without inventing retroactive `S2-Txxx` identities.
-- No `S2-T042` identity is invented by this reconciliation. The next dependency is described only by the exact successor boundary established by the latest canonical qualification.
+- No `S2-T042` identity is invented by this reconciliation. The next dependency is described only by the exact bounded successor boundary established below if this reconciliation itself becomes canonical.
 
 ## Canonical merge chain
 
@@ -39,6 +39,8 @@ This file is the canonical task-status index for Specification 002. Detailed evi
 | S2-T041 / 002A3 dependency discovery | #53 | `6f242e1ad7747fba7e544001e6d8c3f5bcce5d83` | static Prisma schema candidate; no workspace prerequisite established |
 | S2-T041 post-merge ledger reconciliation | #55 | `5645987c8ff2835b5cc95e392274a3b312b4d427` | T041 evidence/frontier reconciled; no T042 invented |
 | 002B Prisma schema path qualification | #56 | `dba8940dbc9210f6f6cbff4dfa48cc605d7b9b76` | AGPL/MIT rights conflict remains unresolved; Stage R blocked |
+| 002B Prisma schema qualification ledger reconciliation | #57 | `a49fc659e59e9bc42313aeaad7d61091af48386c` | PR #56 evidence/frontier reconciled; rights-resolution only |
+| 002B Prisma schema rights-conflict resolution | #58 | `e37e21936b033bbabf52171cae29f3f45308d785` | public evidence exhausted; clarification still required; no import authority |
 
 ## S2-P — shaping and snapshot truth
 
@@ -110,7 +112,7 @@ Canonical implementation evidence includes exact-head Provenance run `3387856977
 
 ## Canonical successor units after S2-T040
 
-The following units are canonical. Units before `S2-T041` were executed under separately reviewed successor authority after `S2-T040`; this ledger records their exact evidence without assigning retroactive task identities.
+The following units are canonical merge-chain records. Units before `S2-T041` were executed under separately reviewed successor authority after `S2-T040`; this ledger records their exact evidence without assigning retroactive task identities. Where a later reconciliation is needed to establish new successor authority, this ledger says so explicitly rather than treating historical merge presence alone as authority.
 
 ### 002A1 implementation closeout — PR #47
 
@@ -234,6 +236,47 @@ Canonical path-qualification result:
 
 The conflict is exact and material: pinned first-party Community policies describe Community Edition as AGPL-3.0 outside the explicit `packages/ee/**` commercial boundary, while the more-specific pinned `packages/prisma/package.json` declares `"license": "MIT"`. The schema beginning has no file-local SPDX/license/copyright notice, and the pinned `packages/prisma/` directory has no package-local `LICENSE` artifact resolving the scope of the MIT metadata. No license or copyright holder is inferred.
 
+### 002B Prisma schema qualification ledger reconciliation — PR #57
+
+- exact base: `dba8940dbc9210f6f6cbff4dfa48cc605d7b9b76`;
+- exact reviewed head: `3b3153d318eb1f1d4ad4a6676e8983cfb08f3bfc`;
+- independent substantive review: `github:issue-comment:5551456066 = NO_MATERIAL_FINDINGS`;
+- merge: `a49fc659e59e9bc42313aeaad7d61091af48386c`;
+- merge tree equals reviewed-head tree `54b001016fd5ac3637022c9acf0723622b4ab53d`;
+- ordered parents: pre-merge `main` `dba8940dbc9210f6f6cbff4dfa48cc605d7b9b76`, then exact reviewed head `3b3153d318eb1f1d4ad4a6676e8983cfb08f3bfc`;
+- post-merge evidence: `github:issue-comment:5551470890`;
+- post-merge GitHub Actions: `NO_APPLICABLE_RUN`, not PASS;
+- result: PR #56 evidence and the rights-conflict-resolution-only successor frontier became canonical; no `S2-T042` identity was created.
+
+### 002B Prisma schema rights-conflict resolution — PR #58
+
+- exact base: `a49fc659e59e9bc42313aeaad7d61091af48386c`;
+- exact reviewed head: `884527cfb2a65f485f7059a3eb1f74b12029e7b6`;
+- independent substantive review: `github:issue-comment:5551491977 = NO_MATERIAL_FINDINGS`;
+- merge: `e37e21936b033bbabf52171cae29f3f45308d785`;
+- merge tree equals reviewed-head tree `efb728929664d22daeabea9e0b17677f5506e3fd`;
+- ordered parents: pre-merge `main` `a49fc659e59e9bc42313aeaad7d61091af48386c`, then exact reviewed head `884527cfb2a65f485f7059a3eb1f74b12029e7b6`;
+- merge commit signature: verified/valid;
+- post-merge evidence: `github:issue-comment:5551509494`;
+- post-merge GitHub Actions: `NO_APPLICABLE_RUN`, not PASS;
+- changed surface: exactly `specs/002-documenso-brownfield-baseline/resolution-002b-prisma-schema-rights-conflict.md`;
+- upstream-derived bytes committed: `0`;
+- source-import records created: `0`.
+
+PR #58 exact-tree outcome is mechanically verified. GitHub's post-hoc PR/merge readback does not expose the request-time `expected_head_sha` parameter, so this ledger does not invent proof of that request parameter. This reconciliation therefore does not use PR #58 by itself to create new successor authority. Any successor authority below becomes effective only if this reconciliation independently satisfies fresh exact-head review, guarded expected-head merge, and post-merge verification.
+
+Rights-resolution result carried forward fail-closed:
+
+- `002B_PRISMA_SCHEMA_RIGHTS_CONFLICT_RESOLUTION = UNRESOLVED_REQUIRES_FIRST_PARTY_PATH_SCOPE_CLARIFICATION`;
+- `002B_PRISMA_SCHEMA_LICENSE_CLASSIFICATION = CONFLICT_UNRESOLVED_AGPL_3_0_VS_PACKAGE_MIT`;
+- `002B_PRISMA_SCHEMA_COPY_EXACT_RIGHTS_BASIS = NOT_ESTABLISHED`;
+- `002B_PRISMA_SCHEMA_COPYRIGHT_HOLDER = UNKNOWN_UNINFERRED`;
+- `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY`;
+- `SOURCE_IMPORT_AUTHORITY = ABSENT`;
+- `002B_IMPLEMENTATION_AUTHORITY = ABSENT`.
+
+Public first-party evidence exhausted by PR #58 did not establish whether exact `packages/prisma/schema.prisma` is MIT, AGPL-3.0, or intentionally dual/alternative licensed. No upstream outreach authority was created. Exact-path first-party clarification remains an external evidence dependency for this schema candidate.
+
 ## Explicit blockers and non-grants
 
 - `S2-B001` `packages/ee/**` is restricted/not import-authorized without separately accepted written rights covering the exact intended action.
@@ -245,11 +288,12 @@ The conflict is exact and material: pinned first-party Community policies descri
 - `S2-B007` Specification 003 implementation remains unauthorized.
 - `S2-B008` The 002A1 `.npmrc` L002 result remains path/revision-specific and does not classify or authorize any other Documenso path.
 - `S2-B009` Root `package.json`, `package-lock.json`, `turbo.json`, all `apps/**`, all `packages/**` including observed `packages/tsconfig/**` and `packages/prisma/**`, dependencies/install/network/lifecycle/runtime/provider/credential/deployment activity remain unauthorized unless a later exact unit satisfies every required gate.
-- `S2-B010` Exact `packages/prisma/schema.prisma` is not Stage-R-eligible while its AGPL/MIT rights conflict remains unresolved.
+- `S2-B010` Exact `packages/prisma/schema.prisma` remains not Stage-R-eligible because the AGPL/MIT rights conflict is unresolved and first-party path-scope clarification is still required.
+- `S2-B011` PR #58's post-hoc GitHub readback proves exact reviewed-tree merge outcome but does not expose the request-time `expected_head_sha` parameter; no later authority may fabricate that missing request-level evidence.
 
 ## Current reconciliation gate and next dependency
 
-This branch is a bookkeeping-only reconciliation of already-canonical PR #56 evidence. The recorded PR #56 result and updated frontier become canonical only if this exact reconciliation receives independent substantive exact-head review, guarded expected-head merge, and post-merge verification.
+This branch is a bookkeeping/governance-only reconciliation of already-merged PR #57 and PR #58 evidence. It changes only this Signthos-authored ledger, commits zero upstream-derived bytes, creates zero source-import records, and grants no Stage R, source-import, 002B implementation, executable Prisma/database/runtime, EE, or Specification 003 authority while it is unmerged.
 
 Until this reconciliation becomes canonical:
 
@@ -257,13 +301,16 @@ Until this reconciliation becomes canonical:
 - `STAGE_R_ELIGIBLE_IMPORT_ALLOWLIST = EMPTY`;
 - `SOURCE_IMPORT_AUTHORITY = ABSENT`;
 - no `packages/prisma/schema.prisma` bytes may enter Signthos;
+- no alternative 002B source path is selected or qualified;
 - 002B implementation remains blocked;
 - Specification 003 implementation remains blocked.
 
-If and only if this reconciliation becomes canonical, the next dependency is exactly the successor boundary established by canonical PR #56:
+If and only if this exact reconciliation receives fresh independent substantive exact-head review, zero unresolved material review threads, accurate workflow/check accounting, guarded merge with exact `expected_head_sha`, and post-merge verification, the next bounded dependency is:
 
-**perform one planning/evidence-only rights-conflict resolution unit for exact `packages/prisma/schema.prisma`, seeking sufficiently specific first-party evidence that resolves the package-level MIT declaration relative to the Community AGPL policy.**
+**perform one planning/evidence-only 002B successor-feasibility discovery to determine whether a separate bounded non-EE database/domain candidate from the same pinned snapshot can be qualified independently of blocked `packages/prisma/schema.prisma`, or whether 002B must remain blocked pending first-party clarification.**
 
-That successor may inspect public immutable metadata, package/repository history, licensing policy history, package publication metadata, and authoritative first-party statements. It must not infer ownership from commit authorship, must not choose the operationally convenient license without sufficient evidence, and must preserve zero source-import and Stage R authority unless a later separately reviewed canonical unit establishes otherwise.
+That successor may inspect immutable public upstream structure, metadata, dependency relationships, path-level rights signals, and already-canonical Signthos evidence. It may identify at most one proposed separately bounded qualification candidate if the evidence supports independence from the blocked schema. It must not import, adapt, reconstruct, or embed upstream bytes; create a source-import record; run Prisma/database/runtime/provider behavior; select a convenient license without path-specific evidence; treat repository-level metadata as path authorization; contact upstream parties; authorize `packages/ee/**`; or grant Stage R/002B implementation authority.
+
+If no independently qualifiable candidate is established, the required result is fail-closed: `002B_SUCCESSOR_FEASIBILITY = BLOCKED_PENDING_FIRST_PARTY_PRISMA_SCHEMA_CLARIFICATION`.
 
 No `S2-T042` task identity is assigned by this reconciliation.
