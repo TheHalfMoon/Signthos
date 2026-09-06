@@ -1,22 +1,23 @@
 # Specification 003 — Canonical Task Ledger
 
-Status: `STAGE_P_SHAPING_CANDIDATE / PLANNING_ONLY / ZERO_UPSTREAM_BYTES`
+Status: `STAGE_P_CLOSEOUT_CANDIDATE / PLANNING_ONLY / ZERO_UPSTREAM_BYTES`
 Issue: #6
 Canonical shaping base: `89146441dbd3cbadcddbcd24dc0741b4ecdc14e1`
+Canonical Stage P merge: `d822f3c3ab3bc773efc587ce61f7fc96344098f6`
 Canonical predecessor: Specification 002 `CLOSED_CANONICAL`
 
 ## Ledger contract
 
 This ledger tracks bounded Specification 003 planning/qualification work.
 
-- `[x]` means the shaping candidate contains the stated result/evidence; it becomes canonical only if this exact Stage P package passes independent substantive review, guarded merge, post-merge verification, and ledger reconciliation.
+- `[x]` means the current candidate contains the stated result/evidence; newly reconciled closeout items become canonical only if this exact closeout package passes independent substantive review, guarded merge, post-merge verification, and live successor reconciliation.
 - `[ ]` means incomplete, blocked, or not yet authorized.
 - A checked planning task grants no product/runtime implementation authority.
-- No implementation task identity is created by Stage P.
+- No implementation task identity is created by Stage P or its closeout.
 - No source-import, dependency-acquisition, database-migration, runtime/provider, PDF/signing, or Specification 004 authority is implied by task ordering.
-- Historical Specification 002 evidence remains immutable predecessor evidence and is not rewritten by this ledger.
+- Historical Specification 002 and Stage P evidence remain immutable predecessor evidence and are not rewritten by this ledger.
 
-## Stage P — shaping
+## Stage P — shaping and closeout
 
 - [x] `S3-T001` Re-read canonical Constitution, `AGENTS.md`, `ROADMAP.md`, Issue #6, and exact current `main` before shaping.
 - [x] `S3-T002` Verify Specification 002 predecessor closure through PR #85 / merge `89146441dbd3cbadcddbcd24dc0741b4ecdc14e1` and closed Issue #5.
@@ -36,42 +37,74 @@ This ledger tracks bounded Specification 003 planning/qualification work.
 - [x] `S3-T016` Define separate future implementation-authorization requirements for every implementation grain.
 - [x] `S3-T017` Define contract, adapter, security, privacy, evidence-class, and Diffciplane qualification requirements for future grains.
 - [x] `S3-T018` Prove the Stage P candidate itself requires zero source import, zero dependency acquisition, zero runtime/provider execution, and zero product implementation.
-- [ ] `S3-T019` Verify exact Stage P diff is limited to `spec.md`, `plan.md`, and `tasks.md` under `specs/003-signthos-domain-boundary/**`, with zero upstream-derived source bytes and zero protected-surface mutation.
-- [ ] `S3-T020` Account truthfully for exact-head GitHub Actions/check/provider state; do not convert skipped/unavailable/neutral/billing-blocked output into PASS.
-- [ ] `S3-T021` Obtain independent substantive review of the exact final Stage P head against exact base.
-- [ ] `S3-T022` Repair every material finding forward-only and obtain fresh exact-head re-review if the head changes.
-- [ ] `S3-T023` Confirm unresolved material review threads are zero and reverify exact base/head, mergeability, rulesets, and branch protection immediately before merge.
-- [ ] `S3-T024` Record mandatory exact-head premerge proof and guarded-merge using exact `expected_head_sha`.
-- [ ] `S3-T025` Post-merge verify ordered ancestry, reviewed-head/merge tree equality or exact bounded delta, signature, workflow/check accounting, and three-file Stage P surface.
-- [ ] `S3-T026` Reconcile Stage P canonical status and derive the next bounded 003 successor from live post-merge truth.
+- [x] `S3-T019` Verify exact Stage P diff is limited to `spec.md`, `plan.md`, and `tasks.md` under `specs/003-signthos-domain-boundary/**`, with zero upstream-derived source bytes and zero protected-surface mutation.
+- [x] `S3-T020` Account truthfully for exact-head GitHub Actions/check/provider state; skipped/unavailable/neutral/billing-blocked output was not converted into PASS.
+- [x] `S3-T021` Obtain independent substantive review of the exact final Stage P head against exact base.
+- [x] `S3-T022` Reconcile review findings: no material finding required a forward-only repair, so no changed-head re-review was necessary.
+- [x] `S3-T023` Confirm unresolved material review threads are zero and reverify exact base/head, mergeability, rulesets, and branch protection immediately before merge.
+- [x] `S3-T024` Record mandatory exact-head premerge proof and guarded-merge using exact `expected_head_sha`.
+- [x] `S3-T025` Post-merge verify ordered ancestry, reviewed-head/merge tree equality, signature, workflow/check accounting, and three-file Stage P surface.
+- [x] `S3-T026` Reconcile Stage P canonical status and derive the next bounded 003 successor from live post-merge truth through `stage-p-closeout.md`.
+
+## Stage P closeout evidence
+
+Canonical Stage P evidence reconciled by this candidate:
+
+```text
+STAGE_P_BASE = 89146441dbd3cbadcddbcd24dc0741b4ecdc14e1
+STAGE_P_REVIEWED_HEAD = b966343fe9bcd44822a65776f2047725dcaa9486
+STAGE_P_MERGE = d822f3c3ab3bc773efc587ce61f7fc96344098f6
+STAGE_P_REVIEWED_HEAD_TREE = 7beb5dd8c2d7a6239e14c75bf4efcae7fd9168b4
+STAGE_P_MERGE_TREE = 7beb5dd8c2d7a6239e14c75bf4efcae7fd9168b4
+TREE_EQUALITY = PASS
+POSTMERGE_ACTIONS = NO_APPLICABLE_RUN
+POSTMERGE_STATUSES = NO_APPLICABLE_RUN
+UNRESOLVED_MATERIAL_REVIEW_THREADS = 0
+```
+
+Exact review and post-merge details are recorded in `stage-p-closeout.md`, PR #86, and Issue #6.
+
+## Authority-race correction
+
+PR #87 attempted 003A qualification before this mandatory closeout became canonical. Issue #6 still declared:
+
+```text
+003A_DOMAIN_VOCABULARY_AND_IDENTITY_QUALIFICATION = NOT_YET_CANONICAL_SUCCESSOR_AUTHORITY
+```
+
+PR #87 was therefore closed without merge. Its branch/history is non-canonical candidate evidence only. Future 003A work must not reuse PR #87's authority, review, check, or exact-head qualification evidence.
 
 ## Stage P candidate result
 
-Before Stage P merge/post-merge verification:
+Before this closeout candidate is guarded-merged and post-merge verified:
 
 ```text
-SPEC_003_STAGE_P = CANDIDATE_ONLY
+SPEC_003_STAGE_P_SHAPING = MERGED_POSTMERGE_VERIFIED
+SPEC_003_STAGE_P_CLOSEOUT = CANDIDATE_ONLY
 SPEC_003_STATUS = PLANNING_ONLY
 SPEC_003_IMPLEMENTATION_AUTHORITY = ABSENT
+003A_DOMAIN_VOCABULARY_AND_IDENTITY_QUALIFICATION = NOT_YET_CANONICAL_SUCCESSOR_AUTHORITY
 SPEC_004_SUCCESSOR_AUTHORITY = ABSENT
 ```
 
-If and only if `S3-T019` through `S3-T026` complete canonically, the expected post-merge state is:
+If and only if this exact closeout package becomes canonical and the live post-merge reread does not narrow authority, the expected state is:
 
 ```text
 SPEC_003_STAGE_P = CLOSED_CANONICAL
 SPEC_003_STATUS = PLANNING_ACTIVE
 SPEC_003_IMPLEMENTATION_AUTHORITY = ABSENT
-NEXT_CANDIDATE_UNIT = 003A_DOMAIN_VOCABULARY_AND_IDENTITY_QUALIFICATION
+NEXT_AUTHORIZED_REPOSITORY_UNIT = 003A_DOMAIN_VOCABULARY_AND_IDENTITY_QUALIFICATION
+003A_AUTHORITY = PLANNING_CONTRACT_QUALIFICATION_ONLY
+003A_IMPLEMENTATION_AUTHORITY = ABSENT
 SPEC_004_SUCCESSOR_AUTHORITY = ABSENT
 ```
 
-The actual post-merge reread controls and may narrow the successor further.
+The actual post-merge reread controls.
 
 ## Candidate grain dependency graph
 
 ```text
-Stage P shaping
+Stage P shaping + closeout
   -> 003A Domain vocabulary + identity invariants
       -> 003B Revision + immutable signing-input contracts
           -> 003C Envelope / Recipient / Field / Workflow contracts
@@ -86,7 +119,7 @@ The graph orders contract dependencies. It does not create implementation author
 
 ## 003A candidate — planning/qualification only
 
-Potential successor identity after canonical Stage P:
+Potential successor identity after canonical Stage P closeout:
 
 `003A_DOMAIN_VOCABULARY_AND_IDENTITY_QUALIFICATION`
 
@@ -167,7 +200,7 @@ Dependency: all 003 grains that become canonically authorized for the current Sp
 
 ## Rights/provenance state
 
-Stage P introduces no upstream-derived source bytes and no new source-import records.
+Stage P and this closeout introduce no upstream-derived source bytes and no new source-import records.
 
 Canonical Specification 002 rights states remain unchanged:
 
@@ -197,9 +230,9 @@ Specification 003 planning does not broaden or inherit any of those rights.
 
 Specification 003 is not canonically complete when Stage P closes.
 
-No task after `S3-T026` should be invented as an implementation task until live canonical successor analysis explicitly authorizes a bounded unit.
+No implementation task should be invented until live canonical successor analysis explicitly authorizes a bounded implementation unit.
 
-Stage P must preserve the distinction between:
+Stage P and its closeout preserve the distinction between:
 
 - shaping/qualification authority;
 - implementation authority;
