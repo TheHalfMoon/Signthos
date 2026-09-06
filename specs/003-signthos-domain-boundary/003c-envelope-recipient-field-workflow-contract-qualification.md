@@ -377,6 +377,8 @@ Rules:
 
 - `RECIPIENT` fields identify exactly one `recipient_id` in the same envelope;
 - `ENVELOPE` fields have no participant owner and cannot be used to fabricate participant completion;
+- `required = true` implies `owner_kind = RECIPIENT`; an `ENVELOPE`-owned field must be optional (`required = false`);
+- envelope-level workflow preconditions must be represented by their owning workflow contract rather than by an unsatisfied required `ENVELOPE` field;
 - a required participant-action field must be `RECIPIENT` owned before `READY`;
 - changing field ownership after `READY` is not authorized by 003C.
 
@@ -438,7 +440,7 @@ INVALIDATED
 
 Rules:
 
-1. required fields must be `SATISFIED` for their blocking recipient obligation to complete;
+1. every required field is recipient-owned by the ownership invariant above and must be `SATISFIED` for its blocking recipient obligation to complete;
 2. optional fields may remain `UNSATISFIED` without blocking completion;
 3. `INVALIDATED` cannot count as completion;
 4. a recipient may satisfy only fields assigned to its participation slot unless a later explicit workflow contract states otherwise;
