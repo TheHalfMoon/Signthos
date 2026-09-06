@@ -25,6 +25,8 @@ and states that `002B = CLOSED_CANONICAL` becomes effective only after the separ
 
 This correction is controlling for any conflicting 002B lifecycle statement in `002-rights-safe-authorized-surface-amendment.md`.
 
+This correction is also controlling for any conflicting successor-order statement in `002-rights-safe-authorized-surface-amendment.md`. In particular, the amendment's earlier direct-successor statement naming `SPEC_002_RIGHTS_SAFE_CLOSEOUT_RECONCILIATION` must not be used while a required lifecycle closeout remains pending for an actually authorized/imported grain. The corrected predecessor order defined below is the sole successor order for the combined amendment/correction surface.
+
 ## Separate dimensions
 
 Specification 002 closeout must keep two dimensions separate:
@@ -74,6 +76,14 @@ Therefore, after this amendment/correction unit becomes canonical, the successor
 3. SPEC_003_SUCCESSOR_ELIGIBILITY_REEVALUATION
 ```
 
+This ordering supersedes any earlier direct-successor statement in the amendment. Therefore the controlling successor result is:
+
+```text
+NEXT_AUTHORIZED_UNIT_IF_CANONICAL = CANONICALIZE_REQUIRED_PENDING_GRAIN_CLOSEOUTS_FOR_ACTUALLY_AUTHORIZED_IMPORTED_SURFACE
+SPEC_002_RIGHTS_SAFE_CLOSEOUT_RECONCILIATION = BLOCKED_UNTIL_REQUIRED_GRAIN_CLOSEOUTS_CANONICAL
+SPEC_003_SUCCESSOR_AUTHORITY = ABSENT_UNTIL_SPEC_002_CLOSEOUT_CANONICAL
+```
+
 The later Specification 002 closeout must prove all of the following before closure:
 
 - every `AUTHORIZED_AND_IMPORTED` grain has canonical lifecycle closeout evidence required by its governing chain;
@@ -118,4 +128,4 @@ This correction grants no:
 
 Because this correction changes the PR head and expands the planning-only diff from one file to two, all review evidence for prior heads is stale.
 
-The two-file scope is justified solely by the amendment's own qualification allowance for a separately justified canonical bookkeeping correction. A fresh independent substantive exact-head review must verify the combined amendment plus this correction, including the corrected 002B lifecycle truth and successor order, before any merge.
+The two-file scope is justified solely by the amendment's own qualification allowance for a separately justified canonical bookkeeping correction. A fresh independent substantive exact-head review must verify the combined amendment plus this correction, including the corrected 002B lifecycle truth and controlling successor order, before any merge.
