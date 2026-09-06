@@ -92,10 +92,42 @@ AUTHORIZED_AND_IMPORTED
 AUTHORIZED_NOT_YET_IMPORTED
 PLANNING_ONLY_PENDING_QUALIFICATION
 EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT
+NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
 OPTIONAL_NOT_SELECTED
 ```
 
-Only `AUTHORIZED_AND_IMPORTED` and `AUTHORIZED_NOT_YET_IMPORTED` grains belong to the active Specification 002 import-completion dependency set.
+Only `AUTHORIZED_AND_IMPORTED` and `AUTHORIZED_NOT_YET_IMPORTED` belong to the active Specification 002 import-completion dependency set. `PLANNING_ONLY_PENDING_QUALIFICATION` is an active unresolved planning dependency only when a canonical planning chain has actually selected that grain for the current import surface. The remaining three states are outside the active import-completion dependency set, but for different reasons that must not be conflated.
+
+### Status vocabulary mapping
+
+These labels are a Specification 002 closeout-classification layer. They do not rewrite or erase historical task, grain, Stage R, rights, or implementation statuses. Existing canonical records remain authoritative for what was true when each record was created.
+
+- `AUTHORIZED_AND_IMPORTED` means a grain or bounded subgrain obtained separate canonical import authority, imported its authorized bytes, completed required qualification/review/guarded merge/post-merge evidence, and has no remaining authorized import action in the current surface. This classification never broadens the exact imported paths.
+- `AUTHORIZED_NOT_YET_IMPORTED` means separate canonical import authority is effective for an exact path/action but the authorized import has not yet reached canonical post-merge completion. Any such grain blocks Specification 002 closeout. No current candidate is assigned this state by this amendment.
+- `PLANNING_ONLY_PENDING_QUALIFICATION` means a canonical planning chain selected the grain for the current import surface but no effective import authority exists yet and the planning/qualification question remains productively unresolved. Any such current-surface grain blocks Specification 002 closeout. This amendment removes 002C from this state only if the exclusion itself becomes canonical.
+- `EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT` means the grain was selected and qualified far enough to establish a fail-closed exact rights blocker, never obtained import authority, imported zero blocked bytes, and satisfies every exclusion prerequisite below. This is a terminal disposition for the current Specification 002 import surface only; it is not `CLOSED_CANONICAL` implementation, not a license conclusion, not an inherited-behavior claim, and not authority to reproduce the blocked expression.
+- `NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE` means a roadmap candidate grain never obtained separate canonical selection/import authority for the current Specification 002 surface. It is neither completed nor failed; it is simply outside this closeout surface. Later source reuse requires a fresh canonical qualification/authorization chain.
+- `OPTIONAL_NOT_SELECTED` is reserved for a grain that the roadmap/specification already defines as optional or separately permission-dependent and that is not selected. For current Specification 002 this applies to 002H.
+
+The mapping from existing canonical states to these classifications is forward-only:
+
+```text
+HISTORICAL_OR_EXISTING_STATUS -> CURRENT_SURFACE_CLASSIFICATION
+002A1 CLOSED_CANONICAL plus later 002A no-necessity results -> 002A AUTHORIZED_AND_IMPORTED
+002B CLOSED_CANONICAL -> 002B AUTHORIZED_AND_IMPORTED
+002C OPEN_BLOCKED_PENDING_EXACT_RIGHTS_REENTRY -> 002C EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT only after this amendment is canonical
+002D-002G never selected/authorized for import -> NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002H optional separate-rights grain not selected -> OPTIONAL_NOT_SELECTED
+```
+
+The closeout reconciliation may classify Specification 002 eligible for closure only if:
+
+1. every `AUTHORIZED_AND_IMPORTED` grain is fully proven and reconciled;
+2. there are zero `AUTHORIZED_NOT_YET_IMPORTED` grains;
+3. there are zero `PLANNING_ONLY_PENDING_QUALIFICATION` grains selected for the current import surface;
+4. every `EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT` grain satisfies and preserves its fail-closed exclusion proof;
+5. every `NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE` or `OPTIONAL_NOT_SELECTED` grain has zero imported bytes and zero effective import authority under this specification; and
+6. no historical status is rewritten to imply that blocked or unselected implementation occurred.
 
 A grain may become `EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT` only when all of the following are true:
 
@@ -150,10 +182,10 @@ Because 002C would be excluded rather than imported, 002D through 002G must not 
 Accordingly, if this amendment becomes canonical:
 
 ```text
-002D_STATUS = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002E_STATUS = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002F_STATUS = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002G_STATUS = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
+002D_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002E_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002F_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002G_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
 002D_002G_SOURCE_IMPORT_AUTHORITY = ABSENT
 002D_002G_IMPLEMENTATION_AUTHORITY = ABSENT
 ```
@@ -165,7 +197,7 @@ Future reuse of any exact upstream path from those candidate grains still requir
 002H remains optional and empty unless separately accepted exact rights evidence exists.
 
 ```text
-002H_STATUS = OPTIONAL_NOT_SELECTED
+002H_CURRENT_SURFACE_CLASSIFICATION = OPTIONAL_NOT_SELECTED
 002H_SOURCE_IMPORT_AUTHORITY = ABSENT
 ```
 
@@ -183,14 +215,14 @@ If canonicalized, the Specification 002 import dependency set becomes the set of
 Candidate classification:
 
 ```text
-002A = CLOSED_CANONICAL_FOR_ACTUALLY_AUTHORIZED_SURFACE
-002B = CLOSED_CANONICAL
-002C = EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT
-002D = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002E = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002F = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002G = NOT_AUTHORIZED_FOR_CURRENT_SPEC_002_IMPORT_SURFACE
-002H = OPTIONAL_NOT_SELECTED
+002A_CURRENT_SURFACE_CLASSIFICATION = AUTHORIZED_AND_IMPORTED
+002B_CURRENT_SURFACE_CLASSIFICATION = AUTHORIZED_AND_IMPORTED
+002C_CURRENT_SURFACE_CLASSIFICATION = EXCLUDED_RIGHTS_BLOCKED_NO_IMPORT
+002D_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002E_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002F_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002G_CURRENT_SURFACE_CLASSIFICATION = NOT_SELECTED_FOR_CURRENT_IMPORT_SURFACE
+002H_CURRENT_SURFACE_CLASSIFICATION = OPTIONAL_NOT_SELECTED
 ```
 
 This classification must be reverified against exact canonical history during the later Specification 002 closeout unit. This amendment does not itself mark Specification 002 closed.
