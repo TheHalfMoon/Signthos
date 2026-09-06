@@ -75,5 +75,5 @@ The reviewer must verify that:
 2. the annotated-tag object and release commit belong to that repository;
 3. this correction does not inflate Candidate D into adoption or universal-engine selection;
 4. the independent review finding is fully repaired;
-5. both prior PDFium release-digest corrections and remaining native provenance blockers remain intact;
+5. the prior PDFium release-digest correction and remaining native provenance blockers remain intact;
 6. 004C remains unauthorized pending canonical 004B completion and live successor reconciliation.
