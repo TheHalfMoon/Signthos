@@ -100,9 +100,9 @@ Therefore:
 
 Ordinary project approval cannot be converted into a path-specific rights basis by implication.
 
-## Internal planning closure already established
+## Internal planning results already canonical
 
-The two internal planning questions that were independently productive while rights remained blocked are now canonical.
+The two internal planning questions that were independently productive while rights remained blocked now have canonical results.
 
 ### Workspace/dependency closure
 
@@ -234,9 +234,9 @@ No additional dependency-ordered repository implementation, package/config byte 
 The current frontier is therefore:
 
 ```text
-002C_INTERNAL_SOURCE_CLOSURE_PLANNING = CLOSED_CANONICAL
-002C_INTERNAL_WORKSPACE_DEPENDENCY_PLANNING = CLOSED_CANONICAL
-002C_INTERNAL_STATIC_TYPESCRIPT_TOOLCHAIN_PLANNING = CLOSED_CANONICAL
+002C_INTERNAL_SOURCE_CLOSURE_PLANNING = CANONICAL_RESULT_ESTABLISHED
+002C_INTERNAL_WORKSPACE_DEPENDENCY_PLANNING = CANONICAL_RESULT_ESTABLISHED
+002C_INTERNAL_STATIC_TYPESCRIPT_TOOLCHAIN_PLANNING = CANONICAL_RESULT_ESTABLISHED
 002C_PUBLIC_RIGHTS_RESEARCH_ON_CURRENT_QUALIFIED_EVIDENCE = EXHAUSTED_CONFLICT_UNRESOLVED
 002C_NEW_EXACT_RIGHTS_EVIDENCE = NOT_CANONICALLY_PRESENT
 002C_SEPARATE_PERMISSION_BASIS_FOR_SELECTED_PATHS = NOT_CANONICALLY_PRESENT
@@ -314,7 +314,7 @@ Before this frontier reconciliation may become canonical, require one unchanged 
    - the current exact canonical main and PR #80 post-merge proof;
    - the already exhausted public-rights evidence boundary;
    - non-inheritance of 002B permission;
-   - closure of the internal workspace/toolchain planning questions;
+   - the already canonical internal workspace/toolchain planning results;
    - rejection/deferment of all successor alternatives above;
    - exact re-entry trigger and zero current Stage R/import/acquisition/execution/downstream authority;
 8. all material findings are corrected forward-only and prior-head review becomes historical after any head movement;
