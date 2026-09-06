@@ -101,12 +101,22 @@ Separately, it MUST declare exactly one scope disposition:
 
 ```text
 PdfOperationScopeDisposition =
-  | SPEC_004_SUPPORTED
-  | SPEC_004_EVIDENCE_ONLY
+  | IN_SCOPE_FOR_SPEC_004
+  | EVIDENCE_ONLY_FOR_SPEC_004
+  | DEFERRED_PENDING_AUTHORITY
   | OUT_OF_SCOPE_FOR_SPEC_004
 ```
 
 This separation is normative. `OUT_OF_SCOPE_FOR_SPEC_004` is **not** an effect class.
+
+Scope disposition classifies semantic ownership and authority state; it does not assert current implementation support:
+
+- `IN_SCOPE_FOR_SPEC_004` means the capability semantics belong to Specification 004, but execution still requires a separately canonical implementation/provider grain.
+- `EVIDENCE_ONLY_FOR_SPEC_004` means Specification 004 may consume independently qualified evidence produced under separate authority; it does not authorize Specification 004 to execute the evidence-producing capability.
+- `DEFERRED_PENDING_AUTHORITY` means the capability is relevant to the contract but is not currently executable or claimable until a later explicit authority grants its bounded grain.
+- `OUT_OF_SCOPE_FOR_SPEC_004` means the capability implementation belongs to another specification or owner boundary.
+
+No scope disposition grants implementation, provider-runtime, dependency-acquisition, source-import, fixture-acquisition, signing, verification, or Specification 005 authority.
 
 ### 5.1 `READ_ONLY`
 
@@ -161,7 +171,7 @@ effectClass = VERIFICATION_ONLY
 scopeDisposition = OUT_OF_SCOPE_FOR_SPEC_004
 ```
 
-A later 004 mutation grain MAY consume independently qualified verification evidence as `SPEC_004_EVIDENCE_ONLY` to establish whether pre-existing signature state was preserved. The mutating provider's own assertion is insufficient.
+A later 004 mutation grain MAY consume independently qualified verification evidence as `EVIDENCE_ONLY_FOR_SPEC_004` to establish whether pre-existing signature state was preserved. The mutating provider's own assertion is insufficient.
 
 ### 5.5 Unknown capability
 
@@ -623,7 +633,7 @@ inputRevision = R1
 inputDigest = sha256:D1
 capability = inspect
 effectClass = READ_ONLY
-scopeDisposition = SPEC_004_SUPPORTED
+scopeDisposition = IN_SCOPE_FOR_SPEC_004
 locality = BROWSER_LOCAL
 ```
 
@@ -636,7 +646,7 @@ inputRevision = R1
 inputDigest = sha256:D1
 capability = rotate_page
 effectClass = REVISION_CREATING
-scopeDisposition = SPEC_004_SUPPORTED
+scopeDisposition = IN_SCOPE_FOR_SPEC_004
 parameters = {page: 2, degrees: 90}
 ```
 
