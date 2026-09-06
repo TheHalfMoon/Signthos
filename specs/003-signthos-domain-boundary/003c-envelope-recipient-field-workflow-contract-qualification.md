@@ -158,7 +158,7 @@ EXPIRED
 
 `COMPLETED`
 
-- all blocking recipient obligations and required field obligations are satisfied under the 003C workflow contract;
+- all blocking recipient obligations and required field obligations are satisfied or explicitly waived by a valid recipient-skip transition under the 003C workflow contract;
 - this state does not itself prove signature validity, cryptographic trust, or legal effect.
 
 `CANCELLED`
@@ -291,7 +291,8 @@ Rules:
 4. `DECLINED` is an explicit refusal by an actionable blocking slot;
 5. `SKIPPED` requires an explicit workflow decision and cannot be inferred from non-delivery, timeout, UI absence, or provider behavior;
 6. `COMPLETED`, `DECLINED`, and `SKIPPED` are terminal recipient states within the envelope;
-7. recipient-state transitions do not mutate document bytes.
+7. recipient-state transitions do not mutate document bytes;
+8. a valid transition of a blocking recipient to `SKIPPED` atomically moves each of that recipient's still-`UNSATISFIED` required fields to `WAIVED`; the waiver is scoped to that explicit skip and is not satisfaction.
 
 Minimum recipient transitions:
 
@@ -303,7 +304,7 @@ ACTIONABLE -> DECLINED
 ACTIONABLE -> SKIPPED
 ```
 
-A blocking recipient may be `SKIPPED` only when the workflow contract explicitly permits that outcome for that slot.
+A blocking recipient may be `SKIPPED` only when the workflow contract explicitly permits that outcome for that slot. The skip and any required-field `WAIVED` transitions are one semantic transition for idempotency and race-safety purposes.
 
 ## Authentication-evidence separation
 
@@ -377,9 +378,10 @@ Rules:
 
 - `RECIPIENT` fields identify exactly one `recipient_id` in the same envelope;
 - `ENVELOPE` fields have no participant owner and cannot be used to fabricate participant completion;
-- `required = true` implies `owner_kind = RECIPIENT`; an `ENVELOPE`-owned field must be optional (`required = false`);
+- `required = true` implies `owner_kind = RECIPIENT`, and the referenced recipient must have `blocking = true`;
+- an `ENVELOPE`-owned field must be optional (`required = false`);
 - envelope-level workflow preconditions must be represented by their owning workflow contract rather than by an unsatisfied required `ENVELOPE` field;
-- a required participant-action field must be `RECIPIENT` owned before `READY`;
+- a required participant-action field must be `RECIPIENT` owned by a blocking recipient before `READY`;
 - changing field ownership after `READY` is not authorized by 003C.
 
 ## Field kind vocabulary
@@ -435,17 +437,20 @@ Canonical field states are:
 ```text
 UNSATISFIED
 SATISFIED
+WAIVED
 INVALIDATED
 ```
 
 Rules:
 
-1. every required field is recipient-owned by the ownership invariant above and must be `SATISFIED` for its blocking recipient obligation to complete;
-2. optional fields may remain `UNSATISFIED` without blocking completion;
-3. `INVALIDATED` cannot count as completion;
-4. a recipient may satisfy only fields assigned to its participation slot unless a later explicit workflow contract states otherwise;
-5. field-value representation, validation detail, sensitive-data storage, and rendering remain separately owned;
-6. a terminal envelope does not silently rewrite field history.
+1. every required field is recipient-owned by a blocking recipient under the ownership invariant above;
+2. a required field owned by a `COMPLETED` blocking recipient must be `SATISFIED`;
+3. `WAIVED` is permitted only when the owning blocking recipient is validly `SKIPPED` by the workflow; it records an explicit waiver and is not satisfaction;
+4. optional fields may remain `UNSATISFIED` without blocking completion;
+5. `INVALIDATED` cannot count as satisfaction or a skip waiver;
+6. a recipient may satisfy only fields assigned to its participation slot unless a later explicit workflow contract states otherwise;
+7. field-value representation, validation detail, sensitive-data storage, and rendering remain separately owned;
+8. a terminal envelope does not silently rewrite field history.
 
 ## Workflow identity and envelope execution
 
@@ -465,12 +470,13 @@ Rules:
 An `IN_PROGRESS` envelope may become `COMPLETED` only when:
 
 1. every blocking recipient slot is `COMPLETED` or validly `SKIPPED` under the workflow;
-2. every required field owned by a blocking recipient is `SATISFIED`;
-3. no blocking recipient is `DECLINED`;
-4. the envelope has not become `VOIDED` or `EXPIRED`;
-5. the exact sealed revision set remains unchanged.
+2. every required field owned by a `COMPLETED` blocking recipient is `SATISFIED`;
+3. every required field owned by a validly `SKIPPED` blocking recipient is `WAIVED` by that same skip transition;
+4. no blocking recipient is `DECLINED`;
+5. the envelope has not become `VOIDED` or `EXPIRED`;
+6. the exact sealed revision set remains unchanged.
 
-`COMPLETED` means process obligations are complete under 003C. It does not itself prove cryptographic signature validity, evidence sufficiency, trust-chain validity, statutory compliance, or legal enforceability.
+`COMPLETED` means process obligations are complete under 003C. `WAIVED` fields reflect explicit workflow-authorized recipient skips and do not claim the waived action occurred. Completion does not itself prove cryptographic signature validity, evidence sufficiency, trust-chain validity, statutory compliance, or legal enforceability.
 
 ## Cancellation, decline, void, and expiry semantics
 
@@ -537,7 +543,7 @@ TransitionRequest {
 Required idempotency properties:
 
 1. `idempotency_key` is scoped to the owning envelope transition domain;
-2. repeating the same key with the same semantic fingerprint returns the same logical outcome and does not duplicate participant actions, field satisfaction, terminal transitions, or later evidence effects;
+2. repeating the same key with the same semantic fingerprint returns the same logical outcome and does not duplicate participant actions, field satisfaction/waiver, terminal transitions, or later evidence effects;
 3. reusing the same key with a different semantic fingerprint is a conflict, not a second operation;
 4. a stale `expected_envelope_state`, when supplied, cannot be silently ignored;
 5. terminal envelope transitions are not executed twice under retries;
@@ -570,6 +576,8 @@ ENVELOPE_LIFECYCLE_STATE != DOCUMENT_REVISION_IDENTITY
 RECIPIENT_IDENTITY != AUTHENTICATION_PROOF
 AUTHENTICATION_PROOF != RESOURCE_AUTHORIZATION
 FIELD_PLACEMENT -> EXACT_DOCUMENT_REVISION_ID
+REQUIRED_FIELD -> BLOCKING_RECIPIENT
+SKIPPED_BLOCKING_RECIPIENT_REQUIRED_FIELDS -> WAIVED
 READY_OR_LATER -> SEALED_REVISION_SET
 TERMINAL_ENVELOPE_STATE -> NO_FURTHER_003C_PROGRESS
 ```
@@ -683,9 +691,20 @@ Expected:
 
 Given an `OBSERVER` slot is non-blocking and remains `PENDING` while all blocking obligations complete.
 
-Expected: the observer alone does not prevent envelope completion.
+Expected: the observer alone does not prevent envelope completion. Because `required = true` implies a blocking owner, an observer/non-blocking slot cannot own a required field.
 
-### N — Terminal-state replay
+### N — Validly skipped blocking recipient
+
+Given blocking recipient `A` owns unsatisfied required fields and the workflow explicitly permits `A` to be skipped.
+
+Expected:
+
+- `A -> SKIPPED`;
+- each still-unsatisfied required field owned by `A` becomes `WAIVED` atomically with the skip;
+- `WAIVED` does not assert the field action occurred;
+- envelope completion may accept those fields only because their owner is validly `SKIPPED`.
+
+### O — Terminal-state replay
 
 Given a `VOIDED`, `CANCELLED`, `DECLINED`, `EXPIRED`, or `COMPLETED` envelope receives a new progression request.
 
