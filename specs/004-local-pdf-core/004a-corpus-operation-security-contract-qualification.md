@@ -25,75 +25,69 @@ SPEC_004_SIGNING_IMPLEMENTATION_AUTHORITY = ABSENT
 SPEC_005_SUCCESSOR_AUTHORITY = ABSENT
 ```
 
-This file is Signthos-authored contract planning only. It does not import or acquire fixture bytes, install or select a PDF engine, mutate product/runtime code, modify package/lockfile/Cargo/workflow/container/database/provenance/NOTICE surfaces, execute a PDF provider, process a user document, use credentials, or implement signing/verification.
+This file is Signthos-authored planning only. It imports or acquires no fixture bytes or upstream source, selects or installs no PDF engine, changes no product/runtime/dependency/package/lockfile/Cargo/workflow/container/database/provenance/NOTICE surface, executes no PDF provider, uses no credentials, and implements no signing or verification behavior.
 
 ## 2. Purpose
 
-004A freezes the shared semantic and evidence vocabulary that every later Local PDF Core provider must satisfy.
+004A freezes the shared semantic and evidence contract that later Local PDF Core providers must satisfy before implementation claims can converge.
 
-The goal is to make later engine feasibility and implementation work testable against stable Signthos-owned contracts rather than allowing each library or platform to define its own meaning for:
+It qualifies planning requirements for:
 
-- fixture identity;
-- operation identity;
-- input revision identity;
-- output revision identity;
-- mutation/effect classification;
-- resource budgets;
-- locality/network behavior;
-- cancellation and deadline outcomes;
-- unsupported and uncertain outcomes;
+- fixture and corpus identity;
+- fixture source, rights, redistribution and privacy evidence;
+- operation identity and effect semantics;
+- input/output revision identity, digest and lineage;
+- status, error, warning, unsupported and uncertainty semantics;
+- resource budgets, cancellation and deadlines;
+- execution locality and network policy;
 - active-content behavior;
-- encrypted-input behavior;
+- encrypted-input secret handling;
 - provider isolation;
-- signing-boundary safety;
-- deterministic evidence.
+- signed-input safety;
+- output validation and independent redaction recovery;
+- deterministic evidence and adversarial cases.
 
-004A does **not** choose how these contracts are implemented.
+004A does not choose an implementation language, engine, package, crate, binary, provider, or fixture corpus.
 
 ## 3. Canonical predecessor contracts consumed without reopening
 
-Specification 004A consumes the canonical Specification 003 contract boundary.
+Specification 003 continues to own:
 
-The following remain owned by Specification 003 and are not redefined here:
-
-- `Document` and `DocumentId`;
-- `DocumentRevision` and `DocumentRevisionId`;
-- exact revision-byte identity;
-- algorithm-tagged revision digest;
-- revision lineage;
+- `Document`, `DocumentId`, `DocumentRevision`, and `DocumentRevisionId` semantics;
+- exact immutable revision-byte identity;
+- algorithm-tagged revision digest and lineage;
 - conversion-generated revision semantics;
 - immutable signing-input semantics;
-- `Envelope` routing state being distinct from document revision state;
-- authentication being distinct from resource authorization;
+- separation of document revision state from `Envelope` routing state;
+- authentication versus resource authorization;
 - principal/tenant/resource/action authorization decisions;
-- stable domain error class ownership;
-- canonical domain event ownership;
+- stable domain error/event ownership;
 - browser/native/server/heavy provider separation;
 - provider status not being canonical workflow/domain state;
-- no-silent-network local-first semantics;
+- local-first no-silent-network semantics;
 - unsupported/unknown states not becoming success.
 
-004A adds PDF-core-specific operation and evidence requirements on top of those contracts.
+004A specializes those contracts for PDF-core evidence without redefining them.
 
-## 4. Normative terminology
+## 4. Normative planning language
 
-The keywords `MUST`, `MUST NOT`, `REQUIRED`, `SHOULD`, `SHOULD NOT`, and `MAY` express contract requirements for future implementation grains. Their presence here does not create implementation authority.
+`MUST`, `MUST NOT`, `REQUIRED`, `SHOULD`, `SHOULD NOT`, and `MAY` define requirements for later separately authorized implementation grains. They do not create implementation authority here.
 
-A **fixture** is a byte-exact input artifact used for deterministic qualification.
+A **fixture** is a byte-exact qualification input.
 
-A **corpus** is a versioned set of fixture records and associated rights/evidence metadata.
+A **corpus** is an immutable revision of fixture records plus their evidence.
 
-A **provider** is an implementation behind a Signthos capability contract. No provider is selected by this document.
+A **provider** is a concrete implementation behind a Signthos capability contract. No provider is selected here.
 
-An **operation** is one requested PDF capability invocation bound to an exact input revision and explicit effect class.
+An **operation** is one requested capability invocation bound to exact canonical input revision(s), one effect class, and one scope disposition.
 
-A **published output** is an output that has passed the operation's success gates and may be bound to a new canonical revision where required.
+A **published output** is an output that has passed all success and validation gates required by its capability.
 
-A **partial output** is any intermediate or incomplete artifact produced before final success. Partial output is never silently promoted to published success.
+A **partial output** is intermediate or incomplete provider output. It is never silently promoted to success.
 
-## 5. Lifecycle/effect classes
+## 5. Effect class and scope disposition are separate axes
 
-Every PDF-core capability MUST declare exactly one primary effect class for a concrete invocation:
+A concrete invocation MUST declare exactly one primary effect class:
 
 ```text
 PdfOperationEffectClass =
@@ -101,61 +95,81 @@ PdfOperationEffectClass =
   | REVISION_CREATING
   | SIGNATURE_CREATING
   | VERIFICATION_ONLY
-  | OUT_OF_SCOPE
 ```
+
+Separately, it MUST declare exactly one scope disposition:
+
+```text
+PdfOperationScopeDisposition =
+  | SPEC_004_SUPPORTED
+  | SPEC_004_EVIDENCE_ONLY
+  | OUT_OF_SCOPE_FOR_SPEC_004
+```
+
+This separation is normative. `OUT_OF_SCOPE_FOR_SPEC_004` is **not** an effect class.
 
 ### 5.1 `READ_ONLY`
 
 A `READ_ONLY` operation:
 
-- MUST consume an exact immutable `DocumentRevision`;
-- MUST NOT change input revision bytes;
-- MUST NOT create a replacement revision merely as an implementation side effect;
-- MAY return derived render/extraction/inspection data;
-- MUST bind derived evidence to the exact input revision digest;
-- MUST declare unsupported/partial extraction explicitly;
-- MUST remain local when the selected provider contract declares local execution.
+- consumes exact immutable input revision(s);
+- does not change those revision bytes;
+- does not create a replacement revision merely as a provider side effect;
+- may return derived render/extraction/inspection artifacts;
+- binds derived evidence to exact input revision digest(s);
+- makes unsupported/partial facts explicit;
+- obeys the requested locality/network policy.
 
-Examples: inspect, render, text search, thumbnail generation, bounded metadata read.
+Typical 004 candidates: inspect, render, search, text extraction, thumbnails and bounded metadata read.
 
 ### 5.2 `REVISION_CREATING`
 
 A `REVISION_CREATING` operation:
 
-- MUST preserve the source revision unchanged;
-- MUST produce a distinct output revision when successful;
-- MUST compute and bind an algorithm-tagged output digest;
-- MUST record lineage from exact source revision(s);
-- MUST identify the operation/provider evidence that produced the output;
-- MUST NOT overwrite an existing signed/signing-bound revision;
-- MUST classify lossy behavior explicitly where applicable;
-- MUST NOT publish partial output after timeout/cancellation/failure.
+- preserves every source revision unchanged;
+- produces a distinct canonical output revision only after success gates pass;
+- binds an algorithm-tagged output digest;
+- records exact source lineage and normalized operation parameters;
+- records provider/version evidence;
+- never overwrites signed/signing-bound source bytes;
+- declares lossy behavior when applicable;
+- never publishes partial output after cancellation, deadline, resource-limit or validation failure.
 
-Examples: rotate, remove page, merge, split, annotation application, form fill, watermark, metadata mutation, redaction apply, compression, repair, OCR text-layer creation, conversion.
+Typical 004 candidates: page transforms, merge/split, annotations/forms, marks/metadata/attachments, redaction, compression/repair, OCR text layers and conversion.
 
 ### 5.3 `SIGNATURE_CREATING`
 
 Cryptographic signing implementation belongs to Specification 005.
 
-Specification 004 may only define preservation/interoperability constraints required to avoid corrupting or silently replacing signed revisions.
+A cryptographic signing invocation has:
 
-An operation whose actual purpose is to create a cryptographic PDF signature MUST be `SIGNATURE_CREATING` and `OUT_OF_SCOPE` for 004 implementation until Specification 005 separately authorizes it.
+```text
+effectClass = SIGNATURE_CREATING
+scopeDisposition = OUT_OF_SCOPE_FOR_SPEC_004
+```
+
+Specification 004 may define preservation/interoperability requirements around signed inputs, but it does not implement signing under 004A.
 
 ### 5.4 `VERIFICATION_ONLY`
 
 Cryptographic signature/trust verification implementation belongs to Specification 005.
 
-Specification 004 MAY later use independently qualified verification evidence to prove whether a PDF mutation preserved a pre-existing signature state, but it MUST NOT treat the mutating engine's own assertion as sufficient verification.
+A standalone cryptographic verifier invocation has:
 
-### 5.5 `OUT_OF_SCOPE`
+```text
+effectClass = VERIFICATION_ONLY
+scopeDisposition = OUT_OF_SCOPE_FOR_SPEC_004
+```
 
-An operation is `OUT_OF_SCOPE` when its semantics belong to another specification or when no supported deterministic contract exists.
+A later 004 mutation grain MAY consume independently qualified verification evidence as `SPEC_004_EVIDENCE_ONLY` to establish whether pre-existing signature state was preserved. The mutating provider's own assertion is insufficient.
 
-Unknown operations MUST fail closed rather than being guessed into a nearby class.
+### 5.5 Unknown capability
 
-## 6. Versioned fixture record contract
+An unknown capability MUST be classified explicitly as unsupported/out-of-scope. It MUST NOT be guessed into a nearby effect class or silently executed.
 
-Future corpus manifests MUST represent every fixture using a record equivalent in meaning to:
+## 6. Fixture record contract
+
+Future corpus manifests MUST represent every fixture with information equivalent to:
 
 ```text
 PdfFixtureRecord {
@@ -194,13 +208,13 @@ Field names are planning vocabulary, not a language-specific API commitment.
 
 ### 6.1 Fixture identity
 
-A fixture identity MUST bind the exact bytes through an algorithm-tagged cryptographic digest.
+Fixture identity MUST bind exact bytes with an algorithm-tagged cryptographic digest.
 
-A filename, URL, repository tag, release label, or human description alone MUST NOT establish fixture identity.
+Filename, URL, tag, release label, repository path, or description alone is insufficient.
 
-Changing fixture bytes creates a new fixture identity/evidence record even when the visible document appears unchanged.
+Any byte change creates a new fixture identity/evidence record.
 
-### 6.2 Fixture source classes
+### 6.2 Source classes
 
 The future manifest MUST distinguish at least:
 
@@ -217,78 +231,77 @@ FixtureSourceClass =
 
 `UNKNOWN` is not redistributable by default.
 
-### 6.3 Rights basis
+### 6.3 Rights and redistribution
 
-Every fixture intended for repository inclusion or redistribution MUST have exact rights evidence covering the intended use.
+Every fixture intended for repository inclusion or redistribution MUST bind exact rights evidence covering the intended use.
 
-Required future facts include, as applicable:
+Evidence includes, as applicable:
 
-- source owner/project;
+- owner/project;
 - exact source revision/path/artifact;
-- public license and exact version;
-- permission artifact where public license is insufficient;
-- whether modification is allowed;
-- whether redistribution is allowed;
+- exact license and version;
+- permission artifact when public license is insufficient;
+- modification/redistribution allowance;
 - copyright/attribution/NOTICE obligations;
-- whether embedded fonts/images/attachments carry separate rights;
-- whether the fixture contains personal, confidential, or regulated data.
+- separately licensed embedded fonts/images/attachments;
+- privacy/confidentiality classification.
 
-Absence or ambiguity of rights is fail-closed for import/redistribution.
+Public availability alone does not establish redistribution rights.
 
-004A itself acquires no external fixture bytes.
+Ambiguous or missing rights fail closed for import/redistribution.
 
-### 6.4 Privacy rule
+004A acquires no external fixture bytes.
 
-The canonical shared corpus SHOULD use synthetic or purpose-built non-personal material wherever possible.
+### 6.4 Privacy
 
-No PHI, secrets, credentials, private correspondence, personal identifiers, or production customer documents may be introduced merely to create a test case.
+The shared corpus SHOULD prefer synthetic or purpose-built non-personal material.
 
-A user-supplied document used for local debugging is not automatically eligible for repository corpus inclusion.
+No PHI, secrets, credentials, private correspondence, production customer documents, or unnecessary personal identifiers may be introduced merely to create a test case.
+
+User-supplied local debugging material is not automatically repository-corpus eligible.
 
 ## 7. Required corpus families
 
-A future implementation corpus MUST cover the capability families actually claimed. The baseline planning matrix is:
+A future corpus MUST cover the families relevant to the claimed capability:
 
-| Family | Minimum planning purpose |
+| Family | Qualification purpose |
 |---|---|
 | `minimal` | smallest structurally valid PDF cases |
-| `typical` | ordinary multipage text/image PDFs |
-| `fonts-images` | embedded/subset fonts, raster/vector images |
-| `annotations` | common annotation families and appearance streams |
-| `forms` | AcroForm fields, appearances, values, unsupported systems |
-| `metadata-attachments` | document metadata and embedded files |
-| `malformed-truncated` | broken xref/object/stream/truncation cases |
-| `encrypted` | supported/unsupported encryption and password behavior |
-| `signed` | pre-existing signature containers and signed byte ranges |
+| `typical` | ordinary multipage text/image documents |
+| `fonts-images` | embedded/subset fonts and raster/vector images |
+| `annotations` | annotations and appearance streams |
+| `forms` | AcroForm plus explicit unsupported form systems |
+| `metadata-attachments` | metadata and embedded files |
+| `malformed-truncated` | xref/object/stream/truncation failures |
+| `encrypted` | supported/unsupported encryption/password behavior |
+| `signed` | pre-existing signature containers/signed byte ranges |
 | `incremental` | incremental updates and multiple revisions/signatures |
-| `active-content` | JavaScript/actions/launch/external-reference cases |
-| `rtl-arabic` | Arabic/RTL text, fonts, extraction/render cases |
+| `active-content` | JavaScript/actions/launch/URI/external-reference cases |
+| `rtl-arabic` | Arabic/RTL rendering and extraction cases |
 | `redaction-recovery` | deliberately recoverable hidden/text/image/object cases |
 | `large-resource` | page/object/stream/decompression/resource-bound cases |
-| `lossy-transform` | compression/repair cases with observable information loss |
-| `ocr-conversion` | later generated/conversion cases where separately authorized |
+| `lossy-transform` | compression/repair cases with measurable information loss |
+| `ocr-conversion` | later generated/conversion cases when separately authorized |
 
-This matrix defines required evidence categories, not fixture files.
+This matrix defines evidence families only. It does not claim any fixture exists.
 
 ## 8. Corpus revision contract
 
-A corpus used as merge-critical implementation evidence MUST have an immutable revision identity.
-
-The corpus revision MUST bind:
+A merge-critical corpus MUST have an immutable corpus revision binding:
 
 - manifest bytes/digest;
-- ordered or canonically normalized fixture-record set;
+- canonically normalized fixture-record set;
 - exact fixture digests;
-- fixture-rights evidence references;
+- rights-evidence references;
 - expected-fact schema version;
-- generation recipe/version for synthetic/generated fixtures;
-- any exclusions or unsupported fixture families.
+- generation recipe/version for generated fixtures;
+- exclusions/unsupported families.
 
-A later corpus mutation MUST create a new corpus revision. Results from an earlier corpus revision MUST NOT be silently represented as results for a later revision.
+Any corpus mutation creates a new corpus revision. Evidence from one revision MUST NOT be represented as evidence for another.
 
-## 9. Canonical operation request contract
+## 9. Canonical operation request
 
-Every future provider operation MUST consume a request equivalent in meaning to:
+A future request MUST be equivalent in meaning to:
 
 ```text
 PdfOperationRequest {
@@ -296,9 +309,10 @@ PdfOperationRequest {
   operationSchemaVersion
   capabilityId
   effectClass
+  scopeDisposition
   inputRevisionRefs[]
   inputDigestRefs[]
-  parameters
+  normalizedParameters
   localityRequirement
   networkPolicy
   resourceBudget
@@ -311,23 +325,13 @@ PdfOperationRequest {
 }
 ```
 
-### 9.1 Exact input binding
+Every request binds exact input revision(s) and digest(s). A file path, mutable row, current-document pointer, envelope state, or UI selection alone is insufficient.
 
-Every request MUST bind the exact canonical input revision(s). A path, current-document pointer, mutable database row, envelope state, or UI selection alone is insufficient.
+Parameters affecting behavior or output MUST have deterministic normalization for evidence. Provider-private defaults that affect behavior MUST NOT be hidden from merge-critical evidence.
 
-### 9.2 Parameter normalization
+Byte-identical determinism MUST NOT be claimed when provider/PDF behavior legitimately introduces permitted nondeterministic bytes unless exact evidence proves byte determinism.
 
-Parameters that affect output bytes or semantic results MUST have deterministic serialization/normalization before they are included in evidence.
-
-Provider-private defaults that change behavior MUST NOT be omitted from merge-critical evidence.
-
-### 9.3 Idempotency expectation
-
-Where an operation is intended to be deterministic, the contract SHOULD define an idempotency/equivalence expectation appropriate to the capability.
-
-Byte-identical output MUST NOT be claimed when the PDF format/provider legitimately introduces permitted nondeterministic bytes unless the exact evidence proves byte determinism.
-
-## 10. Canonical operation result contract
+## 10. Canonical operation result
 
 A future result MUST be equivalent in meaning to:
 
@@ -337,6 +341,7 @@ PdfOperationResult {
   capabilityId
   status
   effectClass
+  scopeDisposition
   providerIdentity
   providerVersionEvidence
   inputRevisionRefs[]
@@ -358,9 +363,7 @@ PdfOperationResult {
 }
 ```
 
-### 10.1 Status vocabulary
-
-At minimum:
+Minimum status vocabulary:
 
 ```text
 PdfOperationStatus =
@@ -375,19 +378,13 @@ PdfOperationStatus =
   | PARTIAL_NOT_PUBLISHED
 ```
 
-No non-success state may be converted to `SUCCEEDED` merely because some output bytes exist.
+No non-success state may become `SUCCEEDED` merely because bytes exist.
 
-### 10.2 Warnings and uncertainty
+Warnings do not replace machine-readable failure/unsupported state. Unknown facts remain explicit uncertainty.
 
-Warnings MUST NOT overwrite machine-readable failure or unsupported classifications.
+## 11. Stable PDF-core error specializations
 
-Unknown/uncertain facts MUST remain explicit.
-
-## 11. Stable PDF-core error categories
-
-004A qualifies PDF-specific error categories as specializations compatible with the canonical Specification 003 stable-error model.
-
-Candidate machine classes:
+Candidate machine classes compatible with Specification 003 include:
 
 ```text
 PDF_INPUT_INVALID
@@ -415,13 +412,11 @@ PDF_RIGHTS_EVIDENCE_MISSING
 PDF_CORPUS_EVIDENCE_MISMATCH
 ```
 
-Later implementation may refine bounded subcategories without changing the semantic requirement that stable machine classes remain separate from localized human messages.
+Later bounded implementation may refine subcategories, but stable machine classes stay separate from localized human messages.
 
 ## 12. Resource-budget taxonomy
 
-Every untrusted PDF provider operation MUST eventually accept or be governed by explicit resource budgets appropriate to its execution environment.
-
-The shared taxonomy includes:
+Every untrusted-PDF provider operation MUST eventually be governed by explicit budgets equivalent to:
 
 ```text
 PdfResourceBudget {
@@ -444,34 +439,30 @@ PdfResourceBudget {
 }
 ```
 
-004A sets no fabricated universal numeric values. Later provider grains MUST set and test concrete limits based on platform/provider evidence.
+004A fabricates no universal numeric thresholds. Provider grains must set and test concrete limits from actual platform/provider evidence.
 
-### 12.1 Decompression bombs
+Encoded input size alone is insufficient; decoded/decompressed expansion must be bounded where applicable.
 
-Encoded input size MUST NOT be the sole resource bound. Providers must bound decoded/expanded data where applicable.
+Limit termination must be distinguishable from malformed input, unsupported capability, provider failure, cancellation and generic failure.
 
-### 12.2 Limit result semantics
+## 13. Cancellation, deadlines and partial output
 
-Resource-limit termination MUST be machine distinguishable from malformed input, unsupported capability, provider crash, cancellation, and generic failure.
+Cancellation and deadline expiration are first-class machine outcomes.
 
-## 13. Cancellation and deadline contract
+Future implementation MUST ensure:
 
-Cancellation and deadline expiration are first-class outcomes.
+- cancellation/deadline signals propagate where technically supported;
+- late results after cancellation/deadline are not reported as success;
+- temporary/partial output is quarantined or discarded unless a separate recovery contract exists;
+- canonical source revision bytes remain unchanged;
+- temporary resources are cleaned under a bounded policy;
+- result evidence records the cancellation/deadline outcome.
 
-Future implementations MUST ensure:
-
-- cancellation/deadline signals propagate into provider work where technically supported;
-- work is not reported successful after cancellation/deadline merely because a late result arrives;
-- partially written output is quarantined/discarded unless a separate recovery contract exists;
-- cancellation does not mutate the canonical source revision;
-- temporary resources are cleaned within a bounded policy;
-- cancellation/deadline evidence is bound to the operation result.
+Partial output is not canonical output until all required success/validation gates pass.
 
 ## 14. Locality and network evidence
 
-The request contract MUST state the required execution locality.
-
-Candidate values:
+Candidate execution localities:
 
 ```text
 ExecutionLocality =
@@ -484,329 +475,269 @@ ExecutionLocality =
 
 A provider MUST NOT silently change locality.
 
-For operations declared local:
+For an operation declared local:
 
-- document bytes MUST NOT be uploaded implicitly;
-- external URL fetches embedded in PDF content MUST be blocked unless an explicit later contract authorizes a bounded fetch;
-- telemetry/logging MUST NOT include document bytes or sensitive extracted content by default;
-- network evidence SHOULD be capable of proving no document-processing network transition occurred where the implementation environment permits such measurement.
+- document bytes are not implicitly uploaded;
+- embedded external references do not trigger automatic fetch without separately authorized behavior;
+- telemetry/logging excludes document bytes and sensitive extracted content by default;
+- later evidence should prove the expected network state where the execution environment permits measurement.
 
-## 15. Active-content default-deny contract
+## 15. Active-content default deny
 
-Untrusted PDF active content is non-executing by default.
-
-The policy applies to, where relevant:
+Untrusted PDF active content is non-executing by default, including where relevant:
 
 - document JavaScript;
-- open actions;
-- additional actions;
+- open/additional actions;
 - launch actions;
 - URI actions;
 - submit/import form actions;
-- embedded files or executable payloads;
+- embedded executable files;
 - multimedia/rich media;
 - external references and automatic fetches.
 
-Future providers MUST distinguish:
+Future providers distinguish:
 
 - presence detected;
-- unsupported inspection;
+- inspection unsupported;
 - blocked/non-executed;
-- sanitized/removed in a new revision;
-- intentionally permitted by a separately authorized feature.
+- sanitized/removed into a new revision;
+- separately authorized intentional behavior.
 
-Absence of detection MUST NOT be described as proof of absence unless the selected provider/corpus evidence supports that claim.
+Failure to detect is not proof of absence unless provider/corpus evidence establishes it.
 
-## 16. Encrypted-input contract
+## 16. Encrypted input and secrets
 
-Encrypted PDFs are untrusted input with additional secret-handling requirements.
-
-Future provider contracts MUST distinguish:
+Future contracts distinguish:
 
 - encrypted/password required;
 - password accepted;
 - invalid password;
 - supported encryption;
 - unsupported encryption;
-- permission flags observed;
-- permission flags not security-enforced by the provider;
+- observed permission flags;
+- permission flags not security-enforced by provider;
 - decryption failure.
 
 Passwords/keys:
 
-- MUST NOT appear in ordinary logs, analytics, errors, fixture manifests, or evidence bundles;
-- SHOULD be held for the minimum operation lifetime;
-- MUST NOT be sent to another provider unless the user-visible operation explicitly selects that provider/locality and governance authorizes it;
-- MUST NOT be persisted by default.
+- never appear in ordinary logs, analytics, fixture manifests or evidence bundles;
+- are held only for the minimum operation lifetime where practical;
+- are not forwarded to another provider without explicit selected locality/provider authority;
+- are not persisted by default.
 
-004A does not define DRM/legal-effect policy from PDF permission bits.
+004A does not infer DRM or legal-effect policy from PDF permission flags.
 
 ## 17. Provider isolation and secret boundary
 
-Every later provider grain MUST declare its trust/isolation boundary.
+Later provider grains declare their trust/isolation boundary.
 
-Untrusted parsers/renderers/heavy converters MUST NOT receive signing keys, KMS credentials, deployment credentials, control-plane secrets, unrelated account tokens, or unrestricted filesystem/network access merely for convenience.
+Untrusted parsers/renderers/heavy converters do not receive signing keys, KMS credentials, deployment credentials, control-plane secrets, unrelated account tokens, or unrestricted filesystem/network access merely for convenience.
 
-A provider requiring broader privilege than its capability needs is not qualified until that privilege is justified and mitigated.
+Broader privileges require explicit justification and mitigation before qualification.
 
-## 18. Signed-input safety contract
+## 18. Signed-input safety
 
-The exact bytes of a signed or signing-bound `DocumentRevision` are immutable.
+Signed or signing-bound source revision bytes are immutable.
 
-For every future `REVISION_CREATING` PDF operation on signed content:
+For any future `REVISION_CREATING` operation on signed content:
 
 - the source revision remains unchanged;
-- the output is a distinct revision;
-- prior signature state MUST NOT be advertised as preserved unless an independent verifier proves the exact applicable state;
-- a full rewrite MUST NOT silently claim signature preservation;
-- incremental update support MUST NOT be assumed safe merely because the provider supports incremental serialization;
-- UI/product layers must receive enough machine state to distinguish a newly unsigned/superseding revision from the signed predecessor.
+- output is a distinct revision;
+- prior signature state is not advertised as preserved without independent verification evidence;
+- full rewrite never silently claims signature preservation;
+- incremental serialization support is not evidence of signature preservation by itself;
+- product layers receive machine state sufficient to distinguish the new unsigned/superseding revision from its signed predecessor.
 
 Signing itself remains Specification 005.
 
-## 19. Partial-output publication rule
+## 19. Output validation
 
-A provider may create temporary bytes while processing. Those bytes are not canonical output until the operation result is `SUCCEEDED` and required validation gates have passed.
+A mutation grain defines validation proportionate to its claim, potentially including:
 
-The following outcomes MUST NOT publish output as a successful new revision:
-
-- cancellation;
-- deadline exceeded;
-- resource limit exceeded;
-- parser/provider crash;
-- failed output validation;
-- unsupported operation;
-- rights/evidence gate failure where the operation requires qualified external material;
-- redaction recovery failure for a safe-redaction claim.
-
-## 20. Output validation contract
-
-A future mutation grain MUST define validation proportionate to the capability.
-
-Potential validation dimensions include:
-
-- output parseability through the implementing provider;
+- output parseability;
 - independent parse/inspection where required;
-- expected page/object/form/annotation counts;
-- input/output digest distinction when mutation is expected;
+- expected page/object/form/annotation facts;
+- input/output digest relation;
 - render sanity;
-- text extraction facts;
+- extraction facts;
 - metadata/attachment facts;
 - signature-state evidence;
-- absence/recovery testing for redaction;
-- format/conformance validation only where an independent validator is qualified.
+- redaction recovery;
+- independent format/conformance validation where claimed.
 
-Same-engine round-trip alone is insufficient for high-assurance claims such as safe redaction or standards conformance.
+Same-engine round-trip alone is insufficient for high-assurance safe-redaction or standards-conformance claims.
 
-## 21. Redaction evidence invariant
+## 20. Independent safe-redaction invariant
 
-No future feature may be labeled safely redacted based solely on visual appearance or on the same engine that performed the redaction.
+Safe redaction is not established by visual appearance or by the implementing engine alone.
 
-A safe-redaction qualification MUST attempt applicable recovery through independent paths covering at least the targeted risk surfaces:
+Applicable independent recovery paths include:
 
 - text extraction/search/copy;
 - raw object/stream inspection;
 - image extraction/inspection;
-- annotations and appearance streams;
+- annotations/appearance streams;
 - forms/XFA where relevant;
-- layers/optional content;
+- optional-content/layers;
 - metadata;
 - attachments;
 - incremental-history artifacts;
 - rendered output.
 
-If targeted recoverable content remains through an applicable independent path, the result MUST fail the safe-redaction claim.
+If targeted recoverable content remains through an applicable independent path, the safe-redaction claim fails.
 
-## 22. Deterministic contract example — read-only
+## 21. Unsupported and uncertainty ledger
+
+Later provider qualification explicitly records unsupported or partial facts such as:
+
+- unsupported encryption family;
+- unsupported XFA;
+- unsupported annotation subtype;
+- unsupported font/image/color feature;
+- incomplete active-content inspection;
+- unavailable cancellation primitive;
+- unavailable native target;
+- unavailable independent validation path.
+
+Unsupported is a valid machine outcome. Silent approximation is not.
+
+## 22. Security logging
+
+Ordinary logs/evidence exclude:
+
+- document bytes;
+- extracted body text;
+- passwords;
+- private/signing keys;
+- embedded attachment content;
+- personal identifiers unless a separately bounded test explicitly requires them.
+
+Safe diagnostic candidates include operation/capability/provider IDs, algorithm-tagged digests, counts, resource-limit class, duration/resource metrics, stable error class, locality/network state, and non-sensitive corpus/fixture IDs.
+
+## 23. Deterministic examples
+
+### Read-only example
 
 ```text
-Given:
-  inputRevision = R1
-  inputDigest = sha256:D1
-  capability = inspect
-  effectClass = READ_ONLY
-  locality = BROWSER_LOCAL
-
-Then success requires:
-  canonical bytes of R1 unchanged
-  result.inputDigest = sha256:D1
-  result.outputRevisionRefs = []
-  locality evidence consistent with BROWSER_LOCAL
-  active content not executed
-  unsupported inspection facts explicit
+inputRevision = R1
+inputDigest = sha256:D1
+capability = inspect
+effectClass = READ_ONLY
+scopeDisposition = SPEC_004_SUPPORTED
+locality = BROWSER_LOCAL
 ```
 
-## 23. Deterministic contract example — revision-creating
+Success requires source bytes unchanged, result input digest bound to `D1`, no canonical output revision, active content non-executing, locality evidence consistent with local execution, and unsupported facts explicit.
+
+### Revision-creating example
 
 ```text
-Given:
-  inputRevision = R1
-  inputDigest = sha256:D1
-  capability = rotate_page
-  effectClass = REVISION_CREATING
-  parameters = {page: 2, degrees: 90}
-
-Then success requires:
-  source R1 unchanged
-  outputRevision = R2
-  R2 != R1
-  outputDigest = algorithm-tagged D2
-  lineage = R2 derived from R1 by exact normalized operation parameters
-  no partial output published before success
+inputRevision = R1
+inputDigest = sha256:D1
+capability = rotate_page
+effectClass = REVISION_CREATING
+scopeDisposition = SPEC_004_SUPPORTED
+parameters = {page: 2, degrees: 90}
 ```
+
+Success requires source `R1` unchanged, a distinct output revision `R2`, algorithm-tagged output digest `D2`, lineage `R2 <- R1`, normalized parameter evidence, and no partial output publication.
+
+### Signing example
+
+```text
+capability = cryptographic_sign
+effectClass = SIGNATURE_CREATING
+scopeDisposition = OUT_OF_SCOPE_FOR_SPEC_004
+```
+
+004A therefore cannot route this invocation into a later 004 PDF mutation implementation merely because an engine exposes a signing API.
 
 ## 24. Adversarial contract cases
 
-Future provider grains MUST include applicable cases such as:
+Later applicable provider grains cover cases including:
 
-1. malformed xref plus enormous declared stream length;
+1. malformed xref with enormous declared stream length;
 2. tiny encoded stream expanding beyond decoded budget;
-3. recursive/nested object structure approaching depth limits;
-4. encrypted PDF with no password;
+3. recursive/nested objects near depth limits;
+4. encrypted input without password;
 5. wrong password;
-6. unsupported encryption algorithm;
-7. JavaScript/open-action document under local render;
-8. external URI/reference attempting automatic network fetch;
+6. unsupported encryption;
+7. JavaScript/open action under local render;
+8. embedded external reference attempting fetch;
 9. cancellation during parse;
-10. cancellation during output serialization;
+10. cancellation during serialization;
 11. deadline expiration after temporary output exists;
-12. provider crash after partial output;
+12. provider failure after partial output;
 13. signed input passed to full-rewrite mutation;
-14. signed input passed to purported incremental mutation without independent signature evidence;
+14. claimed incremental signature preservation without independent evidence;
 15. visually redacted text recoverable by independent extraction;
-16. text removed but image pixels still reveal targeted content;
-17. hidden content remaining in incremental history;
-18. attachment containing targeted sensitive content;
+16. redacted text removed but image pixels remain;
+17. targeted content retained in incremental history;
+18. targeted content retained in attachment;
 19. unsupported XFA treated as ordinary AcroForm;
-20. provider returns bytes while machine status says failure;
+20. provider returns bytes while machine status is failure;
 21. local-only request whose provider attempts network access;
-22. oversized embedded image or attachment;
-23. Arabic/RTL render succeeds but text extraction order is uncertain;
-24. corpus fixture digest differs from manifest;
-25. fixture rights evidence missing or ambiguous.
+22. oversized embedded image/attachment;
+23. Arabic/RTL render succeeds while extraction order remains uncertain;
+24. fixture digest mismatch;
+25. missing/ambiguous fixture rights evidence.
 
-Every applicable case must fail or classify explicitly rather than becoming generic success.
+Applicable cases fail or classify explicitly; none become generic success.
 
-## 25. Security logging contract
+## 25. Future synthetic fixture generation
 
-Ordinary logs/evidence MUST avoid:
+A separately authorized synthetic-fixture grain MAY generate Signthos-owned fixtures when deterministic generation and redistribution are established.
 
-- document bytes;
-- extracted document body text;
-- passwords;
-- private keys;
-- signing credentials;
-- embedded attachment contents;
-- personal identifiers from fixture/user documents unless an explicit bounded test requires them.
+Its generation record should bind generator source/version, parameters, deterministic seed where relevant, output digest, intended facts, embedded-asset rights, and review evidence.
 
-Safe diagnostic fields include, subject to privacy review:
+004A creates no binary fixtures.
 
-- operation ID;
-- capability ID;
-- provider/version IDs;
-- algorithm-tagged digests;
-- byte/page/object counts;
-- resource-limit class;
-- duration/resource metrics;
-- stable error class;
-- locality/network state;
-- corpus/fixture IDs that themselves contain no sensitive data.
+## 26. 004B handoff
 
-## 26. Evidence-level classes
+If 004A becomes canonical and live governance authorizes 004B, feasibility work evaluates exact candidates against this contract rather than replacing it.
 
-A later implementation MAY define levels equivalent to:
+004B must answer for each exact candidate:
 
-```text
-EvidenceLevel =
-  | BASIC_RESULT
-  | DETERMINISTIC_CONTRACT
-  | SECURITY_QUALIFICATION
-  | INDEPENDENT_VALIDATION
-```
+- actual supported lifecycle/capability scope;
+- exact source/package/crate/WASM/native artifacts that would ship;
+- rights/licenses/notices/SBOM obligations;
+- advisory/update path;
+- locality/isolation/resource/cancellation behavior;
+- active-content/encryption behavior;
+- corpus-family coverage potential;
+- unsupported/uncertain semantics;
+- adapter requirements needed to prevent provider APIs from becoming domain authority.
 
-A high-assurance claim MUST NOT be made from a lower evidence class than its canonical grain requires.
+004B discovery alone does not grant dependency acquisition, source import, provider execution or product implementation authority.
 
-004A does not claim that any provider currently satisfies these levels.
+## 27. Acceptance criteria
 
-## 27. Unsupported capability ledger
+004A is sound only if review confirms:
 
-Every later provider qualification MUST maintain explicit unsupported/partial capability facts.
-
-Examples include:
-
-- unsupported PDF encryption family;
-- unsupported XFA;
-- unsupported annotation subtype;
-- unsupported color/font/image feature;
-- inability to inspect active content comprehensively;
-- unavailable cancellation primitive;
-- unavailable native target;
-- missing independent verification path.
-
-Unsupported is a valid result; silently approximating unsupported behavior is not.
-
-## 28. Future synthetic fixture generation rules
-
-A separately authorized synthetic-fixture grain MAY generate Signthos-owned fixtures when it can establish deterministic generation and safe redistribution.
-
-A generation record SHOULD bind:
-
-- generator source/version;
-- exact generation parameters;
-- deterministic seed where relevant;
-- output digest;
-- intended feature/adversarial facts;
-- whether generated embedded fonts/images carry compatible rights;
-- review evidence.
-
-004A itself creates no binary fixture artifacts.
-
-## 29. 004B handoff contract
-
-If 004A becomes canonical and live governance authorizes 004B, engine feasibility work must evaluate candidates against this contract rather than replacing it.
-
-004B must be able to answer, for each exact candidate:
-
-- which lifecycle classes/capabilities are actually supported;
-- what exact source/package/crate/binary artifacts would ship;
-- what rights/notices/SBOM obligations apply;
-- what locality/isolation/resource/cancellation behavior exists;
-- what active-content/encryption behavior exists;
-- which corpus families can be exercised;
-- which required semantics are unsupported or uncertain;
-- whether a separate adapter would be needed to keep provider APIs from becoming domain authority.
-
-004B discovery alone does not grant dependency acquisition or implementation authority.
-
-## 30. Acceptance criteria for 004A
-
-004A is substantively sound only if review confirms:
-
-- the fixture-record contract binds byte identity, source, rights, redistribution, and evidence without importing external fixtures;
-- corpus revision semantics prevent stale-result reuse;
-- required corpus families cover the Stage P threat/capability matrix;
-- operation effect classes are unambiguous and preserve Specification 003 revision ownership;
-- request/result/status contracts make input/output/locality/resource/cancellation evidence explicit;
-- resource taxonomy includes decoded/decompression and temporary-resource risks;
-- local/no-network and active-content default-deny semantics fail closed;
-- encrypted-input secret handling is explicit;
+- effect class and scope disposition are separate, non-conflicting axes;
+- fixture identity binds exact bytes and rights are fail-closed;
+- corpus revision prevents stale evidence reuse;
+- corpus families cover the Stage P threat/capability matrix without claiming current fixture existence;
+- request/result/status contracts bind exact revisions, digests, normalized parameters, locality, resources and provider evidence;
+- decoded/decompression and temporary-resource risks are explicit;
+- cancellation/deadline/partial-output semantics fail closed;
+- local/no-network and active-content behavior fail closed;
+- encrypted secrets are protected;
 - provider isolation protects signing/control-plane secrets;
-- signed-input mutation cannot silently replace or claim preservation of signed bytes;
-- partial output cannot become success;
-- high-assurance redaction requires independent recovery attempts;
+- signed inputs remain immutable and preservation claims require independent evidence;
+- redaction uses independent recovery paths;
 - unsupported/uncertain states remain explicit;
-- logs exclude sensitive document/secrets by default;
-- 004B remains a later candidate only;
-- no engine/dependency/source/runtime/fixture acquisition occurs in this grain.
+- logs exclude sensitive content/secrets by default;
+- 004B and Specification 005 remain unauthorized;
+- no engine/dependency/source/runtime/fixture acquisition occurs.
 
-## 31. Qualification evidence requirements
+## 28. Qualification evidence requirements
 
-This exact 004A candidate requires:
+The exact 004A candidate requires:
 
 - exact base/head/diff accounting;
-- `git diff --check` clean;
-- zero upstream-derived source bytes;
-- zero external fixture bytes;
+- clean `git diff --check`;
+- zero upstream-derived source bytes and zero external fixture bytes;
 - zero dependency/package/lockfile/Cargo/workflow/container/database/product/runtime mutation;
 - truthful exact-head provider/check accounting;
 - fresh independent substantive exact-head review;
@@ -818,9 +749,9 @@ This exact 004A candidate requires:
 - post-merge tree/parents/signature/check verification;
 - live Issue #7 successor reread before 004B authority.
 
-## 32. Completion boundary
+## 29. Completion boundary
 
-Until this exact candidate passes the complete Diffciplane lifecycle:
+Until the exact candidate completes Diffciplane:
 
 ```text
 004A_STATUS = CANDIDATE_ONLY
@@ -833,4 +764,4 @@ SPEC_004_PROVIDER_RUNTIME_AUTHORITY = ABSENT
 SPEC_005_SUCCESSOR_AUTHORITY = ABSENT
 ```
 
-Canonical 004A completion would qualify planning contracts only. It would not by itself install, adopt, execute, or ship a PDF engine or fixture corpus.
+Canonical 004A completion qualifies planning contracts only. It does not install, adopt, execute or ship a PDF engine or fixture corpus.
