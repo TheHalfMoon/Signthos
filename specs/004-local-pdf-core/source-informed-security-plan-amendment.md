@@ -151,7 +151,7 @@ DISPOSITION = REFERENCE_OR_OUT_OF_PROCESS_TOOL_ONLY_BY_DEFAULT
 PRIMARY_ROLE = HISTORICAL_STATIC_ANALYSIS_ARCHITECTURE
 ```
 
-Useful ideas include extensible checks, normalized findings, and false-positive handling. Direct permissive-core incorporation is not selected. Any later use must compare actively maintained alternatives and explicitly qualify process boundaries and GPL distribution implications.
+Useful ideas include extensible checks, normalized findings, and false-positive handling. Direct product-core incorporation is not selected. Any later use must compare actively maintained alternatives and explicitly qualify process boundaries and GPL distribution implications.
 
 ## 4. Material planning gap
 
