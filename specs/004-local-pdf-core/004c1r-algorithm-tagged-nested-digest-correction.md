@@ -5,15 +5,14 @@ Issue: #7
 Owning specification: `004-local-pdf-core`
 Primary candidate: `specs/004-local-pdf-core/004c1r-content-identity-admission-semantic-qualification.md`
 Repair authority: `github:issue-comment:5576663706`
+Synchronization authority: `github:issue-comment:5576728632`
 Self-review finding: `github:issue-comment:5576645937`
-Superseded candidate head: `66a074844d483d605d9ab235472f99c3924aa18c`
-Superseded candidate tree: `7573e5146eb8d4bd5f5c560de26f81a5511f6eed`
+Original superseded candidate head: `66a074844d483d605d9ab235472f99c3924aa18c`
+Original superseded candidate tree: `7573e5146eb8d4bd5f5c560de26f81a5511f6eed`
 
-## 1. Purpose
+## 1. Purpose and precedence
 
-This forward-only correction repairs one material semantic ambiguity in the 004C1R candidate.
-
-The primary 004C1R artifact correctly binds its top-level exact input identity and canonical admission evidence envelope to:
+This forward-only correction repairs one material semantic ambiguity in the 004C1R candidate: nested exact-byte digest fields must explicitly use the canonical algorithm-tagged digest type.
 
 ```text
 ContentDigest {
@@ -22,13 +21,19 @@ ContentDigest {
 }
 ```
 
-However, several nested evidence snippets use bare field names such as `inputExactBytesDigest` or `parentDocumentDigest` without explicitly repeating the canonical `ContentDigest` type. Canonical Specification 003, canonical 004A, and the canonical 004C algorithm-tagged digest correction already establish that an exact-byte digest without algorithm identity is insufficient.
+The primary 004C1R artifact remains authoritative for every non-digest field, source-binding rule, admission disposition, evidence state, authorization rule, derived-artifact lifecycle rule, locality/network rule, error rule, non-grant, and successor boundary.
 
-This correction supersedes only that ambiguous nested digest representation. It changes no other 004C1R status, disposition, policy, evidence, provider, locality, network, error, authority, or successor semantics.
+```text
+NON_DIGEST_SCHEMA_AUTHORITY = PRIMARY_004C1R_ARTIFACT
+DIGEST_TYPING_CORRECTION_AUTHORITY = THIS_ARTIFACT
+CORRECTION_MAY_REMOVE_OR_REDEFINE_PRIMARY_NON_DIGEST_FIELDS = FALSE
+```
+
+This correction supersedes only ambiguous nested digest representation. If an example here and the current primary artifact differ outside digest typing, the current primary artifact controls.
 
 ## 2. Canonical exact-byte digest rule
 
-Every exact-byte digest field in 004C1R is an algorithm-tagged canonical value:
+Every exact-byte digest field in the complete 004C1R package is an algorithm-tagged canonical value:
 
 ```text
 ContentDigest {
@@ -44,11 +49,12 @@ Rules:
 3. exact-byte digest equality requires equality of both `algorithm` and `value`.
 4. a raw digest/checksum string without algorithm identity is insufficient exact-byte evidence.
 5. no nested evidence producer may omit, infer after execution, normalize away, or silently substitute the digest algorithm.
-6. every nested exact-byte digest must bind the same exact bytes and byte length claimed by the owning 004C1R admission evidence record.
+6. every nested input digest must bind the same exact bytes and byte length carried by the owning primary `ContentInputBinding`.
+7. a derived artifact has its own independent algorithm-tagged digest and byte length; it does not inherit the parent digest or admission disposition.
 
-## 3. Corrected deterministic observation digest
+## 3. Deterministic observation digest
 
-The `DeterministicContentObservation` contract in the primary 004C1R artifact is interpreted as:
+The primary `DeterministicContentObservation` contract is interpreted with this exact digest typing:
 
 ```text
 DeterministicContentObservation {
@@ -66,11 +72,11 @@ DeterministicContentObservation {
 }
 ```
 
-The deterministic observation is invalid exact-byte evidence if either digest component is absent or differs from the canonical 004C1R input identity.
+The observation is invalid exact-byte evidence if either digest component is absent or differs from the owning input binding.
 
-## 4. Corrected probabilistic classifier digest
+## 4. Probabilistic classifier digest
 
-The `ProbabilisticClassifierEvidence` contract in the primary 004C1R artifact is interpreted as:
+The primary `ProbabilisticClassifierEvidence` contract is interpreted with this exact digest typing:
 
 ```text
 ProbabilisticClassifierEvidence {
@@ -95,11 +101,11 @@ ProbabilisticClassifierEvidence {
 }
 ```
 
-Classifier evidence cannot be reconciled with other admission evidence unless the full algorithm/value pair and byte length identify the same exact input bytes.
+Classifier evidence cannot be reconciled with the admission package unless the full algorithm/value pair and byte length identify the same exact input bytes.
 
-## 5. Corrected structural inspection digest
+## 5. Structural inspection digest
 
-The `PdfStructuralInspectionEvidence` contract in the primary 004C1R artifact is interpreted as:
+The primary `PdfStructuralInspectionEvidence` contract is interpreted with this exact digest typing:
 
 ```text
 PdfStructuralInspectionEvidence {
@@ -123,14 +129,16 @@ PdfStructuralInspectionEvidence {
 }
 ```
 
-Structural acceptance or rejection cannot be attached to a different digest algorithm/value pair, different byte length, mutable alias, or silently substituted input.
+Structural acceptance or rejection cannot be attached to a different digest algorithm/value pair, byte length, mutable alias, or silently substituted input.
 
-## 6. Corrected derived-artifact parent digest
+## 6. Derived-artifact digest typing
 
-The `DerivedArtifactIdentityEvidence` contract in the primary 004C1R artifact is interpreted as:
+The current primary artifact owns the derived-artifact schema and lifecycle. Its digest fields are interpreted exactly as:
 
 ```text
 DerivedArtifactIdentityEvidence {
+  derivedArtifactRef
+  parentOperationRef
   parentDocumentRevisionId
   parentDocumentDigest: ContentDigest {
     algorithm
@@ -151,16 +159,32 @@ DerivedArtifactIdentityEvidence {
 Rules:
 
 1. `parentDocumentDigest` is the canonical algorithm-tagged digest of the exact parent revision from which extraction evidence was produced.
-2. `extractedArtifactDigest` is independently algorithm tagged and identifies the exact extracted artifact bytes.
+2. `extractedArtifactDigest` independently identifies the exact extracted artifact bytes.
 3. parent and extracted digest identities are separate; equality is neither required nor implied.
 4. a change in extracted artifact algorithm/value or byte length creates a new derived-artifact identity requiring new admission evidence.
-5. no derived artifact inherits the parent admission disposition.
+5. `derivedArtifactRef`, `parentOperationRef`, pre-promotion admission, later canonical-revision promotion, authorization, and general-004C eligibility remain governed only by the current primary artifact.
+6. this correction cannot turn a derived artifact into a `DocumentRevision` or authorize general 004C execution.
 
-## 7. Canonical admission envelope remains unchanged
+## 7. Admission-envelope synchronization
 
-The primary 004C1R `ContentIdentityAdmissionEvidence` already explicitly types its top-level input digest as canonical `ContentDigest { algorithm, value }`. This correction does not alter that contract.
+The current primary `ContentIdentityAdmissionEvidence` carries exact input identity through:
 
-Every nested producer referenced by the envelope must use the same algorithm-tagged input digest and byte length unless it explicitly represents a new derived artifact identity under Section 6.
+```text
+inputBinding: ContentInputBinding
+```
+
+The current primary `ContentInputBinding.inputExactBytesDigest` is explicitly:
+
+```text
+ContentDigest {
+  algorithm
+  value
+}
+```
+
+Every nested producer referenced by the admission envelope must use the same algorithm-tagged input digest and byte length unless it explicitly represents a new derived-artifact identity under the primary contract.
+
+This correction does not replace `ContentInputBinding`, does not restore the superseded mandatory-revision-only shape, and does not modify the primary authorization or derived-artifact rules.
 
 ## 8. Authority remains unchanged
 
@@ -195,11 +219,16 @@ SPECIFICATION_005 = NOT_AUTHORIZED
 
 ## 9. Re-review requirement
 
-Any review/check conclusion bound to the superseded head `66a074844d483d605d9ab235472f99c3924aa18c` is stale for merge qualification.
+Every review/check conclusion bound to an earlier 004C1R head is stale for merge qualification after either forward-only repair.
 
-The complete repaired 004C1R candidate — primary semantic artifact plus this correction artifact — must receive fresh independent substantive exact-head review against the unchanged canonical base.
+The complete exact two-file candidate must receive fresh independent substantive exact-head review against unchanged canonical base `a580747cc14f5bb1ff99503d6ef608065f59e029`.
 
-The reviewer must verify that this correction fully restores explicit algorithm-tagged digest identity for every nested exact-byte evidence contract without altering the primary candidate's admission dispositions, evidence-strength rules, classifier advisory-only boundary, structural-evidence requirement, TOCTOU behavior, polyglot handling, read-only/no-network rules, or explicit non-grants.
+The reviewer must verify that:
+
+- every nested exact-byte digest is explicitly algorithm tagged;
+- the current primary artifact's `ContentInputBinding` and derived-artifact schema remain authoritative;
+- this correction does not remove or redefine non-digest primary semantics;
+- the complete package preserves admission dispositions, evidence-strength rules, classifier advisory-only boundary, structural-evidence requirement, TOCTOU behavior, authorization separation, polyglot handling, read-only/no-network rules, derived-artifact lifecycle rules, and explicit non-grants.
 
 ## 10. Repair result candidate
 
@@ -211,6 +240,7 @@ CLASSIFIER_EVIDENCE_DIGEST = ALGORITHM_TAGGED
 STRUCTURAL_INSPECTION_DIGEST = ALGORITHM_TAGGED
 DERIVED_PARENT_DIGEST = ALGORITHM_TAGGED
 DERIVED_ARTIFACT_DIGEST = ALGORITHM_TAGGED
+NON_DIGEST_SCHEMA_AUTHORITY = PRIMARY_004C1R_ARTIFACT
 OTHER_004C1R_SEMANTICS = UNCHANGED
 IMPLEMENTATION_AUTHORITY = ABSENT
 NEXT_SUCCESSOR = NOT_YET_DERIVED
