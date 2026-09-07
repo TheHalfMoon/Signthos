@@ -87,7 +87,7 @@ min-release-age = 7
 
 ## 4. Public package-manifest semantic evidence
 
-004C1N uses public first-party package-manifest documentation only to avoid inventing unnecessary fields.
+004C1N uses public first-party package-manifest documentation only to avoid inventing unnecessary fields and to remove module-format ambiguity.
 
 Observed documentation facts:
 
@@ -96,6 +96,8 @@ Observed documentation facts:
 - npm documents `engines.node` as a version expression describing the intended Node version surface; enforcement behavior is configuration-dependent.
 - npm documents `workspaces` as an optional local workspace discovery/membership surface.
 - Node.js package documentation defines the root `type` field as controlling how `.js` files beneath that package boundary are interpreted as CommonJS or ES modules.
+- Node.js documents syntax detection for ambiguous `.js` input when a controlling package lacks an explicit `type`, and recommends explicit package type markers.
+- An explicit `type: commonjs` deterministically classifies root-controlled `.js` files as CommonJS while `.mjs` remains explicitly ESM and nested packages may define their own package boundaries.
 
 Evidence references:
 
@@ -116,6 +118,7 @@ ROOT_MANIFEST_PUBLICATION_ROLE = NONE
 ROOT_MANIFEST_APPLICATION_ENTRYPOINT_ROLE = NONE
 ROOT_MANIFEST_LIBRARY_ENTRYPOINT_ROLE = NONE
 ROOT_MANIFEST_WORKSPACE_MEMBERSHIP_AUTHORITY = NONE
+ROOT_MANIFEST_MODULE_BOUNDARY_ROLE = ROOT_CONTROL_FILES_ONLY
 ```
 
 The manifest must not acquire product metadata or executable behavior merely because such fields are common in published npm packages.
@@ -128,6 +131,7 @@ The manifest must not acquire product metadata or executable behavior merely bec
 name = signthos
 private = true
 packageManager = pnpm@10.34.5
+type = commonjs
 engines.node = 24.20.0
 ```
 
@@ -167,7 +171,29 @@ PACKAGE_MANAGER_STRICT_VERSION = REQUIRED
 
 Those controls must be serialized and qualified by later authority before any resolver execution.
 
-### 6.4 `engines.node`
+### 6.4 `type`
+
+```text
+type = commonjs
+```
+
+This is a deterministic root control-package boundary, not a product-framework or future application-package module-system decision.
+
+Node.js documents that a missing `type` can leave `.js` files ambiguous and subject to syntax detection, whereas explicit `type: commonjs` makes root-controlled `.js` interpretation deterministic. 004C1N therefore selects `commonjs` only for files whose nearest controlling manifest is this future root `package.json`.
+
+The decision does not prohibit:
+
+- explicit `.mjs` files;
+- explicit `.cjs` files;
+- separately authorized nested package manifests with their own `type` field;
+- a later product package selecting ESM under separate package ownership.
+
+```text
+ROOT_CONTROL_JS_MODULE_FORMAT = COMMONJS
+NESTED_PRODUCT_PACKAGE_MODULE_FORMAT = NOT_ESTABLISHED_BY_004C1N
+```
+
+### 6.5 `engines.node`
 
 ```text
 engines.node = 24.20.0
@@ -215,7 +241,6 @@ The following fields are intentionally **absent** from the 004C1N-qualified sema
 version = ABSENT
 scripts = ABSENT
 workspaces = ABSENT
-type = ABSENT
 main = ABSENT
 module = ABSENT
 exports = ABSENT
@@ -269,11 +294,11 @@ ROOT_PACKAGE_JSON_WORKSPACES_FIELD = ABSENT_REQUIRED
 PNPM_WORKSPACE_MEMBERSHIP = SEPARATE_UNRESOLVED_GATE
 ```
 
-### 8.4 No `type`
+### 8.4 Explicit root `type` instead of ambiguity
 
-Node.js documents `type` as affecting interpretation of `.js` files beneath the package boundary. 004C1N has no module-system or runtime-source authority, so it must not select CommonJS or ESM for the repository by implication.
+`type` is not absent. It is exactly `commonjs` as qualified in Section 6.4.
 
-Any future root JavaScript execution surface must establish its module-format boundary explicitly rather than inheriting an accidental 004C1N choice.
+This is intentionally narrower than choosing a module system for future application or provider packages: it only fixes the interpretation of root-controlled `.js` files that would otherwise inherit this manifest as their nearest package boundary.
 
 ### 8.5 No entrypoints or publishing metadata
 
@@ -298,6 +323,7 @@ The complete future root-manifest semantic object qualified by 004C1N is therefo
   "name": "signthos",
   "private": true,
   "packageManager": "pnpm@10.34.5",
+  "type": "commonjs",
   "engines": {
     "node": "24.20.0"
   },
@@ -324,15 +350,16 @@ A later root-manifest byte candidate may claim 004C1N semantic compatibility onl
 2. `name` is exactly `signthos`;
 3. `private` is exactly boolean `true`;
 4. `packageManager` is exactly `pnpm@10.34.5`;
-5. `engines` contains exactly `node = 24.20.0` and no additional engine policy absent later authority;
-6. `dependencies` is exactly canonical 004C1M's eight runtime declarations at literal `2.15.0`;
-7. no `devDependencies`, `peerDependencies`, or `optionalDependencies` field is present;
-8. no `scripts` field is present;
-9. no `workspaces` field is present;
-10. no `type` or package/library entrypoint field is present;
-11. no root pnpm/override/resolution/package-extension policy field is present absent later authority;
-12. no package publication or root license simplification metadata is introduced absent later authority;
-13. all workspace, `.npmrc`, provisioning, resolver, network/cache/writable-surface, lockfile, archive, and runtime gates remain independently fail closed.
+5. `type` is exactly `commonjs`;
+6. `engines` contains exactly `node = 24.20.0` and no additional engine policy absent later authority;
+7. `dependencies` is exactly canonical 004C1M's eight runtime declarations at literal `2.15.0`;
+8. no `devDependencies`, `peerDependencies`, or `optionalDependencies` field is present;
+9. no `scripts` field is present;
+10. no `workspaces` field is present;
+11. no package/library entrypoint field is present;
+12. no root pnpm/override/resolution/package-extension policy field is present absent later authority;
+13. no package publication or root license simplification metadata is introduced absent later authority;
+14. all workspace, `.npmrc`, provisioning, resolver, network/cache/writable-surface, lockfile, archive, and runtime gates remain independently fail closed.
 
 Any additional field is `UNQUALIFIED_ROOT_MANIFEST_CONTENT` unless a later canonical successor explicitly authorizes it.
 
@@ -342,12 +369,12 @@ Any additional field is `UNQUALIFIED_ROOT_MANIFEST_CONTENT` unless a later canon
 ROOT_MANIFEST_NAME_DRIFT = FAIL
 ROOT_MANIFEST_PRIVATE_NOT_TRUE = FAIL
 ROOT_MANIFEST_PACKAGE_MANAGER_DRIFT = FAIL
+ROOT_MANIFEST_TYPE_DRIFT = FAIL
 ROOT_MANIFEST_NODE_BASELINE_DRIFT = FAIL
 ROOT_MANIFEST_DEPENDENCY_SET_DRIFT = FAIL
 ROOT_MANIFEST_EXTRA_DEPENDENCY_CLASS = FAIL
 ROOT_MANIFEST_SCRIPT_ADDITION = FAIL_UNLESS_LATER_AUTHORIZED
 ROOT_MANIFEST_WORKSPACES_FIELD_PRESENT = FAIL
-ROOT_MANIFEST_TYPE_FIELD_PRESENT = FAIL_UNLESS_LATER_AUTHORIZED
 ROOT_MANIFEST_ENTRYPOINT_OR_PUBLISH_SURFACE = FAIL_UNLESS_LATER_AUTHORIZED
 ROOT_MANIFEST_PACKAGE_MANAGER_POLICY_FIELD = FAIL_UNLESS_LATER_AUTHORIZED
 ROOT_MANIFEST_UNQUALIFIED_EXTRA_FIELD = FAIL_CLOSED
@@ -386,11 +413,11 @@ ROOT_MANIFEST_NONDEPENDENCY_SEMANTIC_SHAPE = QUALIFIED_CANDIDATE
 ROOT_MANIFEST_NAME = signthos
 ROOT_MANIFEST_PRIVATE = true
 ROOT_MANIFEST_PACKAGE_MANAGER = pnpm@10.34.5
+ROOT_MANIFEST_TYPE = commonjs
 ROOT_MANIFEST_NODE_ENGINE = 24.20.0
 ROOT_MANIFEST_DEPENDENCIES = EXACT_004C1M_8_RUNTIME_SET
 ROOT_MANIFEST_WORKSPACES = ABSENT_REQUIRED
 ROOT_MANIFEST_SCRIPTS = ABSENT
-ROOT_MANIFEST_TYPE = ABSENT
 ROOT_MANIFEST_PACKAGE_MANAGER_POLICY_FIELDS = ABSENT
 ROOT_PACKAGE_JSON_BYTES = NOT_CREATED
 DEPENDENCY_ADOPTION = NOT_CLAIMED
