@@ -14,6 +14,7 @@ This grain qualifies the control-plane contract required before any deterministi
 004C1D_AUTHORITY = PLANNING_CONTRACT_QUALIFICATION_ONLY
 004C1D_IMPLEMENTATION_AUTHORITY = ABSENT
 004C1D_PACKAGE_MANAGER_EXECUTION_AUTHORITY = ABSENT
+004C1D_COREPACK_EXECUTION_AUTHORITY = ABSENT
 004C1D_DEPENDENCY_ADOPTION_AUTHORITY = ABSENT
 004C1D_DEPENDENCY_INSTALLATION_AUTHORITY = ABSENT
 004C1D_PACKAGE_ARCHIVE_DOWNLOAD_IMPORT_AUTHORITY = ABSENT
@@ -27,7 +28,7 @@ This grain qualifies the control-plane contract required before any deterministi
 SPEC_005_SUCCESSOR_AUTHORITY = ABSENT
 ```
 
-No package-manager command, resolver, package installation, archive download, manifest/lockfile mutation, provenance mutation, or runtime execution is authorized by this grain.
+No package-manager command, Corepack command, resolver, package installation, archive download, manifest/lockfile mutation, provenance mutation, or runtime execution is authorized by this grain.
 
 ## 2. Canonical predecessor state
 
@@ -60,6 +61,13 @@ PackageControlSurfaceDecision {
   selectedPackageManager
   selectedPackageManagerVersion
   packageManagerVersionPinMechanism
+  corepackState
+  corepackVersion
+  corepackPinMechanism
+  corepackProvisioningMode
+  corepackCacheState
+  corepackAcquisitionSource
+  corepackNetworkPolicy
   lockfilePath
   lockfileFormat
   lockfileOwnership
@@ -79,7 +87,15 @@ PackageControlSurfaceDecision {
 }
 ```
 
-Every field that affects dependency resolution must be explicit. Unknown fields remain blockers rather than being filled from developer-machine defaults.
+Every field that affects dependency resolution or package-manager provisioning must be explicit. Unknown fields remain blockers rather than being filled from developer-machine defaults.
+
+For Corepack, the future decision must choose exactly one explicit state:
+
+```text
+COREPACK = NOT_USED
+```
+
+or a fully pinned used state that records exact Corepack version, pin mechanism, provisioning/activation command mode, cache location and relevant cache state, package-manager acquisition source, and network/download policy. `COREPACK = USED_UNPINNED` is nonqualifying.
 
 ## 4. Package-manager selection criteria
 
@@ -88,7 +104,9 @@ A future package-manager selection must be based on repository control-surface c
 The decision must evaluate at least:
 
 - whether canonical repository roots already declare a package manager or workspace owner;
-- exact version pinning rather than moving latest behavior;
+- exact package-manager version pinning rather than moving latest behavior;
+- whether Corepack is used at all and, if used, its exact version and provisioning behavior;
+- whether Corepack can download or switch the package-manager executable and under what explicit network policy;
 - lockfile determinism and canonical ownership;
 - peer-dependency semantics;
 - optional-dependency semantics;
@@ -102,6 +120,7 @@ Candidate families may include npm, pnpm, yarn, bun, or another resolver, but th
 
 ```text
 SIGNTHOS_PACKAGE_MANAGER = NOT_SELECTED_BY_004C1D
+COREPACK_STATE = NOT_SELECTED_BY_004C1D
 ```
 
 ## 5. Workspace-root ownership
@@ -122,20 +141,24 @@ No nested package manifest may silently become the dependency-policy root merely
 
 If multiple candidate roots exist, the ambiguity must be reconciled before resolver execution.
 
-## 6. Exact version pinning
+## 6. Exact version and provisioning pinning
 
-A package-manager binary or runtime used for merge-critical resolution evidence must be exact-version-bound.
+A package-manager binary, Corepack provisioning layer, or runtime used for merge-critical resolution evidence must be exact-version-bound where applicable.
 
 Acceptable future evidence must identify:
 
 - exact package-manager name;
 - exact package-manager version;
 - exact runtime version where behavior depends on it;
-- exact version-pin mechanism such as a repository-owned declaration or separately canonical equivalent;
+- exact package-manager version-pin mechanism such as a repository-owned declaration or separately canonical equivalent;
+- explicit Corepack state (`NOT_USED` or pinned `USED`);
+- when Corepack is used: exact Corepack version, exact pin mechanism, provisioning/activation mode, cache location and state, package-manager provisioning source, and network/download policy;
 - exact resolver command arguments;
 - exact registry configuration inputs applicable to resolution.
 
-Moving aliases such as `latest`, environment-dependent global installs, or undocumented local defaults are nonqualifying.
+Moving aliases such as `latest`, environment-dependent global installs, undocumented local defaults, or an unpinned Corepack that may select or download a package-manager executable are nonqualifying.
+
+Corepack execution, activation, preparation, cache mutation, package-manager provisioning, and any network/download behavior remain prohibited until separately authorized.
 
 ## 7. Lockfile contract
 
@@ -167,13 +190,19 @@ A later decision must define whether peer conflicts fail closed, how optional de
 
 ## 9. Platform-resolution inputs
 
-Exact resolver evidence must state every platform input that can affect graph shape, including where applicable:
+Exact resolver evidence must state every platform input that can affect graph shape or package-manager provisioning, including where applicable:
 
 ```text
 OS
 CPU_ARCHITECTURE
 RUNTIME_VERSION
 PACKAGE_MANAGER_VERSION
+COREPACK_STATE
+COREPACK_VERSION
+COREPACK_PROVISIONING_MODE
+COREPACK_CACHE_STATE
+COREPACK_ACQUISITION_SOURCE
+COREPACK_NETWORK_POLICY
 REGISTRY_CONFIGURATION
 WORKSPACE_ROOT
 ROOT_MANIFEST_DIGEST
@@ -189,12 +218,14 @@ No single-platform graph may be generalized to all supported platforms without s
 
 Even after a package manager is selected, dependency resolution or acquisition remains unauthorized until a fresh canonical unit explicitly grants the required writable paths.
 
-Potential future writable surfaces could include a root manifest, workspace declaration, lockfile, provenance inventory, NOTICE/SBOM outputs, or generated evidence artifacts. None is granted here.
+Potential future writable surfaces could include a root manifest, workspace declaration, lockfile, Corepack/package-manager cache or provisioning surface, provenance inventory, NOTICE/SBOM outputs, or generated evidence artifacts. None is granted here.
 
 ```text
 PACKAGE_MANIFEST_WRITABLE_AUTHORITY = ABSENT
 LOCKFILE_WRITABLE_AUTHORITY = ABSENT
 WORKSPACE_CONFIG_WRITABLE_AUTHORITY = ABSENT
+COREPACK_CACHE_WRITABLE_AUTHORITY = ABSENT
+PACKAGE_MANAGER_PROVISIONING_WRITABLE_AUTHORITY = ABSENT
 PROVENANCE_NOTICE_SBOM_WRITABLE_AUTHORITY = ABSENT
 ```
 
@@ -204,6 +235,8 @@ A future resolver-closure qualification must bind at minimum:
 
 - exact canonical base/head/tree;
 - exact package-manager/runtime versions;
+- explicit Corepack state and, when used, exact Corepack version and provisioning behavior;
+- exact Corepack cache state, acquisition source, and network/download policy where applicable;
 - exact workspace root and root manifest digest;
 - exact resolver command and environment inputs;
 - exact lockfile input/output digest where applicable;
@@ -216,13 +249,15 @@ A future resolver-closure qualification must bind at minimum:
 - proof that no unauthorized repository paths changed;
 - independent substantive exact-head review and guarded canonicalization.
 
-The resolver run itself requires separate authority and is not performed by 004C1D.
+The resolver run itself and any Corepack/package-manager provisioning require separate authority and are not performed by 004C1D.
 
 ## 12. Current qualification result
 
 ```text
 004C1D_CONTROL_SURFACE_CONTRACT = ESTABLISHED_AS_PLANNING_REQUIREMENT
 004C1D_PACKAGE_MANAGER_SELECTION = NOT_PERFORMED
+004C1D_COREPACK_STATE_SELECTION = NOT_PERFORMED
+004C1D_COREPACK_EXECUTION = NOT_PERFORMED
 004C1D_WORKSPACE_ROOT_SELECTION = NOT_PERFORMED
 004C1D_LOCKFILE_SELECTION = NOT_PERFORMED
 004C1D_RESOLVER_EXECUTION = NOT_PERFORMED
@@ -233,7 +268,7 @@ The resolver run itself requires separate authority and is not performed by 004C
 
 ## 13. Successor rule
 
-Canonicalizing 004C1D does not itself select a package manager, authorize resolver execution, install dependencies, create a lockfile, mutate a package manifest, import archive bytes, or authorize 004C2/004D/Specification 005.
+Canonicalizing 004C1D does not itself select a package manager, select or execute Corepack, authorize package-manager provisioning or downloads, authorize resolver execution, install dependencies, create a lockfile, mutate a package manifest, import archive bytes, or authorize 004C2/004D/Specification 005.
 
 After exact-head independent substantive review, guarded merge, post-merge verification, and fresh governance reread, a successor may qualify one bounded control-plane decision or resolver-evidence step only if live canonical truth explicitly authorizes it.
 
@@ -242,8 +277,9 @@ After exact-head independent substantive review, guarded merge, post-merge verif
 004C1D does not claim that:
 
 - npm, pnpm, yarn, bun, or any other package manager is selected;
-- any package-manager command has run;
-- any manifest, workspace file, or lockfile may be changed;
+- Corepack is selected, enabled, invoked, activated, prepared, or permitted to provision/download a package manager;
+- any package-manager or Corepack command has run;
+- any manifest, workspace file, lockfile, Corepack cache, or package-manager provisioning state may be changed;
 - any dependency is adopted, acquired, downloaded, installed, imported, or executable;
 - any deterministic resolved dependency graph exists;
 - any archive/source binding or redistribution closure is complete;
