@@ -33,13 +33,13 @@ No package bytes, source bytes, binaries, fixtures, manifests, lockfiles, proven
 
 004C1A closed canonical through PR #106 and intentionally failed dependency acquisition closed because the complete registry metadata set, exact integrity/tarball identities, published dependency/peer graph, archive-to-source binding, PDFium distribution evidence, font redistribution evidence, peer policy, and Signthos package-manager/workspace selection were not established.
 
-This grain does not weaken those states.
+This grain refines only evidence that is now directly observed from exact public npm version documents. It does not promote those observations into dependency-acquisition authority.
 
 ## 3. Public registry evidence source
 
-The npm public registry remains the authoritative package registry used by npm for package metadata. Public npm package pages are treated only as the evidence fields they directly expose. A package page showing a version, license, dependency count, or repository does not prove `dist.integrity`, `dist.shasum`, exact tarball identity, archive contents, or archive-to-source equivalence.
+The npm public registry is the package registry used by npm for package metadata. This grain distinguishes npm package-page observations from exact npm version-document observations. Exact version-document fields are accepted only as the registry metadata fields they directly expose; they do not prove archive contents, archive-to-source equivalence, bundled third-party notice completeness, or runtime suitability.
 
-Observed first-party/public sources on 2026-09-07:
+Observed public sources on 2026-09-07 include:
 
 - `https://www.npmjs.com/package/@embedpdf/core`
 - `https://www.npmjs.com/package/@embedpdf/engines`
@@ -47,22 +47,24 @@ Observed first-party/public sources on 2026-09-07:
 - `https://www.npmjs.com/package/@embedpdf/pdfium`
 - `https://www.npmjs.com/package/@embedpdf/plugin-interaction-manager`
 - `https://www.npmjs.com/search?q=@embedpdf`
-- npm registry documentation describing the public registry endpoint.
+- exact public npm version documents under `https://registry.npmjs.org/<encoded-package>/<version>` for the selected package/version records inspected by this qualification.
 
-## 4. Published version observations
+The registry version-document boundary is materially stronger than a package-page count: it exposes exact published dependency/peer metadata and exact `dist.integrity`, `dist.shasum`, and `dist.tarball` fields for the queried version record.
 
-The current public package pages establish these bounded facts:
+## 4. Published version and dependency observations
+
+The selected package/version existence and package-level license observations include:
 
 ```text
-@embedpdf/core = 2.15.0 / MIT / 2 dependencies observed
-@embedpdf/engines = 2.15.0 / MIT / 9 dependencies observed
-@embedpdf/models = 2.15.0 / MIT / 0 dependencies observed
-@embedpdf/pdfium = 2.15.0 / MIT package metadata observed
-@embedpdf/plugin-interaction-manager = 2.15.0 / MIT / @embedpdf/models dependency observed
-@embedpdf/utils = 2.15.0 / MIT existence observed
+@embedpdf/core = 2.15.0 / MIT
+@embedpdf/engines = 2.15.0 / MIT
+@embedpdf/models = 2.15.0 / MIT
+@embedpdf/pdfium = 2.15.0 / MIT
+@embedpdf/plugin-interaction-manager = 2.15.0 / MIT
+@embedpdf/utils = 2.15.0 / MIT
 ```
 
-The public npm search surface also establishes that the fallback font packages are independently versioned rather than following the `2.15.0` application-package line:
+The fallback font packages are independently versioned rather than following the `2.15.0` application-package line:
 
 ```text
 @embedpdf/fonts-arabic = 1.0.0 / OFL-1.1
@@ -74,45 +76,68 @@ The public npm search surface also establishes that the fallback font packages a
 @embedpdf/fonts-tc = 1.0.0 / OFL-1.1
 ```
 
-This is a material refinement of the future graph boundary: package names in the pinned source closure must not be assigned `2.15.0` by family-name inference. Exact published dependency ranges from `@embedpdf/engines@2.15.0` still have to be bound before the font versions can be promoted into an exact resolved graph.
+Fresh exact-version-document inspection also establishes that `@embedpdf/engines@2.15.0` publishes nine dependency entries. The seven fallback-font dependency ranges are directly observed as exact `1.0.0` entries rather than inferred from the EmbedPDF `2.15.0` family line. The complete nine-entry published dependency map is therefore registry-observed evidence for this exact version record, not a package-page count or source-workspace inference.
 
-## 5. Published graph state
-
-Current public page evidence improves existence/version/license classification but does not establish the exact published closure.
+Classification:
 
 ```text
 DIRECT_CORE_VERSION_EXISTENCE = ESTABLISHED_FOR_OBSERVED_PACKAGES
 FONT_PACKAGE_VERSION_EXISTENCE = ESTABLISHED_AS_1.0.0_FOR_OBSERVED_FONT_SET
 FONT_PACKAGE_LEVEL_LICENSE = OFL-1.1_OBSERVED
-EXACT_CORE_PUBLISHED_DEPENDENCY_RANGES = PARTIAL
-EXACT_ENGINE_PUBLISHED_DEPENDENCY_RANGES = NOT_ESTABLISHED
-EXACT_PLUGIN_PUBLISHED_DEPENDENCY_RANGES = PARTIAL
+EXACT_ENGINE_PUBLISHED_DEPENDENCY_RANGES = DIRECTLY_OBSERVED_FROM_2.15.0_VERSION_DOCUMENT
+EXACT_ENGINE_FONT_DEPENDENCY_RANGES = SEVEN_DIRECT_EXACT_1.0.0_ENTRIES_OBSERVED
+SELECTED_VERSION_DOCUMENT_PEER_FIELDS = DIRECTLY_OBSERVED_WHERE_PRESENT
 EXACT_PUBLISHED_TRANSITIVE_GRAPH = NOT_ESTABLISHED
-EXACT_PUBLISHED_PEER_GRAPH = NOT_ESTABLISHED
+EXACT_RESOLVED_PEER_GRAPH = NOT_ESTABLISHED
 ```
 
-Dependency counts are not accepted as dependency identities or ranges.
+Direct dependency metadata does not establish the recursively resolved transitive graph or prove that a future Signthos package-manager resolution would produce one specific closure.
 
-## 6. Exact dist metadata state
+## 5. Exact registry dist metadata observations
 
-The current evidence available to this grain does not expose or independently bind the exact npm version-document `dist` fields for the selected package set.
-
-Therefore:
+Fresh public npm version-document inspection establishes that selected exact version records directly expose the registry `dist` fields:
 
 ```text
-EXACT_REGISTRY_INTEGRITY_SET = NOT_ESTABLISHED
-EXACT_REGISTRY_SHASUM_SET = NOT_ESTABLISHED
-EXACT_REGISTRY_TARBALL_SET = NOT_ESTABLISHED
+SELECTED_VERSION_DOCUMENT_DIST_INTEGRITY = DIRECTLY_OBSERVED
+SELECTED_VERSION_DOCUMENT_DIST_SHASUM = DIRECTLY_OBSERVED
+SELECTED_VERSION_DOCUMENT_DIST_TARBALL = DIRECTLY_OBSERVED
+```
+
+These are exact registry metadata observations for the queried package/version records. They correct the predecessor candidate's over-conservative claim that such fields were not exposed.
+
+They do **not** establish all acquisition gates. In particular, this grain does not download or hash package archives inside Signthos, characterize archive payloads, prove archive-to-pinned-source equivalence, or bind bundled PDFium/font distribution obligations.
+
+Therefore the broader states remain:
+
+```text
+EXACT_SELECTED_VERSION_DOCUMENT_DIST_FIELDS = ESTABLISHED_FOR_INSPECTED_RECORDS
+COMPLETE_SELECTED_AND_TRANSITIVE_DIST_SET = NOT_ESTABLISHED
+REGISTRY_ARCHIVE_PAYLOAD_CHARACTERIZATION = NOT_ESTABLISHED
 REGISTRY_ARCHIVE_TO_PINNED_SOURCE_BINDING = UNPROVEN
 ```
 
-No package archive is downloaded into Signthos to compensate for missing metadata.
+No package archive is downloaded into Signthos by this grain.
+
+## 6. Published graph state
+
+The direct registry evidence is now stronger than the previous candidate stated, but the exact acquisition closure is still incomplete.
+
+```text
+EXACT_ENGINE_DIRECT_PUBLISHED_DEPENDENCY_MAP = ESTABLISHED_FROM_VERSION_DOCUMENT
+SELECTED_VERSION_DOCUMENT_PEER_METADATA = DIRECTLY_OBSERVED_WHERE_PRESENT
+SELECTED_VERSION_DOCUMENT_DIST_METADATA = DIRECTLY_OBSERVED
+FULL_RECURSIVE_TRANSITIVE_RESOLUTION = NOT_ESTABLISHED
+FULL_RESOLVED_PEER_OPTIONAL_PEER_CLOSURE = NOT_ESTABLISHED
+COMPLETE_ARCHIVE_IDENTITY_SET_FOR_FINAL_CLOSURE = NOT_ESTABLISHED
+```
+
+No dependency count, family-name convention, source `workspace:*` declaration, or version-number similarity is promoted into a resolved-closure claim.
 
 ## 7. PDFium and font redistribution boundary
 
-The `@embedpdf/pdfium` package page identifies the package as MIT while its documentation states that bundled PDFium WebAssembly is Apache-2.0 licensed. That package-level statement is not sufficient to establish the complete bundled PDFium third-party notice set, build identity, exact WASM digest, reproducibility relationship, or SBOM mapping.
+The `@embedpdf/pdfium` package metadata identifies the wrapper package as MIT while its documentation states that bundled PDFium WebAssembly is Apache-2.0 licensed. Registry `dist` metadata does not by itself establish the complete bundled PDFium third-party notice set, build identity, exact WASM digest after archive extraction, reproducibility relationship, or SBOM mapping.
 
-The fallback fonts are publicly described under OFL-1.1 package metadata. This improves license-family classification but does not yet establish exact shipped font files, copyrights, required notices, archive digests, modification state, or exact relationship to the selected engine archive.
+The fallback fonts are publicly described under OFL-1.1 package metadata. Direct version-document and tarball-URL metadata improve registry identity evidence but do not establish exact shipped font files, copyrights, required notices, modification state, or exact relationship to the selected engine archive without archive characterization.
 
 ```text
 PDFIUM_WRAPPER_LICENSE = MIT_OBSERVED
@@ -122,14 +147,15 @@ PDFIUM_WASM_ARCHIVE_SOURCE_BUILD_BINDING = NOT_ESTABLISHED
 PDFIUM_DISTRIBUTION_NOTICE_SET = NOT_YET_BOUND_IN_SIGNTHOS
 FONT_PACKAGE_LICENSE_FAMILY = OFL_1_1_OBSERVED
 FONT_EXACT_ASSET_NOTICE_SET = NOT_ESTABLISHED
-FONT_ARCHIVE_DIGEST_SET = NOT_ESTABLISHED
+FONT_EXTRACTED_ASSET_DIGEST_SET = NOT_ESTABLISHED
 ```
 
 ## 8. Framework peers and package manager
 
-No framework or Signthos package manager is selected by this grain.
+The selected version documents expose peer metadata where present, but this grain does not select a framework or Signthos package manager and does not resolve peer policy into a concrete installation graph.
 
 ```text
+PEER_METADATA_OBSERVATION = PRESENT_FOR_INSPECTED_VERSION_DOCUMENTS_WHERE_EXPOSED
 PEER_FRAMEWORK_INSTALLATION_SET = UNRESOLVED
 FRAMEWORK_ADOPTION_AUTHORITY = ABSENT
 SIGNTHOS_PACKAGE_MANAGER = NOT_YET_CANONICAL
@@ -142,11 +168,13 @@ Upstream `pnpm@10.4.0` remains reproduction metadata only.
 
 ## 9. Acquisition readiness
 
-The refined evidence still fails dependency acquisition closed:
+The corrected evidence still fails dependency acquisition closed:
 
 ```text
-004C1B_EXACT_PUBLISHED_GRAPH = INCOMPLETE
-004C1B_EXACT_DIST_METADATA = INCOMPLETE
+004C1B_DIRECT_REGISTRY_METADATA = PARTIALLY_ESTABLISHED
+004C1B_RECURSIVE_RESOLVED_GRAPH = INCOMPLETE
+004C1B_COMPLETE_DIST_SET_FOR_FINAL_CLOSURE = INCOMPLETE
+004C1B_ARCHIVE_PAYLOAD_CHARACTERIZATION = UNPROVEN
 004C1B_ARCHIVE_SOURCE_BINDING = UNPROVEN
 004C1B_PDFIUM_NOTICE_BINDING = INCOMPLETE
 004C1B_FONT_NOTICE_BINDING = INCOMPLETE
@@ -157,15 +185,15 @@ The refined evidence still fails dependency acquisition closed:
 004C1B_RUNTIME_AUTHORITY = ABSENT
 ```
 
-A future acquisition/bootstrap grain is not authorized merely because package/version existence is now better characterized.
+A future acquisition/bootstrap grain is not authorized merely because stronger registry metadata is now directly observable.
 
 ## 10. Remaining deterministic gates
 
 Before dependency bytes may enter Signthos, fresh canonical evidence must establish all applicable gates:
 
-1. exact published dependency ranges for the selected direct and transitive package set;
-2. exact published peer and optional-peer metadata;
-3. exact registry `dist.integrity`, `dist.shasum`, and tarball identity per selected package;
+1. the final selected direct and recursively resolved transitive package closure;
+2. the final resolved peer/optional-peer policy and graph;
+3. the complete exact registry `dist.integrity`, `dist.shasum`, and tarball identity set for that final closure;
 4. archive file/executable payload characterization;
 5. acceptable archive-to-pinned-source relationship evidence;
 6. exact PDFium WASM source/build/license/notice/SBOM evidence;
@@ -180,16 +208,15 @@ Before dependency bytes may enter Signthos, fresh canonical evidence must establ
 
 Canonicalizing 004C1B does not authorize dependency acquisition, package-manager selection, runtime implementation, 004D, or Specification 005.
 
-After exact-head independent substantive review, guarded expected-head merge, post-merge verification, and fresh canonical governance reread, the next successor must be derived from live evidence. If exact dist/published-graph and distribution evidence remain unavailable, another evidence-only grain or an explicit external blocker is the safe result.
+After exact-head independent substantive review, guarded expected-head merge, post-merge verification, and fresh canonical governance reread, the next successor must be derived from live evidence. Stronger direct registry evidence may justify a separately authorized archive/provenance or resolution qualification grain, but it does not itself authorize installation or import.
 
 ## 12. Explicit non-claims
 
 004C1B does not claim that:
 
 - any dependency is adopted, installed, downloaded, or imported;
-- the full published dependency/peer closure is known;
-- any exact npm integrity, shasum, or tarball identity is known when not directly evidenced;
-- a registry archive equals pinned Git source bytes;
+- the full recursively resolved dependency/peer closure is known;
+- observed registry `dist` metadata proves archive payload contents or archive-to-source equality;
 - package-level MIT fully classifies bundled PDFium obligations;
 - package-level OFL-1.1 alone completes font redistribution notice evidence;
 - pnpm is selected for Signthos;
