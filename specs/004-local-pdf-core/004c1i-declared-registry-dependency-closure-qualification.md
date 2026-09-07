@@ -76,12 +76,13 @@ These roots are evidence inputs only. They are not a Signthos `package.json` dep
 
 The registry traversal followed only the published `dependencies` field. It did not follow `peerDependencies`, `optionalDependencies`, `devDependencies`, workspace source declarations, package-manager hoisting/deduplication, overrides, platform filters, or a lockfile.
 
-The traversal was bounded to depth 3 and returned:
+The traversal used a configured depth limit of 3 and returned an observed maximum reachable depth of 2:
 
 ```text
 ROOT_COUNT = 8
 REACHABLE_PACKAGE_IDENTITY_COUNT = 18
-MAX_DEPTH = 3
+TRAVERSAL_DEPTH_LIMIT = 3
+OBSERVED_MAX_REACHABLE_DEPTH = 2
 UNRESOLVED_COUNT = 0
 TRUNCATED = FALSE
 VULNERABLE_PACKAGE_COUNT_FROM_OSV_QUERY = 0
