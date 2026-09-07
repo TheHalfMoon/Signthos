@@ -76,7 +76,7 @@ The fallback font packages are independently versioned rather than following the
 @embedpdf/fonts-tc = 1.0.0 / OFL-1.1
 ```
 
-Fresh exact-version-document inspection also establishes that `@embedpdf/engines@2.15.0` publishes nine dependency entries. The seven fallback-font dependency ranges are directly observed as exact `1.0.0` entries rather than inferred from the EmbedPDF `2.15.0` family line. The complete nine-entry published dependency map is therefore registry-observed evidence for this exact version record, not a package-page count or source-workspace inference.
+Fresh exact-version-document inspection establishes that `@embedpdf/engines@2.15.0` publishes nine dependency entries. The seven fallback-font dependency ranges are directly observed as exact `1.0.0` entries rather than inferred from the EmbedPDF `2.15.0` family line. This candidate does not yet record the remaining two dependency names and exact ranges, so it preserves the nine-entry package-to-range map as incomplete rather than claiming complete direct-map qualification.
 
 Classification:
 
@@ -84,8 +84,9 @@ Classification:
 DIRECT_CORE_VERSION_EXISTENCE = ESTABLISHED_FOR_OBSERVED_PACKAGES
 FONT_PACKAGE_VERSION_EXISTENCE = ESTABLISHED_AS_1.0.0_FOR_OBSERVED_FONT_SET
 FONT_PACKAGE_LEVEL_LICENSE = OFL-1.1_OBSERVED
-EXACT_ENGINE_PUBLISHED_DEPENDENCY_RANGES = DIRECTLY_OBSERVED_FROM_2.15.0_VERSION_DOCUMENT
+EXACT_ENGINE_PUBLISHED_DEPENDENCY_COUNT = NINE_DIRECTLY_OBSERVED
 EXACT_ENGINE_FONT_DEPENDENCY_RANGES = SEVEN_DIRECT_EXACT_1.0.0_ENTRIES_OBSERVED
+EXACT_ENGINE_COMPLETE_PUBLISHED_DEPENDENCY_MAP = NOT_ESTABLISHED
 SELECTED_VERSION_DOCUMENT_PEER_FIELDS = DIRECTLY_OBSERVED_WHERE_PRESENT
 EXACT_PUBLISHED_TRANSITIVE_GRAPH = NOT_ESTABLISHED
 EXACT_RESOLVED_PEER_GRAPH = NOT_ESTABLISHED
@@ -123,7 +124,8 @@ No package archive is downloaded into Signthos by this grain.
 The direct registry evidence is now stronger than the previous candidate stated, but the exact acquisition closure is still incomplete.
 
 ```text
-EXACT_ENGINE_DIRECT_PUBLISHED_DEPENDENCY_MAP = ESTABLISHED_FROM_VERSION_DOCUMENT
+EXACT_ENGINE_DIRECT_PUBLISHED_DEPENDENCY_COUNT = NINE_DIRECTLY_OBSERVED
+EXACT_ENGINE_DIRECT_PUBLISHED_DEPENDENCY_MAP = INCOMPLETE
 SELECTED_VERSION_DOCUMENT_PEER_METADATA = DIRECTLY_OBSERVED_WHERE_PRESENT
 SELECTED_VERSION_DOCUMENT_DIST_METADATA = DIRECTLY_OBSERVED
 FULL_RECURSIVE_TRANSITIVE_RESOLUTION = NOT_ESTABLISHED
@@ -215,6 +217,7 @@ After exact-head independent substantive review, guarded expected-head merge, po
 004C1B does not claim that:
 
 - any dependency is adopted, installed, downloaded, or imported;
+- the full direct package-to-range map is established;
 - the full recursively resolved dependency/peer closure is known;
 - observed registry `dist` metadata proves archive payload contents or archive-to-source equality;
 - package-level MIT fully classifies bundled PDFium obligations;
