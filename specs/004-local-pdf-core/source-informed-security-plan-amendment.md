@@ -81,7 +81,7 @@ REPOSITORY = https://github.com/Tencent/AI-Infra-Guard
 RESEARCH_REVISION = e4e622af3ad2b8228ce82dd62b01415dd8ce2b9c
 RESEARCH_TREE = 19aca1c5f39358e59c80b0e4f282d69b048134d3
 ROOT_LICENSE = Apache-2.0
-ROOT_NOTICE = ATTRIBUTION_REQUIRED
+ROOT_NOTICE = ATTRIBUTION_INSTRUCTION_PRESENT_REQUIRES_APPLICABILITY_QUALIFICATION
 DISPOSITION = METHOD_AND_SELECTIVE_COMPONENT_CANDIDATE
 PRIMARY_ROLE = AI_AGENT_MCP_SKILL_SECURITY
 ```
@@ -101,7 +101,7 @@ High-value concepts include:
 - SARIF 2.1.0 result transport;
 - multi-stage audit/review/red-team patterns.
 
-The reviewed root NOTICE requires visible attribution for integrations or derivative redistribution. Path-level licensing remains mandatory: a nested README label is not sufficient proof of the exact license for copied paths when a matching nested license artifact is absent.
+The reviewed root NOTICE contains an explicit attribution instruction for redistribution, integration, or derivative work. Apache-2.0 Section 4(d) governs NOTICE preservation for distributed derivative works and states that NOTICE contents do not modify the License. Any later reuse must qualify the exact distribution/integration context and applicable attribution obligations. Path-level licensing remains mandatory: a nested README label is not sufficient proof of the exact license for copied paths when a matching nested license artifact is absent.
 
 ### 3.3 Tencent AICGSecEval
 
