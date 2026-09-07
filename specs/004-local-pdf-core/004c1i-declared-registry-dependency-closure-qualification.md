@@ -288,84 +288,88 @@ FONT_EXTRACTED_ASSET_DIGEST_SET = NOT_ESTABLISHED
 FONT_REDISTRIBUTION_CLEARANCE = NOT_CLAIMED
 ```
 
-## 11. Reconciliation with 004C1B and 004C1C
+## 11. Historical evidence reconciliation
 
-Historical 004C1B and 004C1C were correct to fail closed because their exact runs did not establish a complete declared dependency closure.
+Canonical 004C1B and 004C1C were correct to remain fail closed with the evidence available at their closeout. 004C1I supplements, rather than rewrites, those historical records.
 
-004C1I adds later evidence without rewriting those historical records:
+The current read-only registry observation now establishes the dependency-only declared map for these exact selected roots and reachable exact versions. It does not retroactively convert historical `UNPROVEN` statements into claims that were known at those earlier commit times.
 
-```text
-004C1B_ENGINE_COMPLETE_PUBLISHED_DEPENDENCY_MAP = HISTORICALLY_NOT_ESTABLISHED
-004C1C_COMPLETE_DECLARED_TRANSITIVE_METADATA_CLOSURE = HISTORICALLY_NOT_ESTABLISHED
-004C1I_DEPENDENCY_ONLY_DECLARED_CLOSURE = ESTABLISHED_FOR_THE_SELECTED_EIGHT_ROOTS_AND_OBSERVED_EXACT_VERSION_RECORDS
-```
+## 12. Explicitly unproven boundaries
 
-This supersedes only the missing dependency-only metadata fact. It does not supersede the peer, optional, resolver, archive, source-binding, notice, or runtime blockers.
-
-## 12. Explicit unresolved evidence
+The following remain fail closed after 004C1I:
 
 ```text
-COMPLETE_PEER_DEPENDENCY_METADATA_CLOSURE = NOT_ESTABLISHED
-COMPLETE_PEER_DEPENDENCIES_META_CLOSURE = NOT_ESTABLISHED
-COMPLETE_OPTIONAL_DEPENDENCY_METADATA_CLOSURE = NOT_ESTABLISHED
-FRAMEWORK_PEER_INSTALLATION_SET = UNRESOLVED
-FRAMEWORK_ADOPTION_AUTHORITY = ABSENT
-ROOT_MANIFEST_EXACT_CONTENT = NOT_AUTHORIZED
-PNPM_WORKSPACE_EXACT_CONTENT = NOT_AUTHORIZED
-ROOT_WORKSPACE_MEMBERSHIP = UNRESOLVED_FAIL_CLOSED
-EXACT_DEPENDENCY_DECLARATION_SET = NOT_AUTHORIZED
-EXACT_PNPM_PROVISIONING_MECHANISM = NOT_AUTHORIZED
-EXACT_NODE_DISTRIBUTION_SHA256 = NOT_ESTABLISHED
-EXACT_RESOLVER_COMMAND = NOT_AUTHORIZED
-EXACT_NETWORK_ALLOWLIST = NOT_AUTHORIZED
-EXACT_CACHE_MODE = NOT_AUTHORIZED
-EXACT_WRITABLE_SURFACE = NOT_AUTHORIZED
+COMPLETE_PEER_DEPENDENCY_CLOSURE = UNPROVEN
+COMPLETE_PEER_DEPENDENCY_META = UNPROVEN
+COMPLETE_OPTIONAL_DEPENDENCY_CLOSURE = UNPROVEN
+FRAMEWORK_PEER_POLICY = UNRESOLVED
+EXACT_SIGNTHOS_DEPENDENCY_DECLARATION_SET = NOT_AUTHORIZED
+ROOT_MANIFEST_BYTES = NOT_AUTHORIZED
+WORKSPACE_BYTES = NOT_AUTHORIZED
+PNPM_CONFIG_BYTES = NOT_AUTHORIZED
+PNPM_PROVISIONING = NOT_AUTHORIZED
+RESOLVER_EXECUTION = NOT_AUTHORIZED
 LOCKFILE = NOT_GENERATED
-RESOLVED_GRAPH = NOT_GENERATED
-COMPLETE_ARCHIVE_INTEGRITY_SET_FOR_RESOLVED_GRAPH = NOT_ESTABLISHED
-REGISTRY_ARCHIVE_PAYLOAD_CHARACTERIZATION = NOT_ESTABLISHED
-REGISTRY_ARCHIVE_TO_PINNED_SOURCE_BINDING = UNPROVEN
-PDFIUM_WASM_EXACT_ACQUISITION_DIGEST = NOT_ESTABLISHED
+PACKAGE_MANAGER_RESOLVED_GRAPH = NOT_GENERATED
+PACKAGE_ARCHIVE_PAYLOAD_DIGEST_SET = NOT_ESTABLISHED
+REGISTRY_ARCHIVE_TO_PINNED_SOURCE_BINDING = NOT_ESTABLISHED
+PDFIUM_DISTRIBUTION_NOTICE_SET = NOT_ESTABLISHED
 PDFIUM_WASM_ARCHIVE_SOURCE_BUILD_BINDING = NOT_ESTABLISHED
-PDFIUM_DISTRIBUTION_NOTICE_SET = NOT_YET_BOUND_IN_SIGNTHOS
-FONT_EXACT_ASSET_NOTICE_SET = NOT_ESTABLISHED
+FONT_NOTICE_SET = NOT_ESTABLISHED
 FONT_EXTRACTED_ASSET_DIGEST_SET = NOT_ESTABLISHED
+PROVENANCE_SBOM = NOT_GENERATED
 ```
 
-Therefore:
+A registry `shasum` is not a locally recomputed archive digest and must not be treated as one.
 
-```text
-004C1I_DEPENDENCY_ACQUISITION_ELIGIBILITY = FAIL_CLOSED
-004C1I_RESOLVER_READINESS = FAIL_CLOSED
-004C1I_PROVIDER_RUNTIME_ELIGIBILITY = FAIL_CLOSED
-```
+## 13. Required future package-control inputs
 
-## 13. Acceptance criteria
+A later package-control-content grain, if freshly authorized, must reconcile at least:
+
+- peer and optional metadata closure;
+- framework peer policy for the headless provider boundary;
+- exact root package declarations;
+- exact workspace membership;
+- exact pnpm provisioning and package-manager policy bytes;
+- source/archive and notice obligations;
+- lifecycle execution policy;
+- release-age/registry/network policy;
+- exact resolver command and writable surface.
+
+004C1I does not authorize that grain.
+
+## 14. Acceptance criteria
 
 004C1I may close canonically only if:
 
-- the final candidate remains one Signthos-authored qualification file under `specs/004-local-pdf-core/**`;
-- the canonical PR base remains exact live `main` at immediate premerge qualification;
-- the dependency-only traversal scope and exclusions remain explicit;
-- all 18 reachable exact package/version identities and dependency maps are represented without promoting them to a lockfile graph;
-- registry tarball/shasum/license/lifecycle/deprecation/vulnerability observations are identified as metadata rather than archive or runtime proof;
-- peer/optional/framework/resolver/archive/source-binding/PDFium/font-notice gaps remain fail closed;
-- no package-control, dependency, source, archive, provenance, NOTICE, SBOM, workflow, runtime, database, or deployment mutation occurs;
-- no package manager, Node, Corepack, resolver, registry acquisition, provider, or PDF engine executes;
+- one Signthos-authored evidence file under `specs/004-local-pdf-core/**` is the complete changed surface;
+- the exact eight planning roots and dependency-only reachable identities are recorded;
+- exact observed published dependency maps are recorded for every reachable identity;
+- traversal limits and observed completeness are explicit;
+- registry tarball/shasum/license/lifecycle/deprecation/vulnerability metadata claims remain bounded to what was observed;
+- peers, optional dependencies, package-manager resolution, archive payload, source binding, notices, and runtime remain explicitly unproven;
+- no package-control, cache, provenance, NOTICE, SBOM, source/runtime, workflow, container, database, or deployment surface is mutated;
 - fresh independent substantive exact-head review reports no material findings;
 - unresolved material review threads are zero;
-- workflow/check/provider accounting is truthful;
+- Actions/status/provider accounting is truthful;
 - guarded normal merge uses exact `expected_head_sha`;
-- merge SHA, signature, ordered parents, tree, and exact canonical surface are mechanically verified post-merge.
+- merge tree equality, ordered parents, signature, changed surface, and post-merge checks are mechanically verified.
 
-## 14. Required successor reconciliation
+## 15. Current result and successor boundary
 
-Canonical 004C1I closeout does not authorize package-control mutation or resolver execution.
+```text
+004C1I_DEPENDENCY_ONLY_DECLARED_CLOSURE = QUALIFIED_FOR_OBSERVED_EXACT_VERSION_RECORDS
+004C1I_PEER_OPTIONAL_CLOSURE = FAIL_CLOSED
+004C1I_PACKAGE_CONTROL_READINESS = FAIL_CLOSED
+004C1I_RESOLVER_READINESS = FAIL_CLOSED
+004C1I_DEPENDENCY_ACQUISITION_ELIGIBILITY = FAIL_CLOSED
+004C2_SUCCESSOR_AUTHORITY = NOT_YET_DERIVED
+004D_SUCCESSOR_AUTHORITY = NOT_YET_DERIVED
+SPEC_005_SUCCESSOR_AUTHORITY = ABSENT
+```
 
-After canonicalization, live governance must reconcile the remaining peer/optional/framework policy and package-control/provisioning blockers before any future `package.json`, `pnpm-workspace.yaml`, `pnpm-lock.yaml`, package acquisition, or resolver execution authority may be considered.
+After 004C1I canonical closeout, governance must be reread before any peer/optional/package-control/provisioning/resolver successor is authorized.
 
-A possible later grain may qualify peer/optional metadata and the exact Signthos framework-facing dependency declaration policy. Another later grain may freeze package-control bytes and provisioning inputs. Neither is authorized by 004C1I by name or implication.
+## 16. Explicit non-claims
 
-## 15. Explicit non-claims
-
-004C1I does not claim dependency adoption, installation, package-manager availability, Node availability, lockfile generation, resolved installation layout, peer resolution, optional-dependency resolution, framework selection, archive contents, archive/source equivalence, PDFium redistribution completion, font redistribution completion, provider runtime safety, PDF behavior, 004C2 readiness, 004D readiness, Specification 004 completion, or Specification 005 authority.
+004C1I does not claim package-manager availability, Node availability, workspace existence, complete peer metadata, complete optional metadata, dependency adoption, acquisition, archive verification, lockfile generation, resolver determinism, source equivalence, PDFium redistribution readiness, font redistribution readiness, provider readiness, PDF runtime readiness, 004C2 readiness, 004D readiness, or Specification 005 authority.
