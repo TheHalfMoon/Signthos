@@ -51,7 +51,7 @@ No implementation, package, model, fixture, scanner, PDF provider, or runtime is
 
 004C1R consumes these canonical predecessor semantics:
 
-1. `DocumentRevision` identifies immutable exact content.
+1. `DocumentRevision` identifies immutable exact canonical document content.
 2. Exact byte identity uses canonical algorithm-tagged `ContentDigest { algorithm, value }`.
 3. Digest equality requires equality of both algorithm and value.
 4. Read-only operations cannot replace canonical revision bytes or silently create a replacement revision.
@@ -63,10 +63,13 @@ No implementation, package, model, fixture, scanner, PDF provider, or runtime is
 10. Raw document content, extracted content, passwords, signing material, and secrets are excluded from ordinary logs.
 11. A classifier label is evidence, not structural PDF validity or universal safety evidence.
 12. A parser opening bytes is evidence, not malware absence, polyglot absence, sanitization, signature validity, certificate trust, or compliance.
-13. Derived or extracted artifacts become new untrusted byte identities.
-14. Admission is read-only with respect to the input revision.
+13. Derived or extracted artifacts become new untrusted byte identities and do not inherit parent admission.
+14. Admission is read-only with respect to the exact admitted bytes.
+15. Authentication/provider/contact identity does not imply resource authorization; authorization remains deny-by-default and must precede privileged document-byte access.
 
 004C1R does not reopen canonical 004A operation/security contracts, canonical 004C read-only capability contracts, canonical 004C algorithm-tagged digest correction, canonical 004C1Q package-control decisions, or the canonical source-informed security amendment.
+
+Content identity evidence never grants resource authorization. A derived-artifact admission may occur only inside an already-authorized parent extraction/quarantine context until that artifact is separately promoted to a canonical document revision.
 
 ## 3. Semantic separation of operation status and admission disposition
 
@@ -127,32 +130,38 @@ A probabilistic classifier result, filename, extension, declared media type, byt
 
 A future admission policy may omit an optional probabilistic classifier, but it may not omit independently qualified structural PDF evidence when publishing `CONFIRMED_PDF`.
 
-## 5. Exact input identity contract
+## 5. Exact input binding contract
 
-Every admission evaluation is bound to one exact immutable input identity:
+Every admission evaluation is bound to one exact immutable byte identity and one explicit source-binding class:
 
 ```text
-ContentInputIdentity {
-  documentId
-  inputRevisionId
+ContentInputBinding {
+  sourceKind: CANONICAL_DOCUMENT_REVISION | DERIVED_ARTIFACT
   inputExactBytesDigest: ContentDigest {
     algorithm
     value
   }
   byteLength
+  documentId?
+  inputRevisionId?
+  derivedArtifactRef?
+  parentOperationRef?
 }
 ```
 
 Rules:
 
-1. `inputRevisionId` MUST identify the exact canonical immutable revision.
-2. `inputExactBytesDigest.algorithm` and `.value` together identify the exact bytes.
-3. `byteLength` MUST describe those same exact bytes.
-4. Every admission observation MUST bind to this same identity.
-5. A raw digest string without algorithm identity is insufficient.
-6. A mutable path, URL, current-document pointer, provider handle, cache key, filename, or media type is never byte identity.
-7. A digest or length mismatch creates a new input identity; it is not a warning attached to the prior identity.
-8. A new input identity requires a new admission evaluation and evidence record.
+1. `inputExactBytesDigest.algorithm`, `.value`, and `byteLength` are mandatory for every admission input.
+2. A `CANONICAL_DOCUMENT_REVISION` binding MUST include `documentId` and `inputRevisionId`; the digest and byte length must match that exact canonical immutable revision.
+3. A `DERIVED_ARTIFACT` binding MUST include `derivedArtifactRef` and `parentOperationRef`; `documentId`/`inputRevisionId` may be absent until explicit canonical revision promotion occurs.
+4. A derived artifact is not a `DocumentRevision` merely because it has a digest or admission evidence.
+5. General 004C inspect/render/search capability execution requires a `CANONICAL_DOCUMENT_REVISION` binding. A pre-promotion derived-artifact admission cannot bypass that requirement.
+6. Every admission observation MUST bind to the same exact digest and byte length as its `ContentInputBinding`.
+7. A raw digest string without algorithm identity is insufficient.
+8. A mutable path, URL, current-document pointer, provider handle, cache key, filename, or media type is never byte identity.
+9. A digest or length mismatch creates a new input identity; it is not a warning attached to the prior identity.
+10. A new input identity requires a new admission evaluation and evidence record.
+11. Source binding is lineage/context evidence; only digest plus length identify the exact bytes.
 
 ## 6. TOCTOU and immutable-byte semantics
 
@@ -167,7 +176,7 @@ A future implementation must prove behavior equivalent to one of these safe patt
 Forbidden behavior includes:
 
 - classify path A, then allow a provider to reopen a mutable path whose bytes may have changed;
-- classify bytes from one revision and structurally inspect another;
+- classify bytes from one revision/artifact and structurally inspect another;
 - use stale cache/provider handles without exact-byte re-binding;
 - accept path replacement, symlink substitution, file truncation/growth, or equivalent input replacement as the same evidence identity.
 
@@ -521,13 +530,7 @@ ContentIdentityAdmissionEvidence {
   operationId
   policyId
   policyVersion
-  documentId
-  inputRevisionId
-  inputExactBytesDigest: ContentDigest {
-    algorithm
-    value
-  }
-  byteLength
+  inputBinding: ContentInputBinding
   declaredIdentity
   deterministicObservations[]
   classifierEvidence?
@@ -539,6 +542,7 @@ ContentIdentityAdmissionEvidence {
   localityEvidence
   networkEvidence
   mutationEvidence
+  authorizationEvidenceRef?
   warnings[]
   evidenceRefs[]
 }
@@ -546,12 +550,13 @@ ContentIdentityAdmissionEvidence {
 
 Rules:
 
-1. every nested observation/evidence producer binds the same input digest and length;
+1. every nested observation/evidence producer binds the same input digest and length carried by `inputBinding`;
 2. `admissionDisposition` is absent when operation status cannot publish a completed disposition;
 3. warnings never replace machine-readable state;
 4. provider-private IDs are excluded from canonical document identity;
 5. raw document bytes and sensitive extracted content are excluded from ordinary evidence/logs;
-6. this envelope is admission evidence, not a security certification.
+6. this envelope is admission evidence, not a security certification or authorization grant;
+7. `authorizationEvidenceRef` may record that required authorization occurred, but its presence cannot redefine identity or bypass deny-by-default authorization checks.
 
 ## 17. Derived and embedded artifact identity
 
@@ -561,8 +566,13 @@ Required semantic evidence is equivalent to:
 
 ```text
 DerivedArtifactIdentityEvidence {
+  derivedArtifactRef
+  parentOperationRef
   parentDocumentRevisionId
-  parentDocumentDigest
+  parentDocumentDigest: ContentDigest {
+    algorithm
+    value
+  }
   embeddedObjectIdentity
   extractedArtifactDigest: ContentDigest {
     algorithm
@@ -579,20 +589,45 @@ Rules:
 
 1. derived artifacts never inherit parent `CONFIRMED_PDF` disposition;
 2. every materialized artifact requires its own content-identity evaluation before unrelated consumers use it;
-3. a digest mismatch between extraction evidence and consumed artifact is a new identity and fails closed;
-4. recursion requires separately qualified aggregate byte/count/depth/resource/deadline/cancellation budgets;
-5. no extracted artifact is automatically executed or network-fetched;
-6. attachment identity does not redefine top-level PDF identity.
+3. before canonical revision promotion, that evaluation uses `sourceKind = DERIVED_ARTIFACT`, `derivedArtifactRef`, `parentOperationRef`, exact artifact digest, and byte length;
+4. promotion to a canonical `DocumentRevision`, if separately authorized, creates a `CANONICAL_DOCUMENT_REVISION` binding whose digest/length must equal the promoted exact bytes;
+5. a digest mismatch between extraction evidence, admission evidence, promotion evidence, or consumed artifact is a new identity and fails closed;
+6. recursion requires separately qualified aggregate byte/count/depth/resource/deadline/cancellation budgets;
+7. no extracted artifact is automatically executed or network-fetched;
+8. attachment identity does not redefine top-level PDF identity;
+9. pre-promotion derived-artifact admission does not authorize general 004C inspect/render/search execution.
 
 004C1R creates no fixture or extracted artifact bytes.
 
-## 18. Read-only and no-mutation rule
+## 18. Derived-artifact recursion budget semantics
 
-Admission is always read-only with respect to the exact input revision.
+A later implementation policy must bind explicit recursion/resource budget fields equivalent to:
+
+```text
+AdmissionRecursionBudget {
+  maxArtifactCount
+  maxAggregateExtractedBytes
+  maxSingleArtifactBytes
+  maxNestedDepth
+  memoryBudget?
+  cpuBudget?
+  wallClockBudget?
+  cancellationRef?
+}
+```
+
+004C1R intentionally does not select numeric limits. Numeric values require later implementation/corpus/resource evidence.
+
+If a required recursion/resource limit is exceeded, traversal fails closed with explicit resource evidence. Partial traversal cannot be published as complete admission evidence.
+
+## 19. Read-only and no-mutation rule
+
+Admission is always read-only with respect to the exact admitted bytes.
 
 ```text
 ADMISSION_EFFECT_CLASS = READ_ONLY
-INPUT_REVISION_MUTATION = FORBIDDEN
+INPUT_BYTE_MUTATION = FORBIDDEN
+INPUT_REVISION_MUTATION = FORBIDDEN_WHEN_REVISION_BOUND
 SANITIZE_DURING_ADMISSION = FORBIDDEN
 REPAIR_DURING_ADMISSION = FORBIDDEN
 NORMALIZE_DURING_ADMISSION = FORBIDDEN
@@ -601,11 +636,11 @@ REDACT_DURING_ADMISSION = FORBIDDEN
 DECOMPRESS_AND_REPACKAGE_DURING_ADMISSION = FORBIDDEN
 ```
 
-A provider may decode/inspect temporary internal representations only if those representations cannot replace canonical source bytes.
+A provider may decode/inspect temporary internal representations only if those representations cannot replace the admitted source bytes.
 
-Sanitize, repair, compression, conversion, redaction, flattening, and similar content changes remain separate `REVISION_CREATING` capability contracts requiring separate authority and evidence.
+Sanitize, repair, compression, conversion, redaction, flattening, promotion to a canonical document revision, and similar content/lifecycle changes remain separate capabilities/transitions requiring separate authority and evidence.
 
-## 19. Locality and network semantics
+## 20. Locality and network semantics
 
 004C1R does not authorize any network provider.
 
@@ -624,7 +659,7 @@ Any later local classifier or structural provider must record locality/network e
 
 A later proposal for explicit network classification or scanning requires separate canonical authority and must not be inferred from the generic `ExecutionLocality` vocabulary.
 
-## 20. Active-content relation
+## 21. Active-content relation
 
 Admission may observe active-content indicators but does not execute them.
 
@@ -637,7 +672,7 @@ ACTIVE_CONTENT_INSPECTION_UNSUPPORTED != ACTIVE_CONTENT_ABSENT
 
 A `CONFIRMED_PDF` disposition does not erase active-content indicators. Capability-specific policy may independently deny general execution when active content is present or cannot be inspected.
 
-## 21. Error and uncertainty routing
+## 22. Error and uncertainty routing
 
 004C1R preserves canonical 004A stable error classes and adds no provider-private domain taxonomy.
 
@@ -655,11 +690,12 @@ Rules:
 
 1. these are semantic specializations, not implementation exceptions;
 2. classifier/provider-specific errors normalize into canonical operation/evidence state;
-3. missing/unavailable evidence never becomes a clean scan or successful content claim;
-4. ambiguity and uncertainty remain distinguishable;
-5. exact error-to-status mapping is qualified with any future implementation contract.
+3. malformed input, unsupported features/encryption, password-required/invalid-password outcomes, provider unavailability, cancellation, deadline, and resource exhaustion remain distinguishable according to canonical 004A/004C contracts;
+4. missing/unavailable evidence never becomes a clean scan or successful content claim;
+5. ambiguity and uncertainty remain distinguishable;
+6. exact error-to-status mapping is qualified with any future implementation contract.
 
-## 22. Prohibited inference table
+## 23. Prohibited inference table
 
 | Observed evidence | Prohibited inference |
 | --- | --- |
@@ -677,7 +713,7 @@ Rules:
 
 No later adapter may promote a weak evidence class into one of these stronger claims without separate owning-spec evidence.
 
-## 23. No dependency/provider/source decision
+## 24. No dependency/provider/source decision
 
 004C1R intentionally does not answer:
 
@@ -696,7 +732,7 @@ No later adapter may promote a weak evidence class into one of these stronger cl
 
 Those are later separately authorized qualification surfaces.
 
-## 24. Explicit non-grants
+## 25. Explicit non-grants
 
 ```text
 SOURCE_IMPORT = NOT_AUTHORIZED
@@ -731,7 +767,7 @@ GENERAL_004C_PDF_RUNTIME = NOT_AUTHORIZED
 SPECIFICATION_005 = NOT_AUTHORIZED
 ```
 
-## 25. Qualification acceptance rules
+## 26. Qualification acceptance rules
 
 004C1R may become canonical only if all remain true:
 
@@ -739,31 +775,38 @@ SPECIFICATION_005 = NOT_AUTHORIZED
 2. the candidate changes exactly this one Signthos-authored planning file;
 3. no package/runtime/source/fixture/workflow/database/provenance/NOTICE/SBOM surface changes;
 4. canonical `ContentDigest { algorithm, value }` semantics are preserved;
-5. operation status remains separate from admission disposition;
-6. the four exact admission dispositions remain narrow and fail closed;
-7. classifier unavailable/error/low-confidence states cannot become `NOT_PDF` or `CONFIRMED_PDF`;
-8. `CONFIRMED_PDF` requires separately qualified structural PDF evidence and cannot rely on classifier/metadata/signature alone;
-9. immutable-byte/TOCTOU identity drift invalidates the current evaluation;
-10. polyglot/mixed-content ambiguity remains explicit;
-11. derived artifacts become new untrusted identities;
-12. admission remains read-only with no silent network or active-content execution;
-13. security/signing/compliance/release inferences remain prohibited;
-14. exact-head Actions/check/provider state is recorded truthfully;
-15. fresh independent substantive exact-head review completes;
-16. every material finding is repaired forward-only and any changed head receives fresh review;
-17. unresolved material review threads are zero;
-18. immediate premerge race proof confirms unchanged base/head/tree/scope/authority and current mergeability/rules state;
-19. guarded normal merge uses exact `expected_head_sha`;
-20. post-merge proof establishes canonical main, ordered parents, reviewed-head/merge-tree equality, signature, exact one-file surface, and truthful post-merge workflow/status state;
-21. successor authority is derived only from fresh post-merge canonical truth.
+5. exact digest plus byte length are mandatory for both canonical-revision and derived-artifact admission inputs;
+6. canonical document/revision binding is mandatory whenever the input is a canonical revision and before general 004C capability execution;
+7. pre-promotion derived artifacts are representable without inventing a `DocumentRevision`, remain lineage-bound, and cannot bypass later revision binding;
+8. resource authorization remains separate from identity and precedes privileged byte access;
+9. operation status remains separate from admission disposition;
+10. the four exact admission dispositions remain narrow and fail closed;
+11. classifier unavailable/error/low-confidence states cannot become `NOT_PDF` or `CONFIRMED_PDF`;
+12. `CONFIRMED_PDF` requires separately qualified structural PDF evidence and cannot rely on classifier/metadata/signature alone;
+13. immutable-byte/TOCTOU identity drift invalidates the current evaluation;
+14. polyglot/mixed-content ambiguity remains explicit;
+15. derived artifacts become new untrusted identities with bounded recursion semantics;
+16. admission remains read-only with no silent network or active-content execution;
+17. security/signing/compliance/release inferences remain prohibited;
+18. exact-head Actions/check/provider state is recorded truthfully;
+19. fresh independent substantive exact-head review completes;
+20. every material finding is repaired forward-only and any changed head receives fresh review;
+21. unresolved material review threads are zero;
+22. immediate premerge race proof confirms unchanged base/head/tree/scope/authority and current mergeability/rules state;
+23. guarded normal merge uses exact `expected_head_sha`;
+24. post-merge proof establishes canonical main, ordered parents, reviewed-head/merge-tree equality, signature, exact one-file surface, and truthful post-merge workflow/status state;
+25. successor authority is derived only from fresh post-merge canonical truth.
 
-## 26. Qualification result candidate
+## 27. Qualification result candidate
 
 If the exact candidate passes the required qualification gates, its semantic result is:
 
 ```text
 004C1R_CONTENT_IDENTITY_ADMISSION_SEMANTICS = QUALIFIED_CANDIDATE
-INPUT_IDENTITY = CANONICAL_REVISION_PLUS_ALGORITHM_TAGGED_DIGEST_PLUS_BYTE_LENGTH
+INPUT_BYTE_IDENTITY = ALGORITHM_TAGGED_DIGEST_PLUS_BYTE_LENGTH
+CANONICAL_REVISION_BINDING = REQUIRED_WHEN_REVISION_BOUND_AND_BEFORE_GENERAL_004C_RUNTIME
+DERIVED_ARTIFACT_BINDING = EXPLICIT_PRE_PROMOTION_IDENTITY_ALLOWED
+RESOURCE_AUTHORIZATION = SEPARATE_DENY_BY_DEFAULT_GATE
 DECLARED_METADATA = UNTRUSTED_EVIDENCE_ONLY
 DETERMINISTIC_OBSERVATIONS = EVIDENCE_NOT_FULL_VALIDITY
 PROBABILISTIC_CLASSIFIER = OPTIONAL_ADVISORY_EVIDENCE
@@ -780,7 +823,7 @@ PROVIDER_RUNTIME = NOT_AUTHORIZED
 NEXT_SUCCESSOR = NOT_YET_DERIVED
 ```
 
-## 27. Completion boundary
+## 28. Completion boundary
 
 004C1R closes only the provider-neutral **meaning** of content identity and PDF admission.
 
