@@ -91,6 +91,35 @@ Each record binds:
 - materialization completeness states;
 - `qualificationExecutionPerformed = false`.
 
+### 5.1 Manifest-local reference resolution
+
+The manifest uses immutable manifest-local shared templates to avoid duplicating identical evidence objects. These references are not external aliases and cannot float independently from the exact manifest bytes.
+
+Resolution is mandatory before interpreting a record as `AdmissionFixtureRecord`-equivalent:
+
+```text
+record.rightsEvidenceRef = "shared.rightsEvidence"
+  -> rightsEvidence = exact shared.rightsEvidence object
+     + coveredArtifactOrComponentScope = record.repositoryPath
+
+record.constructionEvidenceBindingRef = "shared.constructionEvidence"
+  -> constructionEvidenceBinding = exact shared.constructionEvidence object
+     + exactProducedBytesDigest = record.exactBytesDigest
+     + producedByteLength = record.byteLength
+
+record.expectationContract.classifierExpectedEvidenceRef = "shared.classifierExpectedEvidence"
+  -> classifierExpectedEvidence = exact shared.classifierExpectedEvidence object
+
+record.expectationContract.mutationExpectationRef = "shared.mutationExpectation"
+  -> mutationExpectation = exact shared.mutationExpectation object
+```
+
+`record.repositoryPath`, `record.exactBytesDigest`, and `record.byteLength` are part of the same immutable JSON record. Therefore the resolved rights scope and exact-produced-byte construction binding are record-local and cannot be substituted from another fixture.
+
+A missing shared template, unknown reference name, missing repository path, missing digest/length, or contradictory resolved value makes the record invalid rather than falling back to implicit evidence.
+
+This reference-resolution rule is a representation rule for this seed manifest only. It does not create a general runtime serialization format or authorize a manifest loader implementation.
+
 No deterministic observation rule is selected in this materialization grain, so `deterministicExpectedObservations` is intentionally empty. If a later implementation makes a deterministic rule required for qualification, it must create a new versioned fixture record before qualifying execution. Observed runtime output may not be backfilled into these records as an oracle.
 
 Provider-neutral structural expectations intentionally avoid inventing parser-specific results before a structural provider is qualified.
@@ -141,7 +170,7 @@ This grain is merge-qualified only if:
 
 1. the final diff remains exactly inside the six authorized paths;
 2. the exact SHA-256 values and byte lengths above match committed fixture bytes;
-3. manifest records match those committed identities;
+3. manifest records and mandatory manifest-local resolution rules match those committed identities;
 4. no external or third-party bytes are introduced;
 5. no dependency, package, workspace, lockfile, `.npmrc`, source-runtime, provider, model, or workflow surface changes;
 6. no PDF/classifier/provider runtime is executed as qualification evidence;
