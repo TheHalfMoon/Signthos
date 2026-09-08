@@ -1,0 +1,119 @@
+packages:
+  - packages/providers
+
+autoInstallPeers: false
+strictPeerDependencies: true
+managePackageManagerVersions: false
+packageManagerStrict: true
+packageManagerStrictVersion: true
+minimumReleaseAge: 10080
+blockExoticSubdeps: true
+packageExtensions:
+  '@embedpdf/core@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/engines@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-document-manager@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-render@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-thumbnail@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-search@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-selection@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/plugin-interaction-manager@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
+  '@embedpdf/utils@2.15.0':
+    peerDependenciesMeta:
+      preact:
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      svelte:
+        optional: true
+      vue:
+        optional: true
