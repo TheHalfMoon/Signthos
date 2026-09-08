@@ -173,15 +173,23 @@ No package, scope, version, or pattern is exempted from the maturity window by c
 
 ## 10. Exotic-source semantic
 
-Pinned pnpm v10 documentation defines `blockExoticSubdeps` and canonical 004C1G/004C1H require transitive exotic sources to fail closed unless separately qualified.
+Pinned pnpm v10 documentation defines `blockExoticSubdeps`. When set to `true`, pnpm rejects transitive git repositories and direct tarball URLs except source classes that pnpm itself treats as trusted, including configured registry sources, local paths, workspace links, and the documented trusted GitHub-repository exceptions.
 
-The repository-owned semantic is therefore:
+Canonical 004C1H is stricter: any transitive mutable git reference, direct remote tarball, or other exotic non-registry source must be rejected or separately qualified by exact evidence and authority.
+
+The repository-owned semantic is therefore required baseline hardening, not the complete Signthos source-admission policy:
 
 ```text
 blockExoticSubdeps = true
+BLOCK_EXOTIC_SUBDEPS_ROLE = REQUIRED_BASELINE_HARDENING
+BLOCK_EXOTIC_SUBDEPS_COMPLETE_SIGNTHOS_SOURCE_POLICY = NO
+TRANSITIVE_EXOTIC_SOURCE_EVIDENCE_POLICY = ZERO_UNQUALIFIED_EXOTIC_SOURCES
+PNPM_TRUSTED_GITHUB_EXCEPTION_AUTHORITY = ABSENT
 ```
 
-This does not authorize direct exotic-source dependencies. Current exact direct declarations remain the separately canonical registry package set.
+A future resolver evidence object must inspect the actual resolved source identities and fail qualification if any transitive exotic source appears without separate exact authority, even when pnpm technically permits that source under its own trusted-source exception.
+
+This grain does not authorize any direct exotic-source dependency. Current exact direct declarations remain the separately canonical registry package set.
 
 ## 11. Lifecycle-script semantic and current pnpm mechanism
 
@@ -387,6 +395,7 @@ EXACT_WRITABLE_SURFACE = NOT_AUTHORIZED
 EXACT_TARGET_OS = NOT_AUTHORIZED_FOR_EXECUTION
 EXACT_TARGET_ARCH = NOT_AUTHORIZED_FOR_EXECUTION
 EXACT_OPTIONAL_DEPENDENCY_EXECUTION_POLICY = NOT_AUTHORIZED
+TRANSITIVE_EXOTIC_SOURCE_IDENTITY_PROOF = NOT_EXECUTED_OR_PROVEN
 LOCKFILE = NOT_GENERATED
 RESOLVED_GRAPH = NOT_GENERATED
 PACKAGE_ARCHIVE_IDENTITY_SET = NOT_ESTABLISHED
@@ -410,7 +419,7 @@ DEPENDENCY_ACQUISITION_ELIGIBILITY = FAIL_CLOSED
 5. peer settings remain exactly `autoInstallPeers=false` and `strictPeerDependencies=true`;
 6. package-manager controls remain exactly self-management disabled plus strict package-manager name/version checks;
 7. release age remains exactly `10080` minutes with no exclusions;
-8. transitive exotic-source policy serializes fail-closed as `blockExoticSubdeps=true`;
+8. `blockExoticSubdeps=true` is serialized as required baseline hardening while the stricter evidence requirement remains that zero unqualified transitive exotic sources may appear in a future resolved graph;
 9. no dependency lifecycle build allowlist is granted;
 10. no repository override is invented;
 11. supported-architecture expansion and optional-dependency suppression remain absent from repository settings and future execution remains platform-bound;
