@@ -180,26 +180,36 @@ Exact current key:
 KEY = min-release-age
 VALUE = 7
 ORIGIN_CLASS = IMPORTED_NPM_POLICY
+NPM_SEMANTIC_UNIT = DAYS
+NPM_SEMANTIC_VALUE = 7_DAYS
 ```
 
-The selected pnpm `v10.34.5` source defines `minimum-release-age` as a numeric pnpm configuration key and exposes the corresponding `minimumReleaseAge` configuration value.
+Canonical 004C1G already records that the imported npm key `min-release-age` expresses its maturity window in days.
 
-First-party pnpm v10 documentation defines `minimumReleaseAge` in **minutes**.
+The selected pnpm `v10.34.5` source defines a **different** pnpm-owned configuration key, `minimum-release-age`, as numeric configuration and exposes the corresponding `minimumReleaseAge` value. First-party pnpm v10 documentation defines that pnpm setting in **minutes**.
 
-Canonical Signthos 004C1G already freezes the intended maturity window as seven days:
+The exact selected pnpm typed configuration surface does not establish `min-release-age` as an alias for `minimum-release-age`. Therefore this grain does not claim that pnpm consumes the current imported key or interprets its literal `7` as seven minutes.
+
+Canonical Signthos 004C1G separately freezes the intended maturity window as seven days under pnpm semantics:
 
 ```text
 SEVEN_DAYS_IN_MINUTES = 10080
 ```
 
-Therefore retaining the current numeric value under pnpm interpretation would not preserve the canonical security policy:
+The required semantic migration is therefore explicit rather than a literal-key or literal-number copy:
 
 ```text
-IMPORTED_VALUE = 7
-PNPM_UNIT = MINUTES
-IMPORTED_EFFECTIVE_PNPM_POLICY = 7_MINUTES
-CANONICAL_SIGNTHOS_POLICY = 10080_MINUTES
-SEMANTIC_EQUIVALENCE = FALSE
+IMPORTED_NPM_KEY = min-release-age
+IMPORTED_NPM_VALUE = 7
+IMPORTED_NPM_MEANING = 7_DAYS
+SELECTED_PNPM_KEY = minimumReleaseAge
+SELECTED_PNPM_SERIALIZED_KEY = minimumReleaseAge
+SELECTED_PNPM_UNIT = MINUTES
+CANONICAL_SIGNTHOS_PNPM_VALUE = 10080
+PNPM_CONSUMPTION_OF_IMPORTED_min-release-age = NOT_ESTABLISHED
+DIRECT_LITERAL_KEY_COPY = FORBIDDEN
+DIRECT_LITERAL_VALUE_COPY = FORBIDDEN
+SEMANTIC_EQUIVALENCE_REQUIRES = 7_DAYS_TO_10080_MINUTES
 ```
 
 Canonical disposition:
@@ -211,7 +221,7 @@ MINIMUM_RELEASE_AGE_FUTURE_KEY = minimumReleaseAge
 MINIMUM_RELEASE_AGE_FUTURE_VALUE = 10080
 ```
 
-This grain freezes the semantic migration only. It does not serialize future YAML bytes.
+This grain freezes semantic migration only. It does not assert current-key pnpm consumption and does not serialize future YAML bytes.
 
 ## 9. Three-key disposition matrix
 
@@ -219,7 +229,7 @@ This grain freezes the semantic migration only. It does not serialize future YAM
 | --- | ---: | --- | --- |
 | `legacy-peer-deps` | `true` | imported npm peer-policy input with no qualified Signthos pnpm ownership | remove from repository `.npmrc`; use canonical pnpm peer controls instead |
 | `prefer-dedupe` | `true` | imported npm dedupe-policy input with no qualified pnpm semantic equivalent required by Signthos | remove from repository `.npmrc`; do not infer replacement |
-| `min-release-age` | `7` | inherited numeric maturity policy that is not equivalent to the canonical pnpm seven-day setting | remove from repository `.npmrc`; migrate semantic requirement to `minimumReleaseAge: 10080` in future workspace settings |
+| `min-release-age` | `7` | imported npm seven-day maturity policy; pnpm consumption of this exact npm key is not established | remove from repository `.npmrc`; migrate the seven-day requirement explicitly to `minimumReleaseAge: 10080` in future workspace settings |
 
 All three current keys are therefore excluded from the future canonical repository `.npmrc` semantic set used for pnpm resolution.
 
@@ -293,7 +303,7 @@ Before canonical resolver execution:
 
 ## 14. Registry and authentication separation
 
-The pnpm v10 `.npmrc` documentation identifies `.npmrc` as the configuration surface for registry and authorization settings.
+The pnpm v10 `.npmrc` documentation identifies `.npmrc` as a configuration surface for registry and authorization settings.
 
 004C1T does not authorize registry or authentication configuration because no such repository-level requirement is established by this grain.
 
@@ -313,7 +323,7 @@ Public-registry execution remains a future resolver/network authorization bounda
 This reconciliation prevents three classes of ambiguity:
 
 1. **peer-policy ambiguity** — imported npm behavior must not weaken canonical pnpm strict-peer rules;
-2. **maturity-window ambiguity** — a numeric `7` must not silently become a seven-minute policy while being described as seven days;
+2. **maturity-window ambiguity** — the npm key/value pair `min-release-age=7` must not be copied literally into pnpm policy, where the canonical pnpm-owned setting is `minimumReleaseAge` measured in minutes and the seven-day value is `10080`;
 3. **dedupe-policy ambiguity** — npm-specific intent must not be translated into pnpm resolution behavior without first-party evidence and canonical need.
 
 These are package-supply-chain controls, not formatting preferences.
@@ -355,21 +365,22 @@ No one of these may be inferred from task numbering or from the presence of the 
 5. pnpm documentation evidence remains bound to exact commit `b015f4e6d789d894847e432d0cc771526a55cd27`;
 6. `legacy-peer-deps=true` is excluded from canonical Signthos pnpm peer-policy ownership;
 7. `prefer-dedupe=true` is not assigned an invented pnpm equivalent;
-8. `min-release-age=7` is classified as non-equivalent to the canonical seven-day pnpm policy;
-9. the future semantic migration is exactly `minimumReleaseAge = 10080` on the pnpm project-settings surface;
-10. none of the three current settings is retained as future canonical pnpm-resolution `.npmrc` policy;
-11. delete-versus-replace and exact future `.npmrc` bytes remain unresolved and unauthorized;
-12. complete `pnpm-workspace.yaml` bytes remain unresolved and unauthorized;
-13. no package manager, Node, Corepack, resolver, registry, dependency, classifier, structural provider, or PDF runtime is executed;
-14. no `.npmrc`, workspace, manifest, lockfile, package, source, fixture, workflow, provenance, database, or container mutation occurs outside this one planning file;
-15. exact-head Actions/check/provider state is recorded truthfully;
-16. fresh independent substantive review covers the exact complete candidate head/tree;
-17. every material review finding is repaired forward-only and any changed head is freshly reviewed;
-18. unresolved material review threads are zero;
-19. immediate exact-head premerge race proof is recorded;
-20. guarded normal merge uses the exact reviewed `expected_head_sha`;
-21. postmerge verification proves canonical main, ordered parents, reviewed-head/merge-tree equality, valid merge signature, exact changed surface, and truthful workflow/status accounting;
-22. fresh Issue #7 reconciliation derives any successor rather than assuming it.
+8. `min-release-age=7` is classified as imported npm seven-day policy and pnpm consumption of that exact key is not asserted without evidence;
+9. direct literal key/value migration from `min-release-age=7` to pnpm is forbidden;
+10. the future semantic migration is exactly `minimumReleaseAge = 10080` on the pnpm project-settings surface;
+11. none of the three current settings is retained as future canonical pnpm-resolution `.npmrc` policy;
+12. delete-versus-replace and exact future `.npmrc` bytes remain unresolved and unauthorized;
+13. complete `pnpm-workspace.yaml` bytes remain unresolved and unauthorized;
+14. no package manager, Node, Corepack, resolver, registry, dependency, classifier, structural provider, or PDF runtime is executed;
+15. no `.npmrc`, workspace, manifest, lockfile, package, source, fixture, workflow, provenance, database, or container mutation occurs outside this one planning file;
+16. exact-head Actions/check/provider state is recorded truthfully;
+17. fresh independent substantive review covers the exact complete candidate head/tree;
+18. every material review finding is repaired forward-only and any changed head is freshly reviewed;
+19. unresolved material review threads are zero;
+20. immediate exact-head premerge race proof is recorded;
+21. guarded normal merge uses the exact reviewed `expected_head_sha`;
+22. postmerge verification proves canonical main, ordered parents, reviewed-head/merge-tree equality, valid merge signature, exact changed surface, and truthful workflow/status accounting;
+23. fresh Issue #7 reconciliation derives any successor rather than assuming it.
 
 ## 18. Explicit non-grants
 
@@ -420,7 +431,7 @@ Before independent exact-head review and guarded merge:
 CURRENT_NPMRC_THREE_KEY_SET = NOT_ACCEPTABLE_AS_CANONICAL_PNPM_RESOLVER_POLICY
 LEGACY_PEER_DEPS_FUTURE_POLICY = REMOVE
 PREFER_DEDUPE_FUTURE_POLICY = REMOVE_WITHOUT_INFERRED_REPLACEMENT
-MIN_RELEASE_AGE_FUTURE_POLICY = REMOVE_AND_MIGRATE_TO_MINIMUM_RELEASE_AGE_10080
+MIN_RELEASE_AGE_FUTURE_POLICY = REMOVE_AND_SEMANTICALLY_MIGRATE_7_DAYS_TO_MINIMUM_RELEASE_AGE_10080_MINUTES
 NPMRC_MUTATION_AUTHORITY = ABSENT
 PNPM_WORKSPACE_MUTATION_AUTHORITY = ABSENT
 RESOLVER_READINESS = FAIL_CLOSED
