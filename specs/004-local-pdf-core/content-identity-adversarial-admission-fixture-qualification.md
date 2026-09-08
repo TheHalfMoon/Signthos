@@ -274,13 +274,25 @@ Mismatch between declared identity and observed identity is itself expected evid
 Every implementation-bound expected observation must resolve to one immutable qualified producer identity.
 
 ```text
+QualifiedConfigurationIdentity {
+  representation:
+    IMMUTABLE_REFERENCE
+    | EXACT_BYTES
+  immutableConfigurationRef?
+  exactBytesDigest?: ContentDigest {
+    algorithm
+    value
+  }
+  byteLength?
+}
+
 QualifiedObservationImplementationIdentity {
   identityKind
   providerOrAlgorithmId
   providerOrAlgorithmVersion
   packageIdentity?
   modelIdentity?
-  configurationIdentity
+  configurationIdentity: QualifiedConfigurationIdentity
   runtimeIdentity?
   modeOrPolicyIdentity?
 }
@@ -290,10 +302,12 @@ Identity rules:
 
 1. `providerOrAlgorithmId` and `providerOrAlgorithmVersion` are mandatory for every implementation-bound expectation.
 2. package/model/runtime fields are mandatory whenever that component can change the produced observation.
-3. `configurationIdentity` must identify the exact configuration or canonical configuration digest, not a mutable profile name.
-4. a moving branch, floating package version, product name alone, or undocumented ambient runtime is not an immutable implementation identity.
-5. if any identity-bearing component changes, the implementation-bound expectation requires a new qualification binding.
-6. provider-neutral invariants may declare `PROVIDER_NEUTRAL_INVARIANT` instead of preselecting a provider, but the later execution evidence must still publish the exact producer identity that generated the observation.
+3. `configurationIdentity.representation = IMMUTABLE_REFERENCE` requires `immutableConfigurationRef`, forbids `exactBytesDigest` and `byteLength`, and the reference must be immutable rather than a moving profile or alias.
+4. `configurationIdentity.representation = EXACT_BYTES` requires `exactBytesDigest: ContentDigest { algorithm, value }` and mandatory `byteLength`, and forbids `immutableConfigurationRef`.
+5. missing, contradictory, or unsupported configuration-identity combinations are invalid evidence.
+6. a moving branch, floating package version, product name alone, or undocumented ambient runtime is not an immutable implementation identity.
+7. if any identity-bearing component changes, the implementation-bound expectation requires a new qualification binding.
+8. provider-neutral invariants may declare `PROVIDER_NEUTRAL_INVARIANT` instead of preselecting a provider, but the later execution evidence must still publish the exact producer identity that generated the observation.
 
 A fixture may define expected deterministic observations without claiming those observations are sufficient for admission.
 
@@ -452,7 +466,7 @@ Purpose: prevent adversarial policy from rejecting ordinary supported PDF struct
 - non-PDF bytes declared `application/pdf`;
 - valid PDF named with a non-PDF extension;
 - valid PDF with conflicting caller MIME;
-- filename and MIME disagreement.
++- filename and MIME disagreement.
 
 Expected invariant: declared metadata never becomes content truth.
 
@@ -815,7 +829,7 @@ This planning grain qualifies only if all of the following are true:
 14. every fixture record binds a closed `adversarialPurpose`, and the discriminated expectation contract makes exploratory discovery unable to carry qualification expected-output fields until pre-authored promotion;
 15. every fixture record binds a mandatory operational `handlingClass` whose repository-inclusion and execution rules fail closed;
 16. every `constructionClass` satisfies the complete class-to-evidence matrix, including rights scope, redistribution eligibility, restrictions, transformations and parent/component identity where applicable;
-17. every implementation-bound deterministic/classifier/structural expectation resolves to an immutable qualified producer identity, while provider-neutral invariants remain explicitly provider-neutral;
+17. every implementation-bound deterministic/classifier/structural expectation resolves to an immutable qualified producer identity, including configuration identity represented either by an immutable reference or by algorithm-tagged exact bytes plus mandatory byte length, while provider-neutral invariants remain explicitly provider-neutral;
 18. qualification evidence explicitly proves construction, provenance, rights and handling-control completeness before a qualifying result can be produced;
 19. the candidate does not invent numeric production budgets absent canonical evidence;
 20. Actions/check/provider accounting is truthful;
