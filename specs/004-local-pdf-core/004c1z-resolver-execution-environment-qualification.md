@@ -88,28 +88,31 @@ The exact source manifest identifies `bin/pnpm.cjs` as the `pnpm` CLI entry poin
 
 ### pnpm published package metadata
 
-Current exact-version npm-registry-derived metadata for `pnpm@10.34.5` reports:
+An independent exact-version npm packument review for `pnpm@10.34.5` confirms the authoritative published registry fields below:
 
 ```text
 PACKAGE = pnpm@10.34.5
 LICENSE = MIT
 TARBALL_URL = https://registry.npmjs.org/pnpm/-/pnpm-10.34.5.tgz
 REGISTRY_DIST_SHASUM_SHA1 = 6a91127a7f2ca72fe53bb9ff54883e0c75b22f17
+REGISTRY_DIST_INTEGRITY_SRI = sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg==
+REGISTRY_DIST_INTEGRITY_SHA512_HEX = a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e
+REGISTRY_SIGNATURE = PRESENT_AT_EXACT_VERSION_PACKUMENT_REVIEW
 KNOWN_OSV_VULNERABILITIES_AT_LOOKUP = NONE_REPORTED
 NPM_SIGSTORE_PROVENANCE = ABSENT
 ```
 
-Absence of npm Sigstore provenance is not converted into source equivalence or source mismatch. The pinned Git source identity and the published tarball identity remain separate evidence objects until a future acquisition grain can inspect exact acquired bytes.
+`dist.integrity` is authoritative npm-registry metadata for this published version. It is not a locally calculated tarball hash and does not prove source-tree equivalence. The registry signature is accounted as present, but its exact value must be re-read and bound by the future acquisition-authorizing unit together with the complete exact-version packument metadata.
 
-Independent public package-control records consistently expose this pnpm 10.34.5 SHA-512 integrity value:
+A separate public cross-check has exposed this candidate SHA-256 value for the tarball:
 
 ```text
-CORROBORATIVE_PNPM_SHA512_HEX = a4ee05f2f73658255bd6a89859c065a45c28a57daefae2c893a168ee2b73168c37b91e83e57ea67654ad03f03031746430e8bce38e362e042605fb8abc80192e
-CORROBORATIVE_PNPM_SRI = sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg==
-CORROBORATIVE_PNPM_TARBALL_SHA256 = ccb5c479cab1b00621325bfe7d4c9a8a8031e7a525d7249e275ecbec81b08db2
+EXTERNAL_CORROBORATIVE_PNPM_TARBALL_SHA256 = ccb5c479cab1b00621325bfe7d4c9a8a8031e7a525d7249e275ecbec81b08db2
 ```
 
-These values are useful cross-checks but are **not promoted to authoritative npm-registry evidence by 004C1Z** because the available registry read interface did not independently expose `dist.integrity` or SHA-256. A future acquisition-authorizing unit must re-read authoritative npm packument metadata immediately before acquisition, then compute SHA-256 locally over the exact acquired tarball bytes.
+That SHA-256 is **not** promoted to acquired-byte evidence by 004C1Z. The future acquisition-authorizing unit must re-read authoritative npm packument metadata immediately before acquisition, verify the acquired bytes against the authoritative registry-native integrity, and independently compute SHA-256 over those exact acquired tarball bytes.
+
+Absence of npm Sigstore provenance is not converted into source equivalence or source mismatch. The pinned Git source identity and the published tarball identity remain separate evidence objects until a future acquisition grain can inspect exact acquired bytes.
 
 ### Node.js official release identity
 
@@ -128,6 +131,29 @@ NODE_SHASUMS_SIGNATURE_SOURCE = https://nodejs.org/dist/v24.20.0/SHASUMS256.txt.
 ```
 
 The Node release publishes signed SHA-256 checksums. 004C1Z selects the official Linux x64 `.tar.xz` archive only as the first resolver-evidence toolchain artifact. It does not download or execute it.
+
+### PR #140 pre-repair exact-head provider state
+
+The first substantive review attempt bound exact pre-repair head `ba59c1cfaffc2266cd3c834667f0ff4a94454129` and produced the following truthful provider state:
+
+```text
+PRE_REPAIR_HEAD = ba59c1cfaffc2266cd3c834667f0ff4a94454129
+PRE_REPAIR_HEAD_TREE = 73af303f9808a4cdacaf795fe6d9eaf40210f0cf
+ACTIONS_WORKFLOW_RUNS = 0
+CODERABBIT_COMMIT_STATUS = success
+CODERABBIT_STATUS_DESCRIPTION = Review skipped: manual review required for this OSS repository
+CODERABBIT_AUTOMATED_STATUS_QUALIFICATION = NONQUALIFYING_AS_SUBSTANTIVE_REVIEW
+CUBIC_CHECK_STATUS = completed
+CUBIC_CHECK_CONCLUSION = neutral
+CUBIC_CHECK_REASON = AI review line limit reached
+CUBIC_CHECK_QUALIFICATION = NONQUALIFYING
+MANUAL_CODERABBIT_REVIEW = github:pull-review-comment:3961713716
+MANUAL_CODERABBIT_REVIEW_RESULT = MATERIAL_FINDINGS_2
+```
+
+A `success` commit-status context that explicitly says review was skipped is not represented as a substantive review pass. A `neutral` provider check caused by quota exhaustion is not represented as a pass or failure of the candidate.
+
+Any repair necessarily creates a new Git head. Embedding that future head SHA and its post-commit provider state inside this same file would change the file and therefore create yet another head. Final-head Actions/check/provider accounting is therefore merge-critical **PR evidence**, recorded after the final candidate head exists and immediately reverified before merge. This does not weaken the exact-head requirement: any final head without that external exact-head accounting fails closed.
 
 ## 4. Provisioning mechanism qualification
 
@@ -164,7 +190,7 @@ Until those acquired-byte checks occur:
 
 ```text
 NODE_EXTRACTED_EXECUTABLE_SHA256 = NOT_YET_COMPUTED
-PNPM_AUTHORITATIVE_DIST_INTEGRITY = MUST_BE_REVALIDATED_FROM_NPM_PACKUMENT
+PNPM_AUTHORITATIVE_DIST_INTEGRITY = sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg== / REVALIDATE_FROM_NPM_PACKUMENT_BEFORE_ACQUISITION
 PNPM_ACQUIRED_TARBALL_SHA256 = NOT_YET_COMPUTED
 PNPM_EXTRACTED_ENTRYPOINT_SHA256 = NOT_YET_COMPUTED
 EXECUTION_ELIGIBILITY = FAIL_CLOSED
@@ -431,7 +457,7 @@ No field may be silently inferred from a prior run or another platform tuple.
 
 ```text
 NODE_EXTRACTED_EXECUTABLE_SHA256 = NOT_YET_COMPUTED
-PNPM_AUTHORITATIVE_DIST_INTEGRITY = REVALIDATE_FROM_NPM_PACKUMENT_BEFORE_ACQUISITION
+PNPM_AUTHORITATIVE_DIST_INTEGRITY = sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg== / REVALIDATE_FROM_NPM_PACKUMENT_BEFORE_ACQUISITION
 PNPM_ACQUIRED_TARBALL_SHA256 = NOT_YET_COMPUTED
 PNPM_EXTRACTED_ENTRYPOINT_SHA256 = NOT_YET_COMPUTED
 EXACT_OBSERVED_KERNEL = NOT_YET_OBSERVED
@@ -505,7 +531,7 @@ Public observations are evidence inputs only. They do not themselves authorize d
 2. base tree is exactly `41d6184cab36720dc72f76b41ba0ba15d7b541ed`;
 3. exactly one Signthos-authored planning file changes, at the authorized path;
 4. current pnpm tag `v10.34.5` resolves to exact source commit `702ad5f860ffd50d64a3a711d9f8a3da16fc796e`;
-5. current registry-derived exact-version metadata confirms pnpm tarball URL and SHA-1 `6a91127a7f2ca72fe53bb9ff54883e0c75b22f17`;
+5. exact-version npm packument metadata confirms pnpm tarball URL, SHA-1 `6a91127a7f2ca72fe53bb9ff54883e0c75b22f17`, authoritative `dist.integrity` SRI `sha512-pO4F8vc2WCVb1qiYWcBlpFwopX2u+uLIk6Fo7itzFow3uR6D5X6mdlStA/AwMXRkMOi84442LgQmBfuKvIAZLg==`, and registry-signature presence without confusing any of them with a locally calculated acquired-byte SHA-256;
 6. Node 24.20.0 remains the selected LTS baseline and official first-run archive identity is bound to SHA-256 `2f2c0da162318f0de47665410c7c8c2ed3d36c8f3105de4bbc61176c70a7cbf2`;
 7. Corepack, global installation, ambient Node/pnpm, and self-managed pnpm downloads are prohibited;
 8. the future isolated provisioning sequence is explicit and fails before execution on any identity mismatch;
@@ -520,7 +546,7 @@ Public observations are evidence inputs only. They do not themselves authorize d
 17. unknown acquired-byte or runtime-observed hashes remain explicitly unknown rather than fabricated;
 18. no package manager, Node, Corepack, resolver, registry package acquisition, dependency installation, provider, fixture, or PDF runtime is executed by this grain;
 19. no `package.json`, `pnpm-workspace.yaml`, `.npmrc`, `pnpm-lock.yaml`, package, source, fixture, workflow, container, provenance, NOTICE, or SBOM path is mutated;
-20. exact-head Actions/check/provider state is recorded truthfully;
+20. pre-repair exact-head Actions/check/provider state is recorded in this artifact, and the final candidate head's Actions/check/provider state is recorded truthfully as external exact-head PR evidence after that head exists; skipped or neutral provider states are never promoted to a substantive review or CI pass;
 21. fresh independent substantive review covers the exact final candidate head/tree;
 22. every material finding is repaired forward-only and every changed head is re-reviewed;
 23. unresolved material review threads are zero;
@@ -564,8 +590,10 @@ SPECIFICATION_005 = NOT_AUTHORIZED
 ```text
 004C1Z_RESOLVER_EXECUTION_ENVIRONMENT_CONTRACT = QUALIFIED_CANDIDATE
 EXACT_PNPM_SOURCE_IDENTITY = QUALIFIED
-EXACT_PNPM_REGISTRY_TARBALL_URL_AND_SHA1 = QUALIFIED_FROM_CURRENT_REGISTRY_DERIVED_METADATA
-PNPM_SHA512_AND_SHA256_CROSS_CHECKS = CORROBORATIVE_ONLY_PENDING_FUTURE_AUTHORITATIVE_PACKUMENT_REVALIDATION_AND_LOCAL_HASH
+EXACT_PNPM_REGISTRY_TARBALL_URL_SHA1_AND_DIST_INTEGRITY = QUALIFIED_FROM_EXACT_VERSION_PACKUMENT_REVIEW
+PNPM_REGISTRY_SIGNATURE = PRESENT_AT_REVIEW / REVALIDATE_EXACT_VALUE_BEFORE_ACQUISITION
+EXTERNAL_CORROBORATIVE_PNPM_TARBALL_SHA256 = NONAUTHORITATIVE_CROSS_CHECK_ONLY
+PNPM_ACQUIRED_TARBALL_SHA256 = NOT_YET_COMPUTED
 EXACT_NODE_ARCHIVE_IDENTITY_AND_OFFICIAL_SHA256 = QUALIFIED
 PROVISIONING_MECHANISM = QUALIFIED_PLANNING_CONTRACT_ONLY
 FIRST_RUN_PLATFORM = LINUX_X64_GLIBC_ONLY
