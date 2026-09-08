@@ -78,7 +78,10 @@ AdmissionFixtureRecord {
   fixtureId
   fixtureSchemaVersion
   fixtureClass
+  adversarialPurpose
+  expectationMode
   constructionClass
+  handlingClass
 
   exactBytesDigest: ContentDigest {
     algorithm
@@ -89,6 +92,7 @@ AdmissionFixtureRecord {
   sourceEvidence
   rightsEvidence
   provenanceEvidence
+  constructionEvidenceBinding
 
   declaredIdentityInputs
   deterministicExpectedObservations
@@ -105,7 +109,21 @@ AdmissionFixtureRecord {
 }
 ```
 
-A fixture name is not an identity. A source URL is not an identity. A Git commit without exact fixture path and exact distributed-byte digest is not final fixture identity.
+`adversarialPurpose` is a closed decision-boundary binding to Section 15. `fixtureClass` may remain a stable human/domain classification, but it cannot substitute for `adversarialPurpose`.
+
+```text
+ExpectationMode =
+  | QUALIFICATION
+  | EXPLORATORY_DISCOVERY
+```
+
+Rules:
+
+1. `QUALIFICATION` requires exactly one `adversarialPurpose`, pre-authored applicable expectations, complete construction/rights/provenance evidence, and the handling controls required by `handlingClass`.
+2. `EXPLORATORY_DISCOVERY` must still bind exact bytes, construction, rights/provenance, handling class and the purpose being explored, but its observed outputs are discovery evidence only.
+3. An `EXPLORATORY_DISCOVERY` record cannot contribute to qualification pass/fail evidence, acceptance counts, negative-control coverage or corpus qualification.
+4. Promotion from `EXPLORATORY_DISCOVERY` to `QUALIFICATION` requires a new versioned fixture record whose expectations are authored before the qualifying execution. Prior discovery outputs cannot be copied into the expected-result fields as an oracle.
+5. A fixture name is not an identity. A source URL is not an identity. A Git commit without exact fixture path and exact distributed-byte digest is not final fixture identity.
 
 ## 6. Construction classes
 
@@ -122,6 +140,20 @@ COMPOSITE_OR_POLYGLOT_WITH_RECORDED_CONSTRUCTION
 The class determines required provenance and rights evidence.
 
 No construction class is authorized for byte materialization by this planning grain.
+
+Before a fixture can become `QUALIFICATION` evidence, its declared construction class must satisfy this complete class-to-evidence matrix:
+
+| `constructionClass` | Mandatory provenance/construction evidence | Mandatory rights evidence |
+| --- | --- | --- |
+| `SIGNTHOS_AUTHORED_SYNTHETIC` | Signthos authorship record; exact construction specification identity; exact produced-byte digest/length once materialized; evidence that no unrecorded third-party byte asset is embedded | Signthos-owned-or-authorized rights basis; redistribution scope; attribution/notice obligations if any |
+| `EXTERNAL_EXACT_BYTES` | exact publisher/repository, immutable revision/release, exact path/artifact, retrieved exact-byte digest/length, retrieval record, zero-transformation declaration | exact license/permission source; covered path/artifact scope; redistribution eligibility; restrictions; notice/attribution obligations |
+| `EXTERNAL_DERIVED_WITH_RECORDED_TRANSFORMATION` | all external-parent evidence; parent exact digest/length; transformation tool/spec identity; ordered transformation steps/parameters; output exact digest/length | parent rights plus explicit derivative/transformation permission and output redistribution eligibility/restrictions |
+| `PROGRAMMATICALLY_GENERATED_FROM_SIGNTHOS_SPEC` | generator identity/version, generation-spec identity, parameters/seed where applicable, environment identity where material, determinism statement, generated exact digest/length | rights basis for generator/spec inputs and generated output; redistribution eligibility; third-party embedded-input assessment |
+| `COMPOSITE_OR_POLYGLOT_WITH_RECORDED_CONSTRUCTION` | ordered component list; every component exact digest/length and parent/source evidence; exact composition method/order/offset rules; composite exact digest/length | rights basis and redistribution eligibility for every component plus the resulting composite; any one restricted/unknown component keeps repository inclusion fail-closed |
+
+Every matrix row is mandatory for the declared class. A rights-category label from Section 8 is classification metadata only; it cannot substitute for the underlying proof, scope, redistribution determination, restrictions, notices, transformation rights or parent/component identity binding.
+
+`constructionEvidenceBinding` must enumerate the evidence records that satisfy the selected row and publish a completeness state. Missing or contradictory required evidence makes the fixture ineligible for `QUALIFICATION`.
 
 ## 7. Source and provenance requirements
 
@@ -176,6 +208,23 @@ Future rights evidence must distinguish:
 
 A repository-level license cannot be assumed to cover every embedded fixture asset.
 
+Future rights evidence must itself bind at least:
+
+```text
+FixtureRightsEvidence {
+  rightsBasisClass
+  evidenceSource
+  coveredArtifactOrComponentScope
+  redistributionEligibility
+  restrictions[]
+  attributionOrNoticeRequirements[]
+  transformationOrDerivativePermission?
+  authorizationRef?
+}
+```
+
+`redistributionEligibility` must distinguish at least `ALLOWED`, `PROHIBITED`, `RESTRICTED`, and `UNKNOWN`. `UNKNOWN` is fail-closed, not implied permission.
+
 If redistribution rights are absent or ambiguous, the fixture must remain out of the repository unless a later canonical unit provides exact permission or uses a non-redistributed test mechanism that is separately qualified.
 
 ## 9. No PHI, secrets, or real signing material
@@ -211,11 +260,37 @@ Mismatch between declared identity and observed identity is itself expected evid
 
 ## 11. Deterministic byte-signature expectation contract
 
+Every implementation-bound expected observation must resolve to one immutable qualified producer identity.
+
+```text
+QualifiedObservationImplementationIdentity {
+  identityKind
+  providerOrAlgorithmId
+  providerOrAlgorithmVersion
+  packageIdentity?
+  modelIdentity?
+  configurationIdentity
+  runtimeIdentity?
+  modeOrPolicyIdentity?
+}
+```
+
+Identity rules:
+
+1. `providerOrAlgorithmId` and `providerOrAlgorithmVersion` are mandatory for every implementation-bound expectation.
+2. package/model/runtime fields are mandatory whenever that component can change the produced observation.
+3. `configurationIdentity` must identify the exact configuration or canonical configuration digest, not a mutable profile name.
+4. a moving branch, floating package version, product name alone, or undocumented ambient runtime is not an immutable implementation identity.
+5. if any identity-bearing component changes, the implementation-bound expectation requires a new qualification binding.
+6. provider-neutral invariants may declare `PROVIDER_NEUTRAL_INVARIANT` instead of preselecting a provider, but the later execution evidence must still publish the exact producer identity that generated the observation.
+
 A fixture may define expected deterministic observations without claiming those observations are sufficient for admission.
 
 ```text
 DeterministicSignatureExpectation {
   observationId
+  implementationIdentity: QualifiedObservationImplementationIdentity
+  exactImplementationIdentityRequired = TRUE
   expectedState
   expectedValue?
   requiredForFixturePurpose
@@ -223,7 +298,7 @@ DeterministicSignatureExpectation {
 }
 ```
 
-Expected observations must be defined against exact bytes and an explicitly qualified observation algorithm/version before implementation evidence can be treated as reproducible.
+For deterministic observation expectations, the identity must bind the exact observation algorithm/rule and version plus configuration identity. Expected observations must be defined against exact bytes and this immutable identity before implementation evidence can be treated as reproducible.
 
 ## 12. Classifier expectation contract
 
@@ -232,6 +307,10 @@ Classifier expectations must preserve advisory semantics.
 ```text
 ClassifierExpectation {
   applicability
+  identityRequirement:
+    PROVIDER_NEUTRAL_INVARIANT
+    | EXACT_QUALIFIED_IMPLEMENTATION
+  classifierImplementationIdentity?: QualifiedObservationImplementationIdentity
   expectedStateSet
   expectedLabelSet?
   confidenceConstraint?
@@ -241,7 +320,11 @@ ClassifierExpectation {
 }
 ```
 
-A future fixture must not require one probabilistic score as universal truth unless the exact model, config, package/runtime, mode, and threshold policy are fixed.
+Rules:
+
+1. `EXACT_QUALIFIED_IMPLEMENTATION` requires `classifierImplementationIdentity` and `exactClassifierIdentityRequired = TRUE`; package, model, configuration, runtime, mode and policy identities must be present whenever they influence the observation.
+2. `PROVIDER_NEUTRAL_INVARIANT` must not contain provider-specific score/label assumptions masquerading as portable truth; later execution evidence still records the exact producer identity actually used.
+3. a future fixture must not require one probabilistic score as universal truth unless the exact model, config, package/runtime, mode, and threshold policy are fixed.
 
 Portable fixtures should prefer invariant expectations such as:
 
@@ -256,6 +339,10 @@ Portable fixtures should prefer invariant expectations such as:
 ```text
 StructuralInspectionExpectation {
   applicability
+  identityRequirement:
+    PROVIDER_NEUTRAL_INVARIANT
+    | EXACT_QUALIFIED_IMPLEMENTATION
+  structuralImplementationIdentity?: QualifiedObservationImplementationIdentity
   expectedStateSet
   malformedIndicators?
   encryptionState?
@@ -266,6 +353,8 @@ StructuralInspectionExpectation {
   exactInputBindingRequired = TRUE
 }
 ```
+
+`EXACT_QUALIFIED_IMPLEMENTATION` requires `structuralImplementationIdentity`, including exact provider/version/configuration and runtime identity whenever runtime variation can affect the observation. `PROVIDER_NEUTRAL_INVARIANT` may express only provider-neutral security/contract invariants, while execution evidence still records the actual exact producer identity.
 
 A future structural expectation is valid only for a qualified provider/version/configuration. Parser-specific acceptance cannot be promoted to universal PDF truth.
 
@@ -295,6 +384,37 @@ UNSUPPORTED_OR_UNCERTAIN
 A fixture may permit more than one disposition when the canonical policy intentionally leaves a provider-dependent or capability-dependent uncertainty boundary. Such flexibility must be explicit rather than treated as nondeterministic test success.
 
 ## 15. Core fixture-family matrix
+
+Every `QUALIFICATION` fixture must bind exactly one closed `adversarialPurpose` value:
+
+```text
+AdversarialPurpose =
+  | ORDINARY_PDF_CONTROL
+  | DECLARED_IDENTITY_MISMATCH
+  | DETERMINISTIC_SIGNATURE_AMBIGUITY
+  | STRUCTURAL_MALFORMED_INPUT
+  | ACTIVE_CONTENT_OR_EXTERNAL_ACTION
+  | PROBABILISTIC_CLASSIFIER_STRESS
+  | POLYGLOT_OR_MIXED_CONTENT_AMBIGUITY
+  | RESOURCE_OR_DECOMPRESSION_STRESS
+  | DERIVED_ARTIFACT_RECURSION
+  | TOCTOU_OR_SUBSTITUTION_REGRESSION
+```
+
+The mapping to this section is closed:
+
+| Section 15 family | `adversarialPurpose` |
+| --- | --- |
+| A | `ORDINARY_PDF_CONTROL` |
+| B | `DECLARED_IDENTITY_MISMATCH` |
+| C | `DETERMINISTIC_SIGNATURE_AMBIGUITY` |
+| D | `STRUCTURAL_MALFORMED_INPUT` |
+| E | `ACTIVE_CONTENT_OR_EXTERNAL_ACTION` |
+| F | `PROBABILISTIC_CLASSIFIER_STRESS` |
+| G | `POLYGLOT_OR_MIXED_CONTENT_AMBIGUITY` |
+| H | `RESOURCE_OR_DECOMPRESSION_STRESS` |
+| I | `DERIVED_ARTIFACT_RECURSION` |
+| J | `TOCTOU_OR_SUBSTITUTION_REGRESSION` |
 
 The future corpus must cover, at minimum, these classes where rights and safe construction permit.
 
@@ -487,7 +607,22 @@ Missing evidence cannot be encoded as a clean result.
 
 ## 20. Expected-result integrity
 
-Expected outcomes must be authored before the corresponding implementation result is accepted as qualification evidence, except where a dedicated discovery fixture is explicitly marked as exploratory.
+Expected outcomes must be authored before the corresponding implementation result is accepted as qualification evidence.
+
+`expectationMode` controls this boundary:
+
+```text
+QUALIFICATION
+  -> pre-authored applicable expectations required
+  -> eligible for qualification only after all other evidence gates pass
+
+EXPLORATORY_DISCOVERY
+  -> observed outputs are discovery evidence only
+  -> excluded from qualification pass/fail, negative-control coverage and acceptance counts
+  -> promotion requires a new versioned record with expectations authored before qualifying execution
+```
+
+Exploratory output must never be copied into a qualification record's expected fields merely to convert an observed implementation result into a passing oracle.
 
 A later implementation unit must prevent:
 
@@ -529,18 +664,30 @@ Each runtime action requires its own canonical unit.
 
 ## 23. Safe handling classes
 
-Future fixture records should classify operational handling:
+`AdmissionFixtureRecord.handlingClass` is mandatory and is distinct from `confidentialityClass`.
 
 ```text
-ORDINARY_TEST_BYTES
-RESOURCE_STRESS_BYTES
-ACTIVE_CONTENT_TEST_BYTES
-POLYGLOT_OR_MIXED_FORMAT_TEST_BYTES
-MALWARE_LIKE_BUT_INERT_SYNTHETIC_BYTES
-RESTRICTED_SECURITY_SAMPLE
+HandlingClass =
+  | ORDINARY_TEST_BYTES
+  | RESOURCE_STRESS_BYTES
+  | ACTIVE_CONTENT_TEST_BYTES
+  | POLYGLOT_OR_MIXED_FORMAT_TEST_BYTES
+  | MALWARE_LIKE_BUT_INERT_SYNTHETIC_BYTES
+  | RESTRICTED_SECURITY_SAMPLE
 ```
 
-`RESTRICTED_SECURITY_SAMPLE` must fail closed for repository inclusion unless exact rights, handling, and execution safeguards are separately authorized.
+Fail-closed handling rules:
+
+1. no handling class authorizes acquisition, generation, repository inclusion or execution by itself;
+2. repository inclusion requires complete construction/provenance/rights evidence, explicit redistribution eligibility, and separate materialization authority;
+3. `RESOURCE_STRESS_BYTES` requires a separately authorized bounded resource policy before execution;
+4. `ACTIVE_CONTENT_TEST_BYTES` may be inspected only under later explicit runtime authority that preserves active-content non-execution and no-silent-network behavior;
+5. `POLYGLOT_OR_MIXED_FORMAT_TEST_BYTES` remains untrusted under every interpretation and cannot be admitted from one parser/classifier success alone;
+6. `MALWARE_LIKE_BUT_INERT_SYNTHETIC_BYTES` requires evidence that the bytes are Signthos-authored/generated under authorized rules and inert for the intended test; the label cannot waive sandbox or execution restrictions;
+7. `RESTRICTED_SECURITY_SAMPLE` is repository-inclusion and execution ineligible by default. It requires exact rights, handling controls, storage/access restrictions, isolation, and separate explicit execution authority before either action may occur;
+8. a missing, unknown, contradictory or unsupported `handlingClass` is fail-closed.
+
+`confidentialityClass` governs information sensitivity. `handlingClass` governs operational safeguards. Neither may silently substitute for the other.
 
 This planning grain does not authorize real malware acquisition or execution.
 
@@ -640,13 +787,17 @@ This planning grain qualifies only if all of the following are true:
 11. derived artifacts receive independent exact-byte identities and recursion expectations;
 12. resource-limit outcomes cannot become ordinary success;
 13. rights/provenance requirements are explicit for every future fixture class;
-14. the candidate does not invent numeric production budgets absent canonical evidence;
-15. Actions/check/provider accounting is truthful;
-16. a fresh independent substantive exact-head review finds no unresolved material defect;
-17. unresolved material review threads are zero;
-18. immediate race verification confirms exact base/head/tree/surface/authority;
-19. guarded normal merge uses the exact reviewed head;
-20. postmerge verification proves canonical main, parents, tree, signature and exact surface.
+14. every fixture record binds a closed `adversarialPurpose`, and exploratory discovery is explicitly excluded from qualification until pre-authored promotion;
+15. every fixture record binds a mandatory operational `handlingClass` whose repository-inclusion and execution rules fail closed;
+16. every `constructionClass` satisfies the complete class-to-evidence matrix, including rights scope, redistribution eligibility, restrictions, transformations and parent/component identity where applicable;
+17. every implementation-bound deterministic/classifier/structural expectation resolves to an immutable qualified producer identity, while provider-neutral invariants remain explicitly provider-neutral;
+18. the candidate does not invent numeric production budgets absent canonical evidence;
+19. Actions/check/provider accounting is truthful;
+20. a fresh independent substantive exact-head review finds no unresolved material defect;
+21. unresolved material review threads are zero;
+22. immediate race verification confirms exact base/head/tree/surface/authority;
+23. guarded normal merge uses the exact reviewed head;
+24. postmerge verification proves canonical main, parents, tree, signature and exact surface.
 
 ## 31. Successor boundary
 
