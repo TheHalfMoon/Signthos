@@ -178,8 +178,14 @@ ClassifierIdentity {
   packageOrBinaryVersion
   sourceRevision
   modelName
-  modelDigest
-  configDigest
+  modelDigest: ContentDigest {
+    algorithm
+    value
+  }
+  configDigest: ContentDigest {
+    algorithm
+    value
+  }
   predictionMode
   effectiveThresholdPolicyIdentity
   runtimeIdentity
@@ -202,7 +208,10 @@ ProbabilisticClassifierEvidence {
   rawModelLabel?
   confidenceOrScore?
   overwriteOrFallbackReason?
-  inputExactBytesDigest
+  inputExactBytesDigest: ContentDigest {
+    algorithm
+    value
+  }
   byteLength
   executionLocality
   networkUseEvidence
@@ -413,7 +422,10 @@ RegistryArtifactEvidence {
   registry
   packageName
   exactVersion
-  immutableArtifactDigest
+  immutableArtifactDigest: ContentDigest {
+    algorithm
+    value
+  }
   registryIntegrityMetadata
   sourceRepository
   sourceRevisionOrRelease
@@ -429,11 +441,20 @@ For an embedded model/config package:
 ClassifierAssetEvidence {
   modelName
   modelVersion
-  modelExactDigest
+  modelExactDigest: ContentDigest {
+    algorithm
+    value
+  }
   modelByteLength
-  configExactDigest
+  configExactDigest: ContentDigest {
+    algorithm
+    value
+  }
   configByteLength
-  metadataExactDigest?
+  metadataExactDigest?: ContentDigest {
+    algorithm
+    value
+  }
   sourceRepository
   sourceRevision
   sourcePaths[]
@@ -449,7 +470,10 @@ For native runtime components:
 NativeRuntimeEvidence {
   componentName
   exactVersionOrRevision
-  exactArtifactDigest
+  exactArtifactDigest: ContentDigest {
+    algorithm
+    value
+  }
   sourceOrBinaryOrigin
   platform
   architecture
