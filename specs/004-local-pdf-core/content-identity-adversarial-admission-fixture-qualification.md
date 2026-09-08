@@ -79,7 +79,6 @@ AdmissionFixtureRecord {
   fixtureSchemaVersion
   fixtureClass
   adversarialPurpose
-  expectationMode
   constructionClass
   handlingClass
 
@@ -95,21 +94,32 @@ AdmissionFixtureRecord {
   constructionEvidenceBinding
 
   declaredIdentityInputs
+  expectationContract:
+    QualificationExpectationContract
+    | ExploratoryDiscoveryExpectationContract
+
+  confidentialityClass
+  evidenceCompleteness
+}
+
+QualificationExpectationContract {
+  expectationMode = QUALIFICATION
   deterministicExpectedObservations
   classifierExpectedEvidence
   structuralExpectedEvidence
   reconciliationExpectedEvidence
   admissionExpectedDisposition
-
   resourceExpectation
   recursionExpectation?
   mutationExpectation
-  confidentialityClass
-  evidenceCompleteness
+}
+
+ExploratoryDiscoveryExpectationContract {
+  expectationMode = EXPLORATORY_DISCOVERY
 }
 ```
 
-`adversarialPurpose` is a closed decision-boundary binding to Section 15. `fixtureClass` may remain a stable human/domain classification, but it cannot substitute for `adversarialPurpose`.
+`expectationMode` is the discriminator of `expectationContract`; it is not an independent duplicate field. `adversarialPurpose` is a closed decision-boundary binding to Section 15. `fixtureClass` may remain a stable human/domain classification, but it cannot substitute for `adversarialPurpose`.
 
 ```text
 ExpectationMode =
@@ -119,11 +129,12 @@ ExpectationMode =
 
 Rules:
 
-1. `QUALIFICATION` requires exactly one `adversarialPurpose`, pre-authored applicable expectations, complete construction/rights/provenance evidence, and the handling controls required by `handlingClass`.
-2. `EXPLORATORY_DISCOVERY` must still bind exact bytes, construction, rights/provenance, handling class and the purpose being explored, but its observed outputs are discovery evidence only.
-3. An `EXPLORATORY_DISCOVERY` record cannot contribute to qualification pass/fail evidence, acceptance counts, negative-control coverage or corpus qualification.
-4. Promotion from `EXPLORATORY_DISCOVERY` to `QUALIFICATION` requires a new versioned fixture record whose expectations are authored before the qualifying execution. Prior discovery outputs cannot be copied into the expected-result fields as an oracle.
-5. A fixture name is not an identity. A source URL is not an identity. A Git commit without exact fixture path and exact distributed-byte digest is not final fixture identity.
+1. `QUALIFICATION` requires exactly one `adversarialPurpose`, a `QualificationExpectationContract` with every applicable expectation pre-authored, complete construction/rights/provenance evidence, and the handling controls required by `handlingClass`.
+2. `EXPLORATORY_DISCOVERY` must use `ExploratoryDiscoveryExpectationContract`; qualification expected-output fields are absent by schema and cannot be populated with observed discovery output or represented as a qualifying oracle.
+3. `EXPLORATORY_DISCOVERY` must still bind exact bytes, construction, rights/provenance, handling class and the purpose being explored, but its observed outputs are discovery evidence only.
+4. An `EXPLORATORY_DISCOVERY` record cannot contribute to qualification pass/fail evidence, acceptance counts, negative-control coverage or corpus qualification.
+5. Promotion from `EXPLORATORY_DISCOVERY` to `QUALIFICATION` requires a new versioned fixture record whose `QualificationExpectationContract` is authored before the qualifying execution. Prior discovery outputs cannot be copied into the expected-result fields as an oracle.
+6. A fixture name is not an identity. A source URL is not an identity. A Git commit without exact fixture path and exact distributed-byte digest is not final fixture identity.
 
 ## 6. Construction classes
 
@@ -560,6 +571,7 @@ DerivedArtifactExpectation {
     algorithm
     value
   }
+  parentByteLength
   embeddedObjectIdentity
   childExactBytesDigest: ContentDigest {
     algorithm
@@ -571,7 +583,7 @@ DerivedArtifactExpectation {
 }
 ```
 
-Every nested digest is algorithm tagged.
+Every nested exact-byte identity is algorithm tagged and length bound. `parentByteLength` is mandatory for every derived-artifact expectation and describes the immediate parent represented by `parentArtifactExactBytesDigest`.
 
 ## 18. Mutation expectation
 
@@ -593,7 +605,10 @@ Future fixture execution results must distinguish:
 
 ```text
 FIXTURE_IDENTITY_COMPLETE
+FIXTURE_CONSTRUCTION_COMPLETE
 FIXTURE_RIGHTS_COMPLETE
+FIXTURE_PROVENANCE_COMPLETE
+HANDLING_CONTROLS_COMPLETE
 DETERMINISTIC_OBSERVATION_COMPLETE
 CLASSIFIER_NOT_APPLICABLE
 CLASSIFIER_NOT_CONFIGURED
@@ -608,20 +623,25 @@ RECONCILIATION_COMPLETE
 ADMISSION_RESULT_COMPLETE
 ```
 
+A `QUALIFICATION` result requires `FIXTURE_IDENTITY_COMPLETE`, `FIXTURE_CONSTRUCTION_COMPLETE`, `FIXTURE_RIGHTS_COMPLETE`, `FIXTURE_PROVENANCE_COMPLETE`, and `HANDLING_CONTROLS_COMPLETE`, plus the deterministic/classifier/structural/reconciliation/admission states required by its pre-authored qualification expectation contract. `NOT_CONFIGURED`, `UNAVAILABLE`, `EXECUTION_FAILED`, or other incomplete provider states remain explicit evidence and cannot silently satisfy an applicable expected stage.
+
 Missing evidence cannot be encoded as a clean result.
 
 ## 20. Expected-result integrity
 
 Expected outcomes must be authored before the corresponding implementation result is accepted as qualification evidence.
 
-`expectationMode` controls this boundary:
+`expectationMode` controls this boundary through the discriminated `expectationContract`:
 
 ```text
 QUALIFICATION
+  -> QualificationExpectationContract required
   -> pre-authored applicable expectations required
   -> eligible for qualification only after all other evidence gates pass
 
 EXPLORATORY_DISCOVERY
+  -> ExploratoryDiscoveryExpectationContract required
+  -> qualification expected-output fields absent by schema
   -> observed outputs are discovery evidence only
   -> excluded from qualification pass/fail, negative-control coverage and acceptance counts
   -> promotion requires a new versioned record with expectations authored before qualifying execution
@@ -706,7 +726,7 @@ Candidate structure:
 AdmissionCorpusIdentity {
   schemaVersion
   corpusVersion
-  orderedFixtureRecordDigests[]
+  orderedFixtureRecordDigests: ContentDigest[]
   manifestDigest: ContentDigest {
     algorithm
     value
@@ -714,7 +734,7 @@ AdmissionCorpusIdentity {
 }
 ```
 
-The exact canonical serialization algorithm must be separately frozen before this becomes merge-critical runtime evidence.
+Every element of `orderedFixtureRecordDigests` is therefore algorithm tagged and value bound. The exact canonical serialization algorithm must be separately frozen before this becomes merge-critical runtime evidence.
 
 ## 25. Fixture update policy
 
@@ -783,26 +803,27 @@ This planning grain qualifies only if all of the following are true:
 2. changed surface is exactly this one Signthos-authored planning file;
 3. zero fixture bytes are created, imported, downloaded, generated, executed, parsed, classified, or redistributed;
 4. zero source/model/package/binary/runtime bytes are acquired;
-5. every digest-bearing schema field is explicitly algorithm tagged with `ContentDigest { algorithm, value }`;
+5. every digest-bearing schema field is explicitly algorithm tagged with `ContentDigest { algorithm, value }`, including every element of `orderedFixtureRecordDigests`;
 6. declared identity remains untrusted evidence;
 7. classifier expectations remain advisory and exact-identity-bound;
 8. structural expectations do not become universal safety claims;
 9. polyglot ambiguity remains explicit;
 10. classifier unavailable/failure cannot become `NOT_PDF`;
-11. derived artifacts receive independent exact-byte identities and recursion expectations;
+11. derived artifacts receive independent exact-byte identities and recursion expectations, including exact parent digest plus mandatory parent byte length;
 12. resource-limit outcomes cannot become ordinary success;
 13. rights/provenance requirements are explicit for every future fixture class;
-14. every fixture record binds a closed `adversarialPurpose`, and exploratory discovery is explicitly excluded from qualification until pre-authored promotion;
+14. every fixture record binds a closed `adversarialPurpose`, and the discriminated expectation contract makes exploratory discovery unable to carry qualification expected-output fields until pre-authored promotion;
 15. every fixture record binds a mandatory operational `handlingClass` whose repository-inclusion and execution rules fail closed;
 16. every `constructionClass` satisfies the complete class-to-evidence matrix, including rights scope, redistribution eligibility, restrictions, transformations and parent/component identity where applicable;
 17. every implementation-bound deterministic/classifier/structural expectation resolves to an immutable qualified producer identity, while provider-neutral invariants remain explicitly provider-neutral;
-18. the candidate does not invent numeric production budgets absent canonical evidence;
-19. Actions/check/provider accounting is truthful;
-20. a fresh independent substantive exact-head review finds no unresolved material defect;
-21. unresolved material review threads are zero;
-22. immediate race verification confirms exact base/head/tree/surface/authority;
-23. guarded normal merge uses the exact reviewed head;
-24. postmerge verification proves canonical main, parents, tree, signature and exact surface.
+18. qualification evidence explicitly proves construction, provenance, rights and handling-control completeness before a qualifying result can be produced;
+19. the candidate does not invent numeric production budgets absent canonical evidence;
+20. Actions/check/provider accounting is truthful;
+21. a fresh independent substantive exact-head review finds no unresolved material defect;
+22. unresolved material review threads are zero;
+23. immediate race verification confirms exact base/head/tree/surface/authority;
+24. guarded normal merge uses the exact reviewed head;
+25. postmerge verification proves canonical main, parents, tree, signature and exact surface.
 
 ## 31. Successor boundary
 
