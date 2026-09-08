@@ -322,9 +322,10 @@ ClassifierExpectation {
 
 Rules:
 
-1. `EXACT_QUALIFIED_IMPLEMENTATION` requires `classifierImplementationIdentity` and `exactClassifierIdentityRequired = TRUE`; package, model, configuration, runtime, mode and policy identities must be present whenever they influence the observation.
-2. `PROVIDER_NEUTRAL_INVARIANT` must not contain provider-specific score/label assumptions masquerading as portable truth; later execution evidence still records the exact producer identity actually used.
-3. a future fixture must not require one probabilistic score as universal truth unless the exact model, config, package/runtime, mode, and threshold policy are fixed.
+1. `EXACT_QUALIFIED_IMPLEMENTATION` requires `classifierImplementationIdentity`, `exactClassifierIdentityRequired = TRUE`, and every package/model/configuration/runtime/mode/policy identity that can influence the observation.
+2. `PROVIDER_NEUTRAL_INVARIANT` requires `exactClassifierIdentityRequired = FALSE` and no provider-specific expected score, label, threshold, model, package, configuration, runtime, mode or policy identity in the qualification expectation. Later execution evidence still records the exact producer identity actually used.
+3. `exactClassifierIdentityRequired` is therefore derived from `identityRequirement`; any contradictory value is invalid evidence.
+4. a future fixture must not require one probabilistic score as universal truth unless the exact model, config, package/runtime, mode, and threshold policy are fixed.
 
 Portable fixtures should prefer invariant expectations such as:
 
@@ -354,9 +355,13 @@ StructuralInspectionExpectation {
 }
 ```
 
-`EXACT_QUALIFIED_IMPLEMENTATION` requires `structuralImplementationIdentity`, including exact provider/version/configuration and runtime identity whenever runtime variation can affect the observation. `PROVIDER_NEUTRAL_INVARIANT` may express only provider-neutral security/contract invariants, while execution evidence still records the actual exact producer identity.
+Identity-flag rules:
 
-A future structural expectation is valid only for a qualified provider/version/configuration. Parser-specific acceptance cannot be promoted to universal PDF truth.
+1. `EXACT_QUALIFIED_IMPLEMENTATION` requires `structuralImplementationIdentity`, `exactProviderIdentityRequired = TRUE`, and exact provider/version/configuration plus runtime identity whenever runtime variation can affect the observation.
+2. `PROVIDER_NEUTRAL_INVARIANT` requires `exactProviderIdentityRequired = FALSE` and no provider-specific expected parser result masquerading as portable truth; later execution evidence still records the actual exact producer identity.
+3. `exactProviderIdentityRequired` is therefore derived from `identityRequirement`; any contradictory value is invalid evidence.
+
+A future structural expectation is valid only for a qualified provider/version/configuration when it is implementation-specific. Parser-specific acceptance cannot be promoted to universal PDF truth.
 
 ## 14. Reconciliation and admission expectation
 
