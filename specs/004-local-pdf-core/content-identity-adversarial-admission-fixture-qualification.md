@@ -466,7 +466,7 @@ Purpose: prevent adversarial policy from rejecting ordinary supported PDF struct
 - non-PDF bytes declared `application/pdf`;
 - valid PDF named with a non-PDF extension;
 - valid PDF with conflicting caller MIME;
-+- filename and MIME disagreement.
+- filename and MIME disagreement.
 
 Expected invariant: declared metadata never becomes content truth.
 
