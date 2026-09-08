@@ -110,7 +110,7 @@ The primary `PdfStructuralInspectionEvidence` contract is interpreted with this 
 ```text
 PdfStructuralInspectionEvidence {
   state
-  structuralIdentityResult?
+  structuralIdentityResult? // presence and state/result validity are governed by the current primary artifact
   providerId?
   providerVersionEvidence?
   providerCapabilityVersion?
@@ -129,41 +129,41 @@ PdfStructuralInspectionEvidence {
 }
 ```
 
-Structural acceptance or rejection cannot be attached to a different digest algorithm/value pair, byte length, mutable alias, or silently substituted input.
+Structural acceptance or rejection cannot be attached to a different digest algorithm/value pair, byte length, mutable alias, or silently substituted input. The current primary artifact exclusively governs when `structuralIdentityResult` is required or prohibited.
 
 ## 6. Derived-artifact digest typing
 
-The current primary artifact owns the derived-artifact schema and lifecycle. Its digest fields are interpreted exactly as:
+The current primary artifact owns the derived-artifact schema, immediate-parent kind, lineage, byte-length fields, and lifecycle. For digest typing only, its current nested exact-byte fields are represented equivalently by:
 
 ```text
-DerivedArtifactIdentityEvidence {
-  derivedArtifactRef
-  parentOperationRef
-  parentDocumentRevisionId
-  parentDocumentDigest: ContentDigest {
+DerivedArtifactParentBinding {
+  parentExactBytesDigest: ContentDigest {
     algorithm
     value
   }
-  embeddedObjectIdentity
+  parentByteLength
+  // all parent-kind and parent-identity fields are owned by the current primary artifact
+}
+
+DerivedArtifactIdentityEvidence {
+  parentBinding: DerivedArtifactParentBinding
   extractedArtifactDigest: ContentDigest {
     algorithm
     value
   }
-  byteLength
-  extractionProviderIdentity
-  extractionEvidenceRef
-  reclassificationRequired = true
+  extractedArtifactByteLength
+  // all other non-digest fields are owned by the current primary artifact
 }
 ```
 
 Rules:
 
-1. `parentDocumentDigest` is the canonical algorithm-tagged digest of the exact parent revision from which extraction evidence was produced.
-2. `extractedArtifactDigest` independently identifies the exact extracted artifact bytes.
+1. `parentBinding.parentExactBytesDigest` is the canonical algorithm-tagged digest of the exact immediate-parent bytes defined by the current primary artifact and is paired with that parent's `parentByteLength`.
+2. `extractedArtifactDigest` independently identifies the exact extracted child bytes and is paired with `extractedArtifactByteLength`.
 3. parent and extracted digest identities are separate; equality is neither required nor implied.
-4. a change in extracted artifact algorithm/value or byte length creates a new derived-artifact identity requiring new admission evidence.
-5. `derivedArtifactRef`, `parentOperationRef`, pre-promotion admission, later canonical-revision promotion, authorization, and general-004C eligibility remain governed only by the current primary artifact.
-6. this correction cannot turn a derived artifact into a `DocumentRevision` or authorize general 004C execution.
+4. a change in either algorithm/value pair or its corresponding byte length creates a different byte identity under the current primary rules.
+5. immediate-parent kind, canonical-revision identity, recursive derived-artifact identity, `derivedArtifactRef`, `parentOperationRef`, pre-promotion admission, later canonical-revision promotion, authorization, and general-004C eligibility remain governed only by the current primary artifact.
+6. this correction cannot turn a derived artifact into a `DocumentRevision`, redefine recursive lineage, or authorize general 004C execution.
 
 ## 7. Admission-envelope synchronization
 
@@ -227,6 +227,7 @@ The reviewer must verify that:
 
 - every nested exact-byte digest is explicitly algorithm tagged;
 - the current primary artifact's `ContentInputBinding` and derived-artifact schema remain authoritative;
+- parent and child digest-plus-length bindings remain distinct while their non-digest lineage semantics remain primary-owned;
 - this correction does not remove or redefine non-digest primary semantics;
 - the complete package preserves admission dispositions, evidence-strength rules, classifier advisory-only boundary, structural-evidence requirement, TOCTOU behavior, authorization separation, polyglot handling, read-only/no-network rules, derived-artifact lifecycle rules, and explicit non-grants.
 
@@ -239,7 +240,9 @@ DETERMINISTIC_OBSERVATION_DIGEST = ALGORITHM_TAGGED
 CLASSIFIER_EVIDENCE_DIGEST = ALGORITHM_TAGGED
 STRUCTURAL_INSPECTION_DIGEST = ALGORITHM_TAGGED
 DERIVED_PARENT_DIGEST = ALGORITHM_TAGGED
+DERIVED_PARENT_LENGTH = PRIMARY_BOUND
 DERIVED_ARTIFACT_DIGEST = ALGORITHM_TAGGED
+DERIVED_ARTIFACT_LENGTH = PRIMARY_BOUND
 NON_DIGEST_SCHEMA_AUTHORITY = PRIMARY_004C1R_ARTIFACT
 OTHER_004C1R_SEMANTICS = UNCHANGED
 IMPLEMENTATION_AUTHORITY = ABSENT
