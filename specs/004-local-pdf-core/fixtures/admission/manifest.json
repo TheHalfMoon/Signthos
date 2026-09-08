@@ -1,0 +1,371 @@
+{
+  "schemaVersion": "signthos-admission-fixture-seed/v1",
+  "corpusVersion": "synthetic-seed-1",
+  "authority": "github:issue-comment:5587167635",
+  "canonicalBase": "9953544e878db735f2a10b779babc9837316ecd3",
+  "shared": {
+    "constructionEvidence": {
+      "authorshipEvidenceRef": "github:issue-comment:5587167635",
+      "constructionSpecificationRef": "specs/004-local-pdf-core/content-identity-synthetic-fixture-seed-materialization.md",
+      "externalBytesUsed": false,
+      "thirdPartyAssetsEmbedded": false,
+      "completeness": "COMPLETE"
+    },
+    "rightsEvidence": {
+      "rightsBasisClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "evidenceSource": "github:issue-comment:5587167635",
+      "redistributionEligibility": "ALLOWED",
+      "restrictions": [],
+      "attributionOrNoticeRequirements": [],
+      "transformationOrDerivativePermission": true,
+      "authorizationRef": "github:issue-comment:5587167635"
+    },
+    "classifierExpectedEvidence": {
+      "applicability": "OPTIONAL",
+      "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+      "exactClassifierIdentityRequired": false,
+      "exactInputBindingRequired": true,
+      "expectedStateSet": [
+        "CLASSIFIER_NOT_CONFIGURED",
+        "CLASSIFIER_UNAVAILABLE",
+        "CLASSIFIER_EXECUTION_FAILED",
+        "CLASSIFIER_UNSUPPORTED_INPUT",
+        "CLASSIFIER_LOW_CONFIDENCE",
+        "CLASSIFIER_RESULT_AVAILABLE"
+      ],
+      "invariants": [
+        "Classifier non-result states MUST NOT become NOT_PDF or CONFIRMED_PDF.",
+        "A pdf label MUST NOT establish CONFIRMED_PDF without required structural evidence."
+      ]
+    },
+    "mutationExpectation": {
+      "inputBytesMustRemainIdentical": true,
+      "outputDocumentRevisionExpected": false,
+      "sanitizerOrRepairOutputExpected": false
+    }
+  },
+  "recordOrdering": [
+    "admission-seed-ordinary-minimal-v1",
+    "admission-seed-declared-pdf-nonpdf-v1",
+    "admission-seed-truncated-pdf-like-v1",
+    "admission-seed-trailing-inert-bytes-v1"
+  ],
+  "records": [
+    {
+      "fixtureId": "admission-seed-ordinary-minimal-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "ORDINARY_MINIMAL_PDF",
+      "adversarialPurpose": "ORDINARY_PDF_CONTROL",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/ordinary-minimal.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "d88bad0d23edfa87d2ee1dd41f8dc0b3909b8f32d5964e8deb144e87be689207"
+      },
+      "byteLength": 583,
+      "declaredIdentityInputs": {
+        "fileName": "ordinary-minimal.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5587167635"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5587167635"
+      },
+      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [],
+        "classifierExpectedEvidenceRef": "shared.classifierExpectedEvidence",
+        "structuralExpectedEvidence": {
+          "applicability": "REQUIRED",
+          "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+          "exactProviderIdentityRequired": false,
+          "exactInputBindingRequired": true,
+          "expectedStateSet": [
+            "STRUCTURAL_INSPECTION_COMPLETE"
+          ],
+          "invariants": [
+            "Evidence MUST bind the exact fixture digest and byte length.",
+            "Provider failure or unavailability MUST NOT be collapsed into structural rejection.",
+            "Structural acceptance MUST NOT imply malware absence, sanitization, signature validity, compliance, or universal safety."
+          ]
+        },
+        "reconciliationExpectedEvidence": {
+          "conflictingSignalsExpected": false,
+          "invariants": [
+            "Only evidence bound to the same exact bytes may be reconciled.",
+            "Incomplete or conflicting required evidence cannot become silent success."
+          ]
+        },
+        "admissionExpectedDisposition": {
+          "conflictingSignalsExpected": false,
+          "evidenceCompletenessExpectation": "COMPLETE_FOR_EXACT_ADMISSION_POLICY_BEFORE_DISPOSITION",
+          "permittedDispositionSet": [
+            "CONFIRMED_PDF"
+          ],
+          "forbiddenDispositionSet": [
+            "NOT_PDF"
+          ],
+          "rationale": "An ordinary synthetic control may be confirmed only after the exact policy completes all required evidence, including qualified structural evidence."
+        },
+        "resourceExpectation": {},
+        "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-declared-pdf-nonpdf-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "MISLEADING_DECLARED_PDF_NONPDF",
+      "adversarialPurpose": "DECLARED_IDENTITY_MISMATCH",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/declared-pdf-nonpdf.bin",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "fecf1b6f0521397334ff12a71c066129c97bb5458e68cbe2e80aed8a3f92825c"
+      },
+      "byteLength": 86,
+      "declaredIdentityInputs": {
+        "fileName": "invoice.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5587167635"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5587167635"
+      },
+      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [],
+        "classifierExpectedEvidenceRef": "shared.classifierExpectedEvidence",
+        "structuralExpectedEvidence": {
+          "applicability": "REQUIRED",
+          "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+          "exactProviderIdentityRequired": false,
+          "exactInputBindingRequired": true,
+          "expectedStateSet": [
+            "STRUCTURAL_INSPECTION_COMPLETE",
+            "STRUCTURAL_INSPECTION_INPUT_REJECTED"
+          ],
+          "invariants": [
+            "Declared filename, extension, and MIME are untrusted evidence.",
+            "Provider failure or unavailability MUST NOT be collapsed into structural rejection."
+          ]
+        },
+        "reconciliationExpectedEvidence": {
+          "conflictingSignalsExpected": true,
+          "invariants": [
+            "Only evidence bound to the same exact bytes may be reconciled.",
+            "Incomplete or conflicting required evidence cannot become silent success."
+          ]
+        },
+        "admissionExpectedDisposition": {
+          "conflictingSignalsExpected": true,
+          "evidenceCompletenessExpectation": "COMPLETE_FOR_EXACT_ADMISSION_POLICY_BEFORE_DISPOSITION",
+          "permittedDispositionSet": [
+            "NOT_PDF",
+            "UNSUPPORTED_OR_UNCERTAIN"
+          ],
+          "forbiddenDispositionSet": [
+            "CONFIRMED_PDF"
+          ],
+          "rationale": "Misleading declared metadata must never be sufficient to confirm these exact non-PDF bytes as PDF."
+        },
+        "resourceExpectation": {},
+        "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-truncated-pdf-like-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "TRUNCATED_PDF_LIKE",
+      "adversarialPurpose": "STRUCTURAL_MALFORMED_INPUT",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/truncated-pdf-like.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "b315f2c38fee3e1ff098b8e815625bf47a6d8eced917cea06a158bad897e02c1"
+      },
+      "byteLength": 94,
+      "declaredIdentityInputs": {
+        "fileName": "truncated-pdf-like.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5587167635"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5587167635"
+      },
+      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [],
+        "classifierExpectedEvidenceRef": "shared.classifierExpectedEvidence",
+        "structuralExpectedEvidence": {
+          "applicability": "REQUIRED",
+          "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+          "exactProviderIdentityRequired": false,
+          "exactInputBindingRequired": true,
+          "expectedStateSet": [
+            "STRUCTURAL_INSPECTION_COMPLETE",
+            "STRUCTURAL_INSPECTION_INPUT_REJECTED"
+          ],
+          "invariants": [
+            "Plausible PDF marker bytes are evidence, not full structural validity.",
+            "Incomplete or failed required structural evidence MUST NOT become successful admission."
+          ]
+        },
+        "reconciliationExpectedEvidence": {
+          "conflictingSignalsExpected": false,
+          "invariants": [
+            "Only evidence bound to the same exact bytes may be reconciled.",
+            "Incomplete or conflicting required evidence cannot become silent success."
+          ]
+        },
+        "admissionExpectedDisposition": {
+          "conflictingSignalsExpected": false,
+          "evidenceCompletenessExpectation": "COMPLETE_FOR_EXACT_ADMISSION_POLICY_BEFORE_DISPOSITION",
+          "permittedDispositionSet": [
+            "NOT_PDF",
+            "UNSUPPORTED_OR_UNCERTAIN",
+            "AMBIGUOUS_CONTENT_IDENTITY"
+          ],
+          "forbiddenDispositionSet": [
+            "CONFIRMED_PDF"
+          ],
+          "rationale": "Truncated PDF-like bytes cannot be confirmed as PDF without complete required structural evidence."
+        },
+        "resourceExpectation": {},
+        "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-trailing-inert-bytes-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "PDF_WITH_TRAILING_INERT_BYTES",
+      "adversarialPurpose": "POLYGLOT_OR_MIXED_CONTENT_AMBIGUITY",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/pdf-with-trailing-inert-bytes.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "d21b6163ad783ee0aca73e17e5f1cd7f06183b751312fdce116d6695146ebec0"
+      },
+      "byteLength": 616,
+      "declaredIdentityInputs": {
+        "fileName": "pdf-with-trailing-inert-bytes.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5587167635"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5587167635"
+      },
+      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [],
+        "classifierExpectedEvidenceRef": "shared.classifierExpectedEvidence",
+        "structuralExpectedEvidence": {
+          "applicability": "REQUIRED",
+          "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+          "exactProviderIdentityRequired": false,
+          "exactInputBindingRequired": true,
+          "expectedStateSet": [
+            "STRUCTURAL_INSPECTION_COMPLETE",
+            "STRUCTURAL_INSPECTION_INPUT_REJECTED"
+          ],
+          "invariants": [
+            "Trailing bytes remain observable evidence and cannot be erased by declared metadata.",
+            "Parser acceptance of one PDF interpretation MUST NOT prove non-polyglot status or universal safety."
+          ]
+        },
+        "reconciliationExpectedEvidence": {
+          "conflictingSignalsExpected": true,
+          "invariants": [
+            "Only evidence bound to the same exact bytes may be reconciled.",
+            "Incomplete or conflicting required evidence cannot become silent success."
+          ]
+        },
+        "admissionExpectedDisposition": {
+          "conflictingSignalsExpected": true,
+          "evidenceCompletenessExpectation": "COMPLETE_FOR_EXACT_ADMISSION_POLICY_BEFORE_DISPOSITION",
+          "permittedDispositionSet": [
+            "AMBIGUOUS_CONTENT_IDENTITY",
+            "CONFIRMED_PDF",
+            "UNSUPPORTED_OR_UNCERTAIN"
+          ],
+          "forbiddenDispositionSet": [],
+          "rationale": "The inert trailing marker exercises policy-visible ambiguity without claiming a true multi-runtime polyglot."
+        },
+        "resourceExpectation": {},
+        "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    }
+  ],
+  "corpusIdentityNote": "This file is not claimed as the canonical AdmissionCorpusIdentity manifestDigest. Section 24 requires a separately frozen canonical record-serialization algorithm before a manifest digest becomes merge-critical runtime evidence."
+}
