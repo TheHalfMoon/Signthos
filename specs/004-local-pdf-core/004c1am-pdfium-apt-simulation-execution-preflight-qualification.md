@@ -72,6 +72,25 @@ APT_STAGE_ORDER = [STAGE_A, STAGE_B, STAGE_C]
 
 These are inherited canonical identities. 004C1AM does not claim that the selected image or any external predecessor evidence remains locally available merely because its identity is canonical.
 
+### 2.1 Fresh competing-successor PR query
+
+A fresh GitHub query was executed after the independent review finding and before this forward-only repair:
+
+```text
+QUERY_TIME_UTC = 2026-09-09T21:23:54Z
+QUERY = gh pr list --repo TheHalfMoon/Signthos --state open --json number,title,headRefOid,baseRefOid --limit 100
+OPEN_PR_COUNT = 1
+OPEN_PR_1_NUMBER = 157
+OPEN_PR_1_TITLE = docs(004): qualify APT simulation execution preflight
+OPEN_PR_1_HEAD = 3bd2955c98f0afccb57016fd5182100b2c8ccefd
+OPEN_PR_1_BASE = e1b3f949651ee16930e6424129b556ebbe6ffc45
+CURRENT_004C1AM_PR = 157
+COMPETING_SUCCESSOR_PR_COUNT = 0
+COMPETING_SUCCESSOR_DISPOSITION = PASS_AT_OBSERVATION_TIME / IMMEDIATE_PREMERGE_RECHECK_REQUIRED
+```
+
+This evidence is time-bounded. It does not authorize ignoring a later competing PR or branch movement. The immediate premerge race proof must query open PRs again and fail closed pending fresh reconciliation if another successor PR appears or if PR #157 no longer targets the exact canonical base/head expected by the reviewed candidate.
+
 ## 3. Fresh physical-host and Docker metadata measurement
 
 The authorized read-only preflight measured the current host and Docker server without creating or executing a container:
@@ -326,7 +345,7 @@ PDFIUM_BUILD_EXECUTION_AUTHORITY = ABSENT_FROM_004C1AM
 
 This candidate is eligible for canonical merge only if all pre-merge gates below pass on the exact final head:
 
-1. canonical base remains `e1b3f949651ee16930e6424129b556ebbe6ffc45` with tree `99cf1ec77f5b4f0113e2cc2d27a2b822e26b93ea`;
+1. canonical base remains `e1b3f949651ee16930e6424129b556ebbe6ffc45` with tree `99cf1ec77f5b4f0113e2cc2d27a2b822e26b93ea`, the time-bounded open-PR evidence in Section 2.1 records exactly PR #157 open with zero competing successor PRs, and the immediate premerge query reconfirms that state or fails closed pending reconciliation;
 2. Issue #7 authority remains exactly `github:issue-comment:5608847657` for 004C1AM;
 3. exactly one repository file changes at the authorized 004C1AM path;
 4. host/Docker facts are recorded exactly from read-only measurements;
