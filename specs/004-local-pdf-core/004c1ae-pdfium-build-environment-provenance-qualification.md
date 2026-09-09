@@ -47,10 +47,24 @@ No image, package, toolchain, dependency, or upstream source byte is committed b
 The canonical source identities remain:
 
 ```text
+EMBEDPDF_REPOSITORY = https://github.com/embedpdf/embed-pdf-viewer
 EMBEDPDF_TAG = refs/tags/v2.15.0
+EMBEDPDF_TAG_API_LOCATOR = https://api.github.com/repos/embedpdf/embed-pdf-viewer/git/ref/tags/v2.15.0
 EMBEDPDF_SOURCE_COMMIT = 2cf7df3b594dfe46de2d85e6973ff50ea447a1ed
+EMBEDPDF_COMMIT_API_LOCATOR = https://api.github.com/repos/embedpdf/embed-pdf-viewer/git/commits/2cf7df3b594dfe46de2d85e6973ff50ea447a1ed
+PDFIUM_SUBMODULE_URL = https://github.com/embedpdf/pdfium.git
+PDFIUM_SUBMODULE_BRANCH_METADATA = embedpdf/main
 PDFIUM_GITLINK = cb29e78f2ba00c9298714d5f4a8bf7765f1e802f
+PDFIUM_COMMIT_API_LOCATOR = https://api.github.com/repos/embedpdf/pdfium/git/commits/cb29e78f2ba00c9298714d5f4a8bf7765f1e802f
 ```
+
+The repository-qualified immutable raw-content prefix used for the exact build-control file reads is:
+
+```text
+https://raw.githubusercontent.com/embedpdf/embed-pdf-viewer/2cf7df3b594dfe46de2d85e6973ff50ea447a1ed/
+```
+
+The exact `.gitmodules` file at the same EmbedPDF commit binds `packages/pdfium/pdfium-src` to `https://github.com/embedpdf/pdfium.git`; the tree entry for that path is the gitlink SHA recorded above. The moving `branch = embedpdf/main` metadata is not used as merge-critical identity; the exact gitlink commit is.
 
 Exact build-control file identities at the EmbedPDF source commit:
 
