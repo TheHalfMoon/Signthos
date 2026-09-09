@@ -116,6 +116,36 @@ DOCKER_SERVER_SECURITY_OPTIONS = [seccomp builtin, cgroupns]
 
 The Docker server version and kernel match the values recorded by canonical 004C1AH. That observation does not substitute for the mandatory fresh bounded guest probe required immediately before a later solver execution.
 
+### 3.1 Time-bounded physical-host libc observation
+
+The independent review required an explicit current physical-host libc identity and measurement method. Two read-only observations were performed at `2026-09-09T21:26:48Z` and `2026-09-09T21:27:11Z`.
+
+The direct install-name path is not materialized as a standalone file on this host:
+
+```text
+LIBSYSTEM_DIRECT_PATH = /usr/lib/libSystem.B.dylib
+LIBSYSTEM_DIRECT_PATH_EXISTS = false
+DIRECT_LIBSYSTEM_FILE_SHA256 = NOT_ESTABLISHED
+DIRECT_LIBSYSTEM_FILE_BYTE_IDENTITY_CLAIMED = false
+```
+
+The libc/LibSystem ABI identity was observed read-only from Mach-O load commands with `/usr/bin/otool -L` on three independent sealed-system executables:
+
+```text
+PHYSICAL_HOST_LIBC_MEASUREMENT_METHOD = /usr/bin/otool -L <system-executable>
+PHYSICAL_HOST_LIBC_PROBE_1 = /usr/bin/true
+PHYSICAL_HOST_LIBC_PROBE_2 = /usr/bin/env
+PHYSICAL_HOST_LIBC_PROBE_3 = /bin/sh
+PHYSICAL_HOST_LIBC_INSTALL_NAME = /usr/lib/libSystem.B.dylib
+PHYSICAL_HOST_LIBC_COMPATIBILITY_VERSION = 1.0.0
+PHYSICAL_HOST_LIBC_CURRENT_VERSION = 1356.0.0
+PHYSICAL_HOST_LIBC_PROBE_AGREEMENT = PASS
+PHYSICAL_HOST_LIBC_IDENTITY = APPLE_LIBSYSTEM_B_DYLIB_CURRENT_VERSION_1356_0_0
+PHYSICAL_HOST_GLIBC_IDENTITY = NOT_APPLICABLE / HOST_IS_MACOS
+```
+
+This establishes the current host-side libc/LibSystem identity needed for preflight characterization without claiming a standalone dylib byte hash. It does not substitute for the separately required future linux/amd64 guest libc recheck, which remains blocked until an authorized successor restores the exact selected image and separately authorizes a bounded guest probe.
+
 ## 4. Fresh Rodete predicate state
 
 Canonical 004C1AH binds the exact Chromium predicate:
@@ -348,7 +378,7 @@ This candidate is eligible for canonical merge only if all pre-merge gates below
 1. canonical base remains `e1b3f949651ee16930e6424129b556ebbe6ffc45` with tree `99cf1ec77f5b4f0113e2cc2d27a2b822e26b93ea`, the time-bounded open-PR evidence in Section 2.1 records exactly PR #157 open with zero competing successor PRs, and the immediate premerge query reconfirms that state or fails closed pending reconciliation;
 2. Issue #7 authority remains exactly `github:issue-comment:5608847657` for 004C1AM;
 3. exactly one repository file changes at the authorized 004C1AM path;
-4. host/Docker facts are recorded exactly from read-only measurements;
+4. host/Docker facts, including the time-bounded physical-host libc/LibSystem observation and measurement method, are recorded exactly from read-only measurements;
 5. exact selected-image absence is recorded truthfully without substituting another image/tag/platform;
 6. no pull, load, container create/run, APT/dpkg execution, package/archive acquisition, install, toolchain, PDFium or provider execution occurred;
 7. blocked apt/guest/argv/materialization identities remain blocked rather than inferred;
