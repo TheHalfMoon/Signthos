@@ -224,7 +224,39 @@ bounded guest uname -m
 
 If any value changes materially, or if the exact guest kernel release satisfies Chromium's Rodete predicate, 004C1AH is stale and provisioning must fail closed pending fresh qualification and, if necessary, a corrected OS-package metadata closure.
 
-## 11. Qualification result and remaining boundary
+## 11. Exact-head provider/check accounting policy and repair record
+
+Issue #7 requires provider/check accounting to distinguish real substantive review from non-qualifying automation output. For the pre-repair exact head that triggered this forward-only repair, the live state was:
+
+```text
+ACCOUNTED_HEAD = 8832d6a3f90e940713b7fba197fde603fe83efb9
+QODO = BILLING_BLOCKED / NOT_APPROVAL
+CUBIC = SKIPPING_OR_NEUTRAL / NOT_APPROVAL
+CODERABBIT_AUTOMATIC_CHECK = REVIEW_SKIPPED_MANUAL_REVIEW_REQUIRED / NOT_APPROVAL
+CODERABBIT_SUBSTANTIVE_REVIEW = github:issue-comment:5607948900 / MATERIAL_FINDING
+UNRESOLVED_INLINE_REVIEW_THREADS = 0
+PRE_REPAIR_HEAD_QUALIFIED_FOR_MERGE = NO
+```
+
+The material finding in `github:issue-comment:5607948900` is the absence of this explicit accounting. This section is the forward-only repair.
+
+A Git commit cannot truthfully embed its own final SHA before that SHA exists. Therefore the final repaired head uses a two-part fail-closed accounting contract:
+
+1. this document fixes the provider classifications and states which outputs never count as approval; and
+2. after the final repair commit exists, a GitHub evidence record must bind the exact final head SHA to the live provider/check results and the fresh substantive review result.
+
+```text
+FINAL_HEAD_ACCOUNTING_LOCATION = PR_CONVERSATION_EXACT_HEAD_EVIDENCE_RECORD
+FINAL_HEAD_QODO_BILLING_BLOCKED = NOT_APPROVAL
+FINAL_HEAD_CUBIC_SKIP_OR_NEUTRAL = NOT_APPROVAL
+FINAL_HEAD_CODERABBIT_AUTOMATIC_SKIP_OR_STATUS = NOT_SUBSTANTIVE_REVIEW
+FINAL_HEAD_SUBSTANTIVE_REVIEW = REQUIRED_FRESH_EXACT_HEAD
+FINAL_HEAD_WITHOUT_EXTERNAL_ACCOUNTING_RECORD = NOT_MERGE_ELIGIBLE
+```
+
+Any provider result that is skipped, neutral, unavailable, rate-limited, billing-blocked, automatic-summary-only, or not explicitly bound to the final head is non-qualifying. Only a fresh substantive exact-head review with zero unresolved material findings can close the review gate.
+
+## 12. Qualification result and remaining boundary
 
 ```text
 004C1AH_RESULT = QUALIFIED_EXACT_MEASURED_EXECUTION_SUBSTRATE_KERNEL_PREDICATE
@@ -252,7 +284,7 @@ SPECIFICATION_005 = NOT_AUTHORIZED
 
 A fresh successor reconciliation must determine the smallest remaining prerequisite. 004C1AH itself does not authorize base-image layer acquisition, package-archive acquisition, provisioning, build/link execution, provider runtime, or downstream specification work.
 
-## 12. Candidate acceptance gates
+## 13. Candidate acceptance gates
 
 The candidate is eligible for canonical merge only if:
 
@@ -267,7 +299,7 @@ The candidate is eligible for canonical merge only if:
 9. native-x86_64 hardware and current Rosetta-mechanism claims remain prohibited;
 10. later provisioning requires a fresh substrate/kernel recheck;
 11. no builder image, package archive, source/toolchain byte, generated build output, runtime/provider artifact, package manifest, lockfile, workflow, fixture, container definition, or database mutation enters the candidate;
-12. exact-head Actions/check/provider state is accounted truthfully;
+12. exact-head Actions/check/provider state is accounted truthfully in this document for the pre-repair head and in a final-head GitHub evidence record after the final SHA exists;
 13. fresh independent substantive exact-head review reports no unresolved material finding;
 14. any repair is forward-only and triggers fresh exact-head review;
 15. unresolved material review threads are zero;
