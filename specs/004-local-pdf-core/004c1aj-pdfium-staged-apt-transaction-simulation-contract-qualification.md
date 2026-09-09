@@ -414,9 +414,11 @@ SPECIFICATION_005 = NOT_AUTHORIZED
 
 No future unit may treat this planning contract itself as evidence that packages are installable, mutually compatible, downloadable, installed, or build-ready.
 
-## 12. Candidate acceptance gates
+## 12. Candidate acceptance and closeout gates
 
-This candidate is eligible for canonical merge only if the exact final head proves all of the following:
+### Pre-merge eligibility and guarded merge procedure
+
+Gates 1–15 must be established on the exact final head before invoking merge. Gate 16 is enforced atomically by the merge invocation itself. Only gates 1–16 govern whether this candidate may proceed through canonical merge; post-merge gates 17–18 are not pre-merge eligibility conditions.
 
 1. canonical base remains `392fd361d7c9b1600dd1680e0b54ee5483eeeeca` with tree `f8d9ff239b7cb19af477e8a25c8f42027a6d2fcc`;
 2. Issue #7 authority remains exactly `github:issue-comment:5608529849` for 004C1AJ;
@@ -433,6 +435,11 @@ This candidate is eligible for canonical merge only if the exact final head prov
 13. any material finding is repaired forward-only and triggers fresh exact-head review;
 14. unresolved material review threads are zero;
 15. immediate premerge base/head/race proof passes;
-16. guarded normal merge uses exact `expected_head_sha`;
+16. the normal merge invocation is guarded with the exact final `expected_head_sha` and must fail closed if the head moved.
+
+### Mandatory post-merge closeout gates
+
+After a successful guarded merge, both post-merge gates below are mandatory before any successor execution authority may be inferred. They do not retroactively determine pre-merge eligibility.
+
 17. mechanical post-merge SHA/tree/parent/signature/surface verification passes;
 18. fresh Issue #7 successor reconciliation occurs before any Docker/APT execution, package archive acquisition, installation, provisioning, toolchain/source acquisition, PDFium build/runtime, 004C2, 004D, or Specification 005 authority is inferred.
