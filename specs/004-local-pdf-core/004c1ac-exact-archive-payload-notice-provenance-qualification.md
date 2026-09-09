@@ -44,21 +44,33 @@ REGISTRY_IDENTITY_SET_SHA256 = f05755127da744c3e195c6ab5654c15f04a79e94e2508b440
 
 No dependency identity or version is added, removed, or reopened here.
 
-## 3. Acquisition method
+## 3. Acquisition method and forward-only evidence repair
 
-Each exact-version npm metadata object and each metadata-declared tarball was fetched directly from `registry.npmjs.org` into a fresh external evidence root. Acquisition used an empty process environment except a minimal system `PATH` and fresh external `HOME`, `curl --noproxy *`, HTTPS-only TLS, and `--max-redirs 0`. No proxy, credential, custom CA, package manager, Node runtime, lifecycle hook, or install command participated.
+Each exact-version npm metadata object and each metadata-declared tarball was fetched from `registry.npmjs.org` into a fresh external evidence root. The admitted fresh replay removed inherited proxy variables, used direct HTTPS requests, required the final metadata and tarball response host to remain `registry.npmjs.org`, and wrote all metadata/archive bytes only beneath the external evidence root. No credential, package manager, Node runtime, lifecycle hook, install command, or repository package cache participated.
 
-For each package, qualification required: lockfile SRI = exact-version metadata `dist.integrity` = independently recomputed SHA-512 SRI over acquired tarball bytes. Registry `dist.shasum` was independently checked against acquired SHA-1 when present, and a separate SHA-256 was computed for evidence identity.
+For each package, qualification required: lockfile SRI = exact-version metadata `dist.integrity` = independently recomputed SHA-512 SRI over acquired tarball bytes. Registry `dist.shasum` was independently checked against acquired SHA-1, and a separate SHA-256 was computed for evidence identity.
+
+The initial candidate surfaces contained conflicting harness JSON digests: the repository candidate recorded `2a06026a2742e008661219209526556a98ffba0a211ab3668e09894009fb1329` while the PR body recorded `3e84b869126a5dc953fed939a5e824e6003b1c3a29dd6f74aba32fa28a3814bb`. Neither conflicting digest is admitted as merge-critical evidence by this repaired head. A fresh independent replay reproduced all 18 exact tarball identities and established a new self-consistent evidence set:
 
 ```text
-ARCHIVE_EVIDENCE_JSON_SHA256 = 2a06026a2742e008661219209526556a98ffba0a211ab3668e09894009fb1329
-SOURCE_ARCHIVE_MANIFEST_COMPARISON_SHA256 = 7579e39110d1993b3707392f16d5e87ddc28947b47c228f78d6808b084cfcca4
+FRESH_REPLAY_EVIDENCE_JSON_SHA256 = 5add7982791238745ab41d3e92d1aaaf2a7e37db2e0419f380c50c0da44af0fb
+FRESH_REPLAY_SUMMARY_TSV_SHA256 = a5b222f434e23b989a03c8f0c22edf5b5abb02895366bdabdc5b7f5919548425
+FRESH_REPLAY_ARCHIVE_IDENTITY_SET_SHA256 = 1f05d8d4ff98a3f9fc11762f13dab05269fa944df02ae8b973da68c32202181f
+FRESH_SOURCE_ARCHIVE_COMPARISON_SHA256 = d25860833892b14eb898bfeff5b77134316a07af72aab6d56e5caf4e6406cfc5
 ACQUIRED_TARBALL_COUNT = 18
+LOCKFILE_SRI_MATCH_COUNT = 18
+REGISTRY_DIST_INTEGRITY_MATCH_COUNT = 18
+REGISTRY_DIST_SHASUM_MATCH_COUNT = 18
 ARCHIVE_INTEGRITY_FAILURE_COUNT = 0
+TAR_MEMBER_COUNT = 898
 UNSAFE_ARCHIVE_PATH_COUNT = 0
 EXTRACTED_NODE_MODULES_COUNT = 0
 PACKAGE_CODE_EXECUTION_COUNT = 0
+TOTAL_TARBALL_BYTES = 133277848
+TOTAL_REGULAR_PAYLOAD_BYTES = 173465981
 ```
+
+Raw metadata, tarballs, source-manifest snapshots, comparison tables, hashes, and inspection logs remain external ephemeral evidence only and are not committed to Signthos.
 
 ## 4. Exact archive evidence
 
@@ -105,7 +117,16 @@ PDFIUM_WASM_BYTES = 4633788
 PDFIUM_WASM_SHA256 = c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8
 ```
 
-The published package therefore does not rely solely on the wrapper MIT declaration: it ships a separate PDFium redistribution license bundle alongside the WASM payload. The bundle includes the PDFium BSD-style redistribution terms and additional third-party license text. A future shipping/adoption grain must preserve the applicable bundled redistribution material; this artifact does not mutate repository `NOTICE` or SBOM files.
+The published package therefore does not rely solely on the wrapper MIT declaration: it ships a separate PDFium redistribution license bundle alongside the WASM payload. The bundle includes PDFium BSD-style redistribution terms and additional license text. The archive contains `package/LICENSE` and `package/LICENSE.pdfium` but no separately named `NOTICE` or machine-readable component inventory.
+
+```text
+PDFIUM_ARCHIVE_LICENSE_FILE_BINDING = ESTABLISHED
+PDFIUM_WASM_ARCHIVE_BINDING = ESTABLISHED
+PDFIUM_COMPONENT_NOTICE_COMPLETENESS = NOT_ESTABLISHED
+WRAPPER_MIT_AS_COMPLETE_WASM_LICENSE = PROHIBITED
+```
+
+Because this grain does not independently enumerate the component composition of `pdfium.wasm`, it does not claim that the published license bundle is a complete component-level redistribution inventory. A future shipping/adoption decision must preserve the observed bundle and separately close any remaining component/NOTICE completeness requirement. This artifact does not mutate repository `NOTICE` or SBOM files.
 
 ## 7. Font archive and redistribution evidence
 
@@ -118,21 +139,36 @@ LICENSE_CLASS = SIL Open Font License 1.1
 RESERVED_FONT_NAME_OBSERVATION = Noto Sans
 ```
 
-The archives contain actual `.ttf`/`.otf` font payloads rather than merely references. Redistribution planning must therefore account for OFL obligations for the shipped font files and must not collapse those obligations into EmbedPDF wrapper MIT metadata.
+The archives contain 48 exact `.ttf`/`.otf` font payloads rather than merely references. The package-local license file therefore binds an observed OFL redistribution surface for each acquired font archive.
+
+```text
+FONT_PACKAGE_COUNT = 7
+FONT_ASSET_COUNT = 48
+FONT_ARCHIVE_LICENSE_FILE_BINDING = ESTABLISHED
+FONT_WRAPPER_MIT_INFERENCE = PROHIBITED
+```
+
+Redistribution planning must preserve the OFL license/copyright material with any adopted font payloads and must not collapse those obligations into EmbedPDF wrapper MIT metadata.
 
 ## 8. Source-to-published-archive relationship
 
-The immutable EmbedPDF source revision remains `2cf7df3b594dfe46de2d85e6973ff50ea447a1ed`. Each of the 18 archive package identities was compared to the corresponding source `package.json` at that revision.
+Fresh immutable source-ref revalidation confirms `refs/tags/v2.15.0` resolves to EmbedPDF source commit `2cf7df3b594dfe46de2d85e6973ff50ea447a1ed`. The 18 corresponding source `package.json` files were read from that exact commit into the external evidence root and compared with the acquired archive manifests.
 
 ```text
+PINNED_SOURCE_TAG = refs/tags/v2.15.0
+PINNED_SOURCE_COMMIT = 2cf7df3b594dfe46de2d85e6973ff50ea447a1ed
 SOURCE_MANIFESTS_PRESENT = 18/18
-NAME_VERSION_IDENTITY_MATCH = 18/18
+NAME_IDENTITY_MATCH = 18/18
+VERSION_IDENTITY_MATCH = 18/18
 SOURCE_VS_PUBLISHED_PACKAGE_JSON_BYTE_EQUAL = 0/18
+PUBLISHED_REGISTRY_GITHEAD_PRESENT = 0/18
+FRESH_SOURCE_ARCHIVE_COMPARISON_SHA256 = d25860833892b14eb898bfeff5b77134316a07af72aab6d56e5caf4e6406cfc5
 ARCHIVE_TO_PINNED_SOURCE_BYTE_EQUIVALENCE = NOT_CLAIMED
+ARCHIVE_TO_PINNED_SOURCE_COMMIT_BINDING = CORROBORATED_NOT_PROVEN
 PROVENANCE_MODEL = DUAL_IDENTITY / PINNED_GIT_SOURCE_PLUS_VERIFIED_NPM_ARCHIVE
 ```
 
-The non-equality is expected for published workspace packages whose manifests and file surfaces are transformed for publication. Version/name alignment and repository-directory metadata corroborate lineage, but they do not prove archive bytes are a byte-for-byte projection of the pinned Git subtree. Future provenance/SBOM records must bind both identities instead of substituting one for the other.
+The published manifests are transformed relative to the source manifests, and the exact-version registry metadata does not expose `gitHead`. Name/version alignment and repository-directory metadata corroborate lineage for the observed packages, but they do not cryptographically bind the acquired tarballs to the pinned Git commit. Future provenance/SBOM records must preserve both exact identities instead of substituting one for the other.
 
 ## 9. Repository metadata observations
 
@@ -140,7 +176,7 @@ Seventeen archives expose repository metadata pointing to `https://github.com/em
 
 ## 10. Security and provenance interpretation
 
-- archive extraction rejected absolute or parent-traversal member paths; none were observed;
+- archive member-name inspection found zero absolute or parent-traversal paths across 898 tar members; no package payload was extracted into Signthos;
 - archive bytes remain outside Signthos and are not dependency adoption;
 - package contents were inspected but never executed;
 - zero lifecycle hooks does not imply arbitrary future install behavior is authorized;
@@ -152,9 +188,9 @@ Seventeen archives expose repository metadata pointing to `https://github.com/em
 
 ## 11. Remaining gates before dependency installation or runtime
 
-004C1AC closes archive-byte identity, archive payload characterization, lifecycle-hook inspection, and the previously unresolved PDFium/font license-file evidence. It does not itself create a distributable NOTICE/SBOM/provenance package, install dependencies, create `packages/providers`, acquire/generate PDF fixtures, or prove runtime behavior.
+004C1AC establishes exact archive-byte identity, archive payload characterization, lifecycle-hook inspection, exact font archive license-file binding, and the exact PDFium license files present beside the acquired WASM. It intentionally preserves two limits: npm metadata does not cryptographically bind the tarballs to the pinned source commit, and this grain does not prove that `LICENSE.pdfium` is a complete component-level NOTICE inventory for `pdfium.wasm`.
 
-A fresh successor reconciliation must decide the smallest next bounded unit from live truth. At minimum, runtime remains blocked on explicit dependency-adoption/install authority, repository provenance/NOTICE/SBOM materialization where required, provider package/workspace creation authority, bounded synthetic-fixture authority, and exact runtime security/corpus evidence.
+It does not itself create a distributable NOTICE/SBOM/provenance package, install dependencies, create `packages/providers`, acquire/generate PDF fixtures, or prove runtime behavior. A fresh successor reconciliation must decide the smallest next bounded unit from live truth and must not infer 004C2 authority from numbering. Runtime remains blocked on explicit later authority and any still-required provenance/redistribution closure.
 
 ## 12. Acceptance criteria
 
@@ -166,9 +202,9 @@ This candidate is qualified only if its exact final head proves:
 4. acquired SHA-256 identities and archive file counts are recorded;
 5. archive package identities match expected exact names/versions;
 6. lifecycle/install/download-hook inspection is complete and reports zero unresolved execution hooks;
-7. PDFium WASM plus wrapper/PDFium license files are exact-hash bound;
-8. all seven font archive licenses are bound and OFL obligations remain visible;
-9. source versus published manifest non-equivalence is represented truthfully with dual provenance;
+7. PDFium WASM plus wrapper/PDFium license files are exact-hash bound without claiming component-NOTICE completeness;
+8. all seven font archive licenses and 48 font assets are bound and OFL obligations remain visible;
+9. source versus published manifest non-equivalence is represented truthfully with dual provenance, including absence of published `gitHead`;
 10. no archive/source bytes, dependencies, lockfile changes, NOTICE/SBOM mutations, provider/runtime code, fixtures, workflows, containers, or database changes enter the candidate;
 11. exact-head Actions/check/provider state is recorded truthfully;
 12. fresh independent substantive exact-head review reports no unresolved material finding;
