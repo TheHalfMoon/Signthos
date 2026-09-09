@@ -1,23 +1,23 @@
-# 004C1AJ — PDFium Staged APT Transaction Simulation Contract Qualification
+# 004C1AL — PDFium Staged APT Transaction Simulation Contract Qualification
 
 Status: `QUALIFICATION_CANDIDATE / PLANNING_AND_STATIC_TRANSACTION_CONTRACT_ONLY / ZERO_APT_OR_DOCKER_EXECUTION`
 Issue: #7
 Owning specification: `004-local-pdf-core`
-Canonical base: `392fd361d7c9b1600dd1680e0b54ee5483eeeeca`
-Canonical base tree: `f8d9ff239b7cb19af477e8a25c8f42027a6d2fcc`
-Authority source: `github:issue-comment:5608529849`
+Canonical base: `b3d3727fd6f3bb214d245a8fecec5d510b906666`
+Canonical base tree: `e2aad24901518a04fdccb3096074a2324468107f`
+Authority source: `github:issue-comment:5608704685`
 
 ## 1. Purpose and exact authority
 
-Canonical 004C1AF defines the deterministic PDFium release-builder provisioning contract. Canonical 004C1AG establishes the exact selected Ubuntu/Jammy metadata closure but explicitly does not claim to be APT or a simultaneously installed final filesystem. Canonical 004C1AH binds the Chromium Rodete kernel predicate for the last measured build substrate, with a mandatory recheck before later provisioning. Canonical 004C1AI establishes the exact content-addressed Emscripten base-image filesystem, installed dpkg state, canonical 004C1AG comparison, and embedded selected Node byte identity without executing image content.
+Canonical 004C1AF defines the deterministic PDFium release-builder provisioning contract. Canonical 004C1AG establishes the exact selected Ubuntu/Jammy metadata closure but explicitly does not claim to be APT or a simultaneously installed final filesystem. Canonical 004C1AH binds the Chromium Rodete kernel predicate for the last measured build substrate, with a mandatory recheck before later provisioning. Canonical 004C1AI establishes the exact content-addressed Emscripten base-image filesystem, installed dpkg state, canonical 004C1AG comparison, and embedded selected Node byte identity without executing image content. Canonical 004C1AJ then establishes the exact metadata-only closure-to-base archive candidate set, and canonical 004C1AK independently acquires and verifies those exact 826 archive byte identities without extraction, installation, or transaction inference.
 
-The remaining package blocker is now narrower: the exact staged APT install/upgrade/remove transaction has not been established. 004C1AJ closes only the planning/static contract required to make a later solver-simulation evidence run reviewable before any Docker/APT execution is authorized.
+The exact 826 selected archive identities are now acquired and verified externally, but the exact staged APT install/upgrade/remove transaction still has not been established. 004C1AL closes only the planning/static contract required to make a later solver-simulation evidence run reviewable before any Docker/APT execution is authorized.
 
 ```text
-004C1AJ_AUTHORITY = PLANNING_AND_STATIC_TRANSACTION_CONTRACT_QUALIFICATION_ONLY
-004C1AJ_ALLOWED_REPOSITORY_PATH = specs/004-local-pdf-core/004c1aj-pdfium-staged-apt-transaction-simulation-contract-qualification.md
-004C1AJ_MAX_CHANGED_REPOSITORY_FILES = 1
-CANONICAL_004C1AF_AG_AH_AI_EVIDENCE_READ = AUTHORIZED
+004C1AL_AUTHORITY = PLANNING_AND_STATIC_TRANSACTION_CONTRACT_QUALIFICATION_ONLY
+004C1AL_ALLOWED_REPOSITORY_PATH = specs/004-local-pdf-core/004c1al-pdfium-staged-apt-transaction-simulation-contract-qualification.md
+004C1AL_MAX_CHANGED_REPOSITORY_FILES = 1
+CANONICAL_004C1AF_THROUGH_004C1AK_EVIDENCE_READ = AUTHORIZED
 PUBLIC_IMMUTABLE_SOURCE_READ_FOR_ALREADY_BOUND_EXACT_REVISIONS = AUTHORIZED_STATIC_ONLY
 EXACT_EMBEDPDF_DOCKER_APT_STAGE_ORDER_RECONCILIATION = AUTHORIZED_STATIC_ONLY
 EXACT_CHROMIUM_INSTALL_BUILD_DEPS_SEMANTIC_RECONCILIATION = AUTHORIZED_STATIC_ONLY
@@ -28,7 +28,8 @@ DOCKER_CONTAINER_EXECUTION = NOT_AUTHORIZED
 APT_GET_EXECUTION = NOT_AUTHORIZED
 APT_CACHE_EXECUTION = NOT_AUTHORIZED
 DPKG_EXECUTION = NOT_AUTHORIZED
-PACKAGE_ARCHIVE_ACQUISITION_OUTSIDE_SELECTED_OCI_LAYERS = NOT_AUTHORIZED
+ADDITIONAL_PACKAGE_ARCHIVE_ACQUISITION = NOT_AUTHORIZED
+DEB_EXTRACTION = NOT_AUTHORIZED
 PACKAGE_INSTALLATION = NOT_AUTHORIZED
 IMAGE_PROVISIONING = NOT_AUTHORIZED
 NODE_EXECUTION = NOT_AUTHORIZED
@@ -49,7 +50,7 @@ No package index, `.deb`, image layer, source tree, toolchain, cache, lockfile, 
 
 ## 2. Canonical predecessor identities
 
-004C1AJ consumes these already-canonical identities without reopening their selection:
+004C1AL consumes these already-canonical identities without reopening their selection:
 
 ```text
 SELECTED_BASE_IMAGE = docker.io/emscripten/emsdk@sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3
@@ -67,6 +68,12 @@ UBUNTU_COMPONENTS = [main, restricted, universe, multiverse]
 004C1AI_INSTALLED_PACKAGE_COUNT = 231
 004C1AI_INSTALLED_PACKAGES_SHA256 = bdc5c6bbbe47db0313b2281b67e2f152ad75e93ab169bbfccf0b5441444694ba
 004C1AI_ROOTFS_INVENTORY_SHA256 = f5362f12e52f0ef7d4fa42bca401be0c3cf99a2bc9962a085fd6b4eb4d6e658d
+004C1AJ_ARCHIVE_ACQUISITION_CANDIDATE_COUNT = 826
+004C1AJ_ARCHIVE_ACQUISITION_CANDIDATES_SHA256 = 6e0f757291d3e2a6ad72799b22b2abe957d239d15f4e9dcd279f6b98160de357
+004C1AK_VERIFIED_ARCHIVE_INVENTORY_SHA256 = 38b36863380150df62a42e6e77c3582244b61f4a083da52619de6e56ccf7ef98
+004C1AK_ARCHIVE_IDENTITY_SET_SHA256 = 8ac7e3c9a44831e5f8c4a03a81862644990b504f7d2043102a1ab1a0fd69810d
+004C1AK_EXACT_ARCHIVE_COUNT = 826
+004C1AK_EXACT_ARCHIVE_TOTAL_BYTES = 317223784
 SELECTED_NODE_PATH = /emsdk/node/20.18.0_64bit/bin/node
 SELECTED_NODE_SHA256 = 94ea6cc6b866ec29a0f5924eb636783f814e0ef0e5925a1d3ccb5f55b91ac633
 LAST_MEASURED_GUEST_MACHINE = x86_64
@@ -92,7 +99,7 @@ A fresh static reread of the exact immutable EmbedPDF Dockerfile confirmed the s
 
 Canonical 004C1AG intentionally uses a Signthos-authored deterministic metadata resolver. It resolves one metadata closure from signed snapshot records, but it explicitly does not claim to implement APT solver behavior.
 
-Canonical unresolved state after 004C1AI is:
+Canonical unresolved transaction state after 004C1AK is:
 
 ```text
 EFFECTIVE_PACKAGE_DOWNLOAD_SET = NOT_ESTABLISHED
@@ -160,7 +167,7 @@ STAGE_B_TARGET_ARCHITECTURE = amd64
 STAGE_B_RODETE_SPECIAL_CASE = FALSE_ONLY_IF_FRESH_SUBSTRATE_RECHECK_MATCHES_004C1AH
 ```
 
-The exact 145-root list remains bound by canonical 004C1AG evidence. 004C1AJ does not regenerate or alter it.
+The exact 145-root list remains bound by canonical 004C1AG evidence. 004C1AL does not regenerate or alter it.
 
 ### Stage C — EmbedPDF `pdfium-deps` post roots
 
@@ -257,7 +264,7 @@ Every package version selected by future simulation must map back to one exact c
 
 ## 7. Future zero-network/no-download/no-install envelope
 
-004C1AJ does not execute this envelope. It defines the minimum requirements for a later separately authorized execution grain.
+004C1AL does not execute this envelope. It defines the minimum requirements for a later separately authorized execution grain.
 
 The future run must:
 
@@ -283,7 +290,7 @@ FUTURE_MAINTAINER_SCRIPT_EXECUTION = 0
 FUTURE_APT_DEFAULT_LIVE_SOURCE_USE = 0
 ```
 
-The exact future Docker/Apt command line is not authorized by 004C1AJ. It must be frozen in the execution successor from the then-current exact substrate/image facts before execution.
+The exact future Docker/Apt command line is not authorized by 004C1AL. It must be frozen in the execution successor from the then-current exact substrate/image facts before execution.
 
 ## 8. Canonical transaction output model
 
@@ -391,14 +398,14 @@ A changed Docker server/kernel, selected image identity, snapshot identity, pack
 
 ## 11. Explicit non-claims
 
-004C1AJ establishes no runtime or provisioning result.
+004C1AL establishes no runtime or provisioning result.
 
 ```text
 APT_SIMULATION_EXECUTED = false
 APT_SOLVER_RESULT = NOT_ESTABLISHED
 EFFECTIVE_PACKAGE_DOWNLOAD_SET = NOT_ESTABLISHED
 EFFECTIVE_INSTALL_UPGRADE_REMOVE_TRANSACTION = NOT_ESTABLISHED
-PACKAGE_ARCHIVE_ACQUISITION = 0
+ADDITIONAL_PACKAGE_ARCHIVE_ACQUISITION = 0
 PACKAGE_INSTALLATION = 0
 IMAGE_PROVISIONING = 0
 FINAL_FILESYSTEM_IDENTITY = NOT_ESTABLISHED
@@ -420,9 +427,9 @@ No future unit may treat this planning contract itself as evidence that packages
 
 Gates 1–15 must be established on the exact final head before invoking merge. Gate 16 is enforced atomically by the merge invocation itself. Only gates 1–16 govern whether this candidate may proceed through canonical merge; post-merge gates 17–18 are not pre-merge eligibility conditions.
 
-1. canonical base remains `392fd361d7c9b1600dd1680e0b54ee5483eeeeca` with tree `f8d9ff239b7cb19af477e8a25c8f42027a6d2fcc`;
-2. Issue #7 authority remains exactly `github:issue-comment:5608529849` for 004C1AJ;
-3. exactly one repository file changes, at the authorized 004C1AJ path;
+1. canonical base remains `b3d3727fd6f3bb214d245a8fecec5d510b906666` with tree `e2aad24901518a04fdccb3096074a2324468107f`;
+2. Issue #7 authority remains exactly `github:issue-comment:5608704685` for 004C1AL;
+3. exactly one repository file changes, at the authorized 004C1AL path;
 4. no upstream source/package/image/index/toolchain/runtime byte is committed;
 5. the three-stage transaction order and recommends policies remain faithful to canonical 004C1AF/AG and the exact immutable EmbedPDF Dockerfile;
 6. NodeSource and development-only Rustup/watchexec paths remain excluded by the deterministic release contract;
