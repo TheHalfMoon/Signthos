@@ -71,6 +71,8 @@ UBUNTU_COMPONENTS = [main, restricted, universe, multiverse]
 UBUNTU_ARCHIVE_KEYRING_URL = https://archive.ubuntu.com/ubuntu/project/ubuntu-archive-keyring.gpg
 UBUNTU_ARCHIVE_KEYRING_BYTES = 3607
 UBUNTU_ARCHIVE_KEYRING_SHA256 = 80a36b0a6de2f69f49d2df75ef473ccde121e9e190b9ea01d20a4f63778d5c31
+UBUNTU_ARCHIVE_KEYRING_EXPECTED_FINGERPRINT_SET = [790BC7277767219C42C86F933B4FE6ACC0B21F32, 843938DF228D22F7B3742BC0D94AA3F0EFE21092, F6ECB3762474EDA9D21B7022871920D1991BC93C]
+UBUNTU_ARCHIVE_KEYRING_IDENTITY_BINDING = FAIL_CLOSED_BEFORE_GPGV
 ```
 
 The bound keyring exposes these primary fingerprints:
@@ -81,7 +83,7 @@ The bound keyring exposes these primary fingerprints:
 F6ECB3762474EDA9D21B7022871920D1991BC93C
 ```
 
-All three selected `InRelease` records validate with `gpgv` to the Ubuntu Archive Automatic Signing Key (2018), fingerprint `F6ECB3762474EDA9D21B7022871920D1991BC93C`.
+Before any `gpgv` invocation, the replay requires the downloaded keyring SHA-256 to equal the bound value above and requires the complete observed fingerprint set to equal the three-entry expected set. A mismatch terminates the replay. Only after those identity checks pass are the three selected `InRelease` records validated with `gpgv` to the Ubuntu Archive Automatic Signing Key (2018), fingerprint `F6ECB3762474EDA9D21B7022871920D1991BC93C`.
 
 | Suite | InRelease bytes | InRelease SHA-256 | Signature |
 |---|---:|---|---|
@@ -124,8 +126,10 @@ Identical package bytes appearing at more than one suite/component location are 
 The external resolver is Signthos-authored; it does not import or execute Chromium installer code. It parses the exact `install-build-deps.py` AST as data and implements only the observed Jammy/amd64 package-selection semantics required by the canonical `--no-prompt` invocation.
 
 ```text
-EXTERNAL_RESOLVER_BYTES = 21610
-EXTERNAL_RESOLVER_SHA256 = 00891f3e692d53df474016d5f4e5af58c7171dd091dfee9dba63ab379e419fd5
+EXTERNAL_RESOLVER_BYTES = 22258
+EXTERNAL_RESOLVER_SHA256 = 8c0150e2054091eba165f56a0576fac62b213a618ff2f0b6f885faa59bd581c2
+KEYRING_SHA256_BINDING_CHECK = PASS
+KEYRING_FINGERPRINT_SET_BINDING_CHECK = PASS
 UPSTREAM_INSTALL_BUILD_DEPS_EXECUTION = 0
 APT_GET_EXECUTION = 0
 APT_CACHE_EXECUTION = 0
@@ -268,10 +272,10 @@ SELECTION_REASON_COUNTS = {ROOT: 157, Pre-Depends: 8, Depends: 637, Recommends: 
 Replay B used a distinct fresh external evidence root, reacquired the keyring, all three signed `InRelease` records, and all twelve referenced package indexes, reverified them, reran the same bounded metadata algorithm, and produced byte-identical canonical outputs.
 
 ```text
-REPLAY_A_EVIDENCE_MANIFEST_BYTES = 4374
-REPLAY_A_EVIDENCE_MANIFEST_SHA256 = 105eb26b82e09b14e93e7942502131fbdf3b10a70cf72d0f32c9d68d4f04beb4
-REPLAY_B_EVIDENCE_MANIFEST_BYTES = 4374
-REPLAY_B_EVIDENCE_MANIFEST_SHA256 = 105eb26b82e09b14e93e7942502131fbdf3b10a70cf72d0f32c9d68d4f04beb4
+REPLAY_A_EVIDENCE_MANIFEST_BYTES = 4640
+REPLAY_A_EVIDENCE_MANIFEST_SHA256 = b81ab60d70f3afa0027e6b688d38162c40d726a55ea9ae544f08169ffd09332f
+REPLAY_B_EVIDENCE_MANIFEST_BYTES = 4640
+REPLAY_B_EVIDENCE_MANIFEST_SHA256 = b81ab60d70f3afa0027e6b688d38162c40d726a55ea9ae544f08169ffd09332f
 ROOT_SET_BYTES_EQUAL = PASS
 ROOT_SET_SHA256_EQUAL = PASS
 RESOLVED_CLOSURE_BYTES_EQUAL = PASS
@@ -286,6 +290,7 @@ Raw keyring, signed metadata, package indexes, resolver source, and canonical JS
 
 ```text
 004C1AG_RESULT = QUALIFIED_EXACT_OS_PACKAGE_METADATA_CLOSURE
+UBUNTU_ARCHIVE_KEYRING_IDENTITY_BINDING = VERIFIED_FAIL_CLOSED
 UBUNTU_SNAPSHOT_SIGNATURE_CHAIN = VERIFIED
 SIGNED_PACKAGES_INDEX_CLOSURE = ESTABLISHED
 CHROMIUM_PACKAGE_AVAILABILITY_SEMANTIC_REPLAY = ESTABLISHED
