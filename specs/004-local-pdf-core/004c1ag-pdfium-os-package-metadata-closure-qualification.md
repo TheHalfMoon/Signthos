@@ -149,10 +149,10 @@ unsupported = false
 no_prompt = true
 TARGET_INIT_CLASS = ELF_64_BIT / derived from authorized linux-amd64 target, not host state
 I386_MULTIARCH_ENABLEMENT = false / lib32=false and backwards_compatible=false
-RODETE_PINNED_LINUX_LIBC_WORKAROUND = false / selected Ubuntu-Jammy contract is not the exact 6.12.*rodete1-amd64 special case
+RODETE_PINNED_LINUX_LIBC_WORKAROUND = NOT_ESTABLISHED_UNTIL_EXECUTION_SUBSTRATE_QUALIFICATION
 ```
 
-Therefore the replay admits `dev_list()` plus `lib_list()`, applies the exact availability branches and final `maybe_append_t64` transformation, and excludes `dbg_list`, `lib32_list`, `arm_list`, and `backwards_compatible_list` under their false defaults. No i386 package index is admitted. If a future execution substrate unexpectedly satisfies Chromium's exact `6.12.*rodete1-amd64` special-case predicate, this closure is inapplicable and must fail closed rather than silently add the pinned libc workaround.
+Therefore the replay admits `dev_list()` plus `lib_list()`, applies the exact availability branches and final `maybe_append_t64` transformation, and excludes `dbg_list`, `lib32_list`, `arm_list`, and `backwards_compatible_list` under their false defaults. No i386 package index is admitted. The selected Ubuntu snapshot does not establish the future execution kernel release. Chromium derives its pinned-libc special case from `uname -r`; therefore 004C1AG does not assign that predicate `true` or `false`. A later execution-substrate qualification must bind the exact kernel-release input before provisioning, and any substrate satisfying Chromium's exact `6.12.*rodete1-amd64` predicate makes this metadata closure inapplicable until the pinned `linux-libc-dev=5.8.14-1` branch is separately resolved.
 
 ## 6. Exact availability/rename branch evidence
 
