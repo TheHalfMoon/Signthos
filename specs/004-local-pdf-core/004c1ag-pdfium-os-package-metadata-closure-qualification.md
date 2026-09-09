@@ -148,13 +148,15 @@ quick_check = false
 unsupported = false
 no_prompt = true
 TARGET_INIT_CLASS = ELF_64_BIT / derived from authorized linux-amd64 target, not host state
+I386_MULTIARCH_ENABLEMENT = false / lib32=false and backwards_compatible=false
+RODETE_PINNED_LINUX_LIBC_WORKAROUND = false / selected Ubuntu-Jammy contract is not the exact 6.12.*rodete1-amd64 special case
 ```
 
-Therefore the replay admits `dev_list()` plus `lib_list()`, applies the exact availability branches and final `maybe_append_t64` transformation, and excludes `dbg_list`, `lib32_list`, `arm_list`, and `backwards_compatible_list` under their false defaults.
+Therefore the replay admits `dev_list()` plus `lib_list()`, applies the exact availability branches and final `maybe_append_t64` transformation, and excludes `dbg_list`, `lib32_list`, `arm_list`, and `backwards_compatible_list` under their false defaults. No i386 package index is admitted. If a future execution substrate unexpectedly satisfies Chromium's exact `6.12.*rodete1-amd64` special-case predicate, this closure is inapplicable and must fail closed rather than silently add the pinned libc workaround.
 
 ## 6. Exact availability/rename branch evidence
 
-The replay made 28 unique `package_exists(...)` decisions from only the signed snapshot indexes: 21 present and 7 absent.
+The replay recorded 174 unique semantic decisions: 28 `package_exists(...)` decisions (21 present / 7 absent), 145 `maybe_append_t64(...)` probes, and the explicit 64-bit target branch. All t64 probes selected the original Jammy package name.
 
 ```text
 ABSENT = [realpath, libav-tools, libpng16-16t64, appmenu-gtk, libgnome-keyring0, libgnome-keyring-dev, libasound2t64]
