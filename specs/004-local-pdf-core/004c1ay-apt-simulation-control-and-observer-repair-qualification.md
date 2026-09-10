@@ -110,9 +110,22 @@ A future execution must still fail closed if any archive appears in the isolated
 
 ## 5. Process observer repair
 
-The future guest observer must treat `/proc` process exit races as expected observation churn rather than shell stderr. It may enumerate `/proc/[0-9]*/comm`, but each read must be guarded so a process disappearing between enumeration and open is silently skipped. The observer may not suppress errors from any non-`/proc` evidence operation.
+The future guest observer must treat only the disappearance of an exact enumerated numeric-PID `/proc/<pid>/comm` path as expected observation churn. It must not broadly suppress `/proc` read errors. The read redirection must put stderr suppression in place before opening the volatile `comm` path; if the read then fails, the harness must immediately test that same path. A failed read is skippable only when that exact path no longer exists. If the path still exists, the observer fails closed. Any error outside an enumerated `/proc/[0-9]*/comm` read remains fatal.
 
-The deterministic output remains the sorted unique set of successfully read process names while the Stage A process is alive. A disappearing PID is neither an execution failure nor evidence of a process that was never read.
+The required shell control shape is:
+
+```sh
+for c in /proc/[0-9]*/comm; do
+  if IFS= read -r n 2>/dev/null < "$c"; then
+    # record the successfully read process name deterministically
+    :
+  else
+    [ ! -e "$c" ] || exit 70
+  fi
+done
+```
+
+This suppresses only the shell diagnostic associated with a path that vanished during the enumeration/open race. Permission errors, I/O errors, empty/malformed reads, or any other read failure while the exact path still exists are qualification failures. The deterministic output remains the sorted unique set of successfully read process names while the Stage A process is alive. A disappearing PID is neither an execution failure nor evidence of a process that was never read.
 
 ## 6. Supersession and fail-closed rules
 
