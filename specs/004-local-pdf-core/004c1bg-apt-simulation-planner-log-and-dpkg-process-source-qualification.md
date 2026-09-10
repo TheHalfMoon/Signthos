@@ -76,6 +76,8 @@ The parser result is solver evidence only. It does not override the inventory or
 
 Retained source revision: `581ec5c0aa2c6665d72465040f1465eb93503200`.
 
+First-party source provenance is the Ubuntu APT source repository `https://git.launchpad.net/ubuntu/+source/apt`, annotated tag object `27207612b00b302b7b18cfeec355bad1a5de6bca` (`import/2.4.13`), peeled commit `581ec5c0aa2c6665d72465040f1465eb93503200`, and tree `e9afcae41f88040e93eb7a10a89e72c00b59e245`. The Ubuntu source tarball identity remains SHA-256 `8bdb54d6bf07185c8687d4ab8eb66690cdbbea31d1b0afa8778598f1ae9dc8a7`.
+
 | Source file | Bytes | SHA-256 |
 | --- | ---: | --- |
 | `apt-pkg/init.cc` | 11966 | `e231c4a740d0ce656dd2b501bb2ee3900b312477dafae6b482f11195535c7fad` |
@@ -87,6 +89,11 @@ Retained source revision: `581ec5c0aa2c6665d72465040f1465eb93503200`.
 | `apt-pkg/contrib/cmndline.cc` | 12491 | `29d1d858d31f993a9137ad1c581d92e4caeaf99f961f49a75b7eacfe3e943134` |
 | `apt-pkg/contrib/configuration.cc` | 33669 | `95c780ce50510038b2e9f1ba7bb868672eaeec363575cafd2c4c328f83cd936f` |
 | `cmdline/apt-config.cc` | 5282 | `22fe9785ec231590698bf8bc032df21029638357a9b20590ae276be51aa96d30` |
+| `apt-private/private-install.cc` | 43268 | `70731f4b87a6211600b9573995e41e6b200010d3cd0508f73a0061c45a32fc90` |
+| `apt-pkg/deb/dpkgpm.cc` | 84151 | `5613f7e7b4d0f09289739fe3fa7156afa09b46948ec86c4a2e8f57dac661fc18` |
+| `apt-pkg/statechanges.cc` | 6993 | `70d4cf3f3d824628ebad2910e7b6ded43147271ded4d124ba23d48a5bb4f3855` |
+| `apt-pkg/pkgsystem.cc` | 2084 | `d78acdb6ac2366ce878980f60a1035b9931f38b5e15f4ef77d7be7cfc4b4bf36` |
+| `apt-pkg/edsp/edspsystem.cc` | 4917 | `3fbf34d2fecca4dba50e9733d6e59b2a95f308144c2eac3d01dad7893e363f50` |
 
 ### 3.1 Planner-log creation is required by the selected internal-planner path
 
@@ -106,6 +113,10 @@ The command-line binding is source-complete. `apt-private/private-cmndline.cc` r
 
 The observation does not establish package unpack/configure execution. It does establish that 004C1BF's broader `DPKG_EXECUTION = PROHIBITED` gate was violated and must remain fail-closed.
 
+The system-selection ordering is also source-grounded. `ParseCommandLine()` in `apt-private/private-cmndline.cc` first initializes configuration, then parses the command line (including `-o` overrides), and only after successful parsing calls `pkgInitSystem()`. Therefore `Dir::Bin::dpkg=/nonexistent-signthos-dpkg-prohibited` is already effective when system scoring runs. At this exact source revision the registered automatic system candidates are the Debian dpkg system and the EDSP/EIPP systems. `edspLikeSystem::Score()` returns `-1000` unconditionally (“Never use the EDSP system automatically”). `debSystem::Score()` awards `+10` for the configured status file, `+10` when the configured dpkg path exists, and `+10` for `/etc/debian_version`. The canonical AW state contains `/tmp/signthos-apt/state/status`, and the retained 004C1AI rootfs inventory contains `/etc/debian_version`; the deliberately nonexistent dpkg path therefore removes only the middle `+10`, leaving a positive Debian score of `20` versus `-1000` for EDSP/EIPP. The sentinel cannot redirect automatic system selection away from the Debian backend.
+
+`debSystem::GetDpkgExecutable()` resolves `Dir::Bin::dpkg`, and `debSystem::GetDpkgBaseCommand()` uses that result. The exact-source architecture probe, feature assertions, state-change helpers, and real `pkgDPkgPM` command construction all derive their configured dpkg executable from this base-command path. Separately, `apt-private/private-install.cc` constructs `SimulateWithActionGroupInhibited`, a `pkgSimulate`, for `APT::Get::Simulate` and returns from that simulation branch before the real `pkgDPkgPM` execution path. The nonexistent configured dpkg path is therefore a fail-closed control for any unexpected configured-dpkg call while preserving the selected Debian package-system backend.
+
 ## 4. Smallest static repair candidate
 
 The candidate preserves the internal EIPP planner rather than disabling it, preserves its output as explicit evidence, and avoids the dpkg architecture-discovery branch by explicitly freezing the already-selected architecture universe.
@@ -120,7 +131,7 @@ ADD = -o Dir::Bin::dpkg=/nonexistent-signthos-dpkg-prohibited
 
 `Dir::Log::Planner` is redirected into the existing isolated evidence tmpfs namespace under a `bb-*` path. The canonical inventory function already excludes `tmp/bb-*` evidence artifacts, so the planner file is no longer an input-state mutation. Unlike a silent exclusion, the candidate adds `bb-eipp.log.xz` to the normalized evidence USTAR and requires the file to exist before export. The candidate preserves the planner log plus a dedicated `bb-eipp-identity.tsv` record containing its observed byte count and SHA-256. This changes the evidence set from 15 to 17 members intentionally and reviewably. The same `CommandLine::ArbItem` source path proves that `-o Dir::Log::Planner=/tmp/signthos-apt/tmp/bb-eipp.log.xz` overrides the planner-log key used by `CreateDumpFile`; the repair therefore redirects the output rather than merely describing an intended path.
 
-`APT::Architectures=amd64` is source-grounded to bypass the empty-vector call to `ArchitecturesSupported()` and therefore the `dpkg --print-foreign-architectures` discovery path. Its scalar-to-vector behavior is bound above from exact 2.4.13 source. The candidate additionally sets `Dir::Bin::dpkg=/nonexistent-signthos-dpkg-prohibited` at both APT command sites. Exact `debSystem::DpkgBaseCommand()` source resolves the dpkg executable through `Dir::Bin::dpkg`; therefore any later reachable dpkg invocation through that mechanism fails closed instead of executing `/usr/bin/dpkg`. This is still a static qualification only; successful runtime validation requires separate authority.
+`APT::Architectures=amd64` is source-grounded to bypass the empty-vector call to `ArchitecturesSupported()` and therefore the `dpkg --print-foreign-architectures` discovery path. Its scalar-to-vector behavior is bound above from exact 2.4.13 source. The candidate additionally sets `Dir::Bin::dpkg=/nonexistent-signthos-dpkg-prohibited` at both APT command sites. Exact `debSystem::GetDpkgBaseCommand()` source resolves the dpkg executable through `Dir::Bin::dpkg`; therefore any later reachable dpkg invocation through that mechanism fails closed instead of executing `/usr/bin/dpkg`. This is still a static qualification only; successful runtime validation requires separate authority.
 
 The candidate also makes nonzero `apt-get --simulate` status fail closed as stored exit `74`. It still exports the evidence bundle first, so failure evidence is preserved; an APT failure can no longer be normalized to outer success.
 
