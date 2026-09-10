@@ -1,9 +1,9 @@
 # 004C1BC — Stage A APT simulator-output parser qualification
 
-Status: **candidate / static qualification only**  
-Canonical base: `9c99b2983cf2c022a5efcd469050964bd9f0f0da`  
-Canonical base tree: `4bea87dd75c6078ca5b15c8d333455b550a4ca21`  
-Authority: `github:issue-comment:5611324884`  
+Status: **candidate / static qualification only**
+Canonical base: `9c99b2983cf2c022a5efcd469050964bd9f0f0da`
+Canonical base tree: `4bea87dd75c6078ca5b15c8d333455b550a4ca21`
+Authority: `github:issue-comment:5611324884`
 Comparator provenance: `github:issue-comment:5611410202`
 
 ## 1. Purpose and authority boundary
