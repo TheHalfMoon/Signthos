@@ -110,14 +110,16 @@ Exact findings:
 ```
 The first finding is the preserved APT summary marker `The following packages will be REMOVED:`. The second is the exact action record `Remv pkg-config [0.29.2-1ubuntu3]`, resolved against the canonical predecessor installed state as `amd64`. Consequently, the grammar repair itself qualifies, but the already-consumed Stage B Replay A remains nonqualifying. 004C1BN does not authorize replacing or retrying that replay.
 ## 7. Retained preserved stdout evidence
-The exact preserved APT stdout is retained here as deterministic XZ bytes encoded with base64 solely for review/reproduction. Two independent compression calls in the same static process produced identical XZ bytes.
+The exact preserved APT stdout is retained here as deterministic XZ bytes encoded with base64 solely for review/reproduction. Two independent compression calls in the same static process produced identical XZ bytes. The compact base64 serialization is the payload with wrapping removed plus one final LF; the Markdown payload below is wrapped at 76 characters and its document-form identity includes every wrap LF plus the final LF before the closing fence.
 ```text
 RAW_APT_STDOUT_BYTES = 132913
 RAW_APT_STDOUT_SHA256 = 6f5efa623e9551f1f159db61b014a04b46a20cc69f3037dfb715023c462067e8
 RETAINED_XZ_BYTES = 13356
 RETAINED_XZ_SHA256 = b9a0460e11ccc614838f5f322644cea074802f239a59fd0a70f4c79c6defb6ec
-RETAINED_BASE64_PLUS_LF_BYTES = 17809
-RETAINED_BASE64_PLUS_LF_SHA256 = 7b7fd21a683e9b3d1c9dce1a650764b927549393659ade72a58a8bbad786d839
+RETAINED_BASE64_COMPACT_PLUS_LF_BYTES = 17809
+RETAINED_BASE64_COMPACT_PLUS_LF_SHA256 = 7b7fd21a683e9b3d1c9dce1a650764b927549393659ade72a58a8bbad786d839
+RETAINED_BASE64_WRAPPED_DOCUMENT_BYTES = 18043
+RETAINED_BASE64_WRAPPED_DOCUMENT_SHA256 = a2643d4733bc5054afbcb825949fb8d4016ef13c623ffeea4957bef7d90a64f9
 ```
 ```base64
 /Td6WFoAAATm1rRGAgAhARwAAAAQz1jM4gcwM+tdACkZSCZfc/62sdSXFLOovYkZamk0ELibAgHF
