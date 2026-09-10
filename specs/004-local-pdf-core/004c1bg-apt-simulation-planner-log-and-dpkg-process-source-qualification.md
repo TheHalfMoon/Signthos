@@ -83,6 +83,10 @@ Retained source revision: `581ec5c0aa2c6665d72465040f1465eb93503200`.
 | `apt-pkg/deb/debsystem.cc` | 16407 | `c6d0d861c838285496034f6619c8aec7d7773bf8f04cfd741c339fafe1b9edad` |
 | `apt-pkg/packagemanager.cc` | 42048 | `af0805eb8ced9971d34486be57f53a389cb87ece504c59ca77ffcc5f61513a8a` |
 | `apt-pkg/aptconfiguration.cc` | 20205 | `9220c9d6c8ca599a85fe64f4e346c9a44097745b8733660b8d739673641f8e9b` |
+| `apt-private/private-cmndline.cc` | 24949 | `ac94ee0b1462654f263a0ed6ca482d5dc1c0c999caf9a131856fa469b82d8541` |
+| `apt-pkg/contrib/cmndline.cc` | 12491 | `29d1d858d31f993a9137ad1c581d92e4caeaf99f961f49a75b7eacfe3e943134` |
+| `apt-pkg/contrib/configuration.cc` | 33669 | `95c780ce50510038b2e9f1ba7bb868672eaeec363575cafd2c4c328f83cd936f` |
+| `cmdline/apt-config.cc` | 5282 | `22fe9785ec231590698bf8bc032df21029638357a9b20590ae276be51aa96d30` |
 
 ### 3.1 Planner-log creation is required by the selected internal-planner path
 
@@ -98,6 +102,8 @@ This source path explains the exact observed `eipp.log.xz` creation without asse
 
 `debSystem::ArchitecturesSupported()` in `apt-pkg/deb/debsystem.cc` then constructs the dpkg base command, appends `--print-foreign-architectures`, invokes `ExecDpkg`, and waits for that process. The frozen 004C1BF command specified neither `APT::Architectures` nor a replacement architecture vector. This exact source branch therefore accounts for the observed `dpkg` process.
 
+The command-line binding is source-complete. `apt-private/private-cmndline.cc` registers `-o`/`--option` as `CommandLine::ArbItem`; `apt-pkg/contrib/cmndline.cc` splits the supplied `key=value` at the first `=` and calls `Configuration::Set(key, value)`; and `Configuration::FindVector()` in `apt-pkg/contrib/configuration.cc` returns a comma-split vector directly when the configured top-level scalar value is non-empty. Therefore `-o APT::Architectures=amd64` deterministically makes `getArchitectures()` observe a non-empty vector containing `amd64`, so the `ArchitecturesSupported()` fallback is not reached. `cmdline/apt-config.cc` itself calls `getArchitectures()` during command initialization, which is why the same explicit architecture binding is required in the hook-query command as well as the Stage A command.
+
 The observation does not establish package unpack/configure execution. It does establish that 004C1BF's broader `DPKG_EXECUTION = PROHIBITED` gate was violated and must remain fail-closed.
 
 ## 4. Smallest static repair candidate
@@ -111,9 +117,9 @@ ADD = -o Dir::Log::Planner=/tmp/signthos-apt/tmp/bb-eipp.log.xz
 ADD = -o APT::Architectures=amd64
 ```
 
-`Dir::Log::Planner` is redirected into the existing isolated evidence tmpfs namespace under a `bb-*` path. The canonical inventory function already excludes `tmp/bb-*` evidence artifacts, so the planner file is no longer an input-state mutation. Unlike a silent exclusion, the candidate adds `bb-eipp.log.xz` to the normalized evidence USTAR and requires the file to exist before export. This changes the evidence set from 15 to 16 members intentionally and reviewably.
+`Dir::Log::Planner` is redirected into the existing isolated evidence tmpfs namespace under a `bb-*` path. The canonical inventory function already excludes `tmp/bb-*` evidence artifacts, so the planner file is no longer an input-state mutation. Unlike a silent exclusion, the candidate adds `bb-eipp.log.xz` to the normalized evidence USTAR and requires the file to exist before export. This changes the evidence set from 15 to 16 members intentionally and reviewably. The same `CommandLine::ArbItem` source path proves that `-o Dir::Log::Planner=/tmp/signthos-apt/tmp/bb-eipp.log.xz` overrides the planner-log key used by `CreateDumpFile`; the repair therefore redirects the output rather than merely describing an intended path.
 
-`APT::Architectures=amd64` is source-grounded to bypass the empty-vector call to `ArchitecturesSupported()` and therefore the `dpkg --print-foreign-architectures` discovery path. This is a static qualification only; the absence of a dpkg process requires a separately authorized runtime replay.
+`APT::Architectures=amd64` is source-grounded to bypass the empty-vector call to `ArchitecturesSupported()` and therefore the `dpkg --print-foreign-architectures` discovery path. Its scalar-to-vector behavior is bound above from exact 2.4.13 source. This is a static qualification only; the absence of a dpkg process requires a separately authorized runtime replay.
 
 No Docker-envelope token changes. Docker argv tokens 0 through 33 remain byte-equivalent to 004C1BE; only the final guest-script token changes.
 
