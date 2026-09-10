@@ -117,6 +117,14 @@ DOCKER_CONTAINER_NET_COUNT_CHANGE = 0
 
 The equality comparison binds Docker exit, stdout bytes/SHA-256, stderr bytes/SHA-256, and frozen Docker argv SHA-256. Both replays are byte-identical on all comparison fields.
 
+### Exact canonical pair JSON payload
+
+The digest above is independently reconstructible from the exact one-line JSON payload below. Take only the UTF-8 bytes between the `json` fences, exclude both fences and their line endings, and append exactly one LF byte. Do not pretty-print, reorder, normalize timestamps, rename fields, or add whitespace. The resulting payload must be exactly `968` bytes and SHA-256 `b1f08e6015a5154a694c62f4e9a24165729696109c6c9222e83ea45051fb2829`.
+
+```json
+{"comparisonFields":["exit","stdoutBytes","stdoutSha256","stderrBytes","stderrSha256","dockerArgvSha256"],"equal":true,"replayA":{"dockerArgvSha256":"08ea086eafe27b7f3c73f310315eccd75fcec2cbddfbbb1a26bc90817ef1bd19","endUtc":"2026-09-10T01:01:36.003918Z","exit":0,"replay":"A","startUtc":"2026-09-10T01:01:35.107808Z","stderrBytes":0,"stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","stdoutBytes":0,"stdoutSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"replayB":{"dockerArgvSha256":"08ea086eafe27b7f3c73f310315eccd75fcec2cbddfbbb1a26bc90817ef1bd19","endUtc":"2026-09-10T01:01:37.115166Z","exit":0,"replay":"B","startUtc":"2026-09-10T01:01:36.005120Z","stderrBytes":0,"stderrSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855","stdoutBytes":0,"stdoutSha256":"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},"schema":"signthos.004c1ba.hook-preflight-execution.v1"}
+```
+
 ```text
 DOCKER_PULL = 0
 DOCKER_IMAGE_LOAD = 0
