@@ -104,9 +104,23 @@ PACKAGE_CONFIGURATION = PROHIBITED
 MAINTAINER_SCRIPT_EXECUTION = PROHIBITED
 ```
 
-The source ordering above is the critical proof: with `APT::Get::Simulate=true`, successful control flow returns from the simulator block before the later `AcquireRun` package-download path. `--network none` remains an independent containment barrier, not a substitute for APT simulation semantics.
+The source ordering above is necessary but not sufficient by itself. Exact APT 2.4.13 source also contains hook surfaces that can execute external commands before or around the simulator: `InstallPackages()` calls `RunScripts("APT::Install::Pre-Invoke")` before all simulator logic; the install command uses `RunJsonHook("AptCli::Hooks::Install", ...)` before `InstallPackages()`, inside `InstallPackages()` before the simulator, and after success/failure; and the zero-action early return can call `RunScripts("APT::Install::Post-Invoke-Success")`. `RunScripts` forks and passes each nonempty configured value to `system()`. `RunJsonHook` forks and executes each nonempty configured hook through `/bin/sh -c`.
 
-A future execution must still fail closed if any archive appears in the isolated archive cache before execution, if the exact image/input identities differ, or if process/inventory evidence indicates package filesystem effects.
+Therefore a future Stage A retry is prohibited unless a separately authorized preflight revalidates the **effective** APT configuration under the exact selected image/environment and exact Stage A configuration overrides and proves all of these executable hook entry sets empty immediately before `apt-get`:
+
+```text
+APT::Install::Pre-Invoke = EMPTY_REQUIRED
+APT::Install::Post-Invoke-Success = EMPTY_REQUIRED
+AptCli::Hooks::Install = EMPTY_REQUIRED
+EFFECTIVE_HOOK_ENTRY_COUNT = 0 / REQUIRED
+HOOK_ABSENCE_INFERENCE_FROM_OLD_PARTIAL_CONFIG_EVIDENCE = PROHIBITED
+```
+
+The preflight observation method itself must be separately bound before execution, including its executable identity, exact argv/configuration inputs, output serialization, and fail-closed parser. 004C1AY does not authorize `apt-config`, Docker, APT, or any other runtime probe and does not claim that prior partial configuration evidence establishes hook absence. The one-token Stage A APT argv repair remains unchanged; hook safety is an independent prerequisite, not an additional `apt-get` argv mutation.
+
+Subject to that mandatory hook-absence gate, the source ordering proves that with `APT::Get::Simulate=true`, successful simulator control flow returns before the later `AcquireRun` package-download path. `--network none` remains an independent containment barrier, not a substitute for APT simulation semantics.
+
+A future execution must still fail closed if any executable hook entry is present, if the hook-absence preflight cannot be established, if any archive appears in the isolated archive cache before execution, if the exact image/input identities differ, or if process/inventory evidence indicates package filesystem effects.
 
 ## 5. Process observer repair
 
@@ -153,6 +167,7 @@ NETWORK_NONE_PRESERVED = YES
 READ_ONLY_ROOTFS_PRESERVED = YES
 ISOLATED_APT_ROOT_PRESERVED = YES
 PROC_OBSERVER_RACE_REPAIR_DEFINED = PASS_STATIC
+PRE_SIMULATOR_EXECUTABLE_HOOK_ABSENCE_GATE_DEFINED = PASS_STATIC
 004C1AY_RESULT = PASS_STATIC_ONLY
 ```
 
