@@ -235,18 +235,26 @@ EFFECTIVE_HOOK_ENTRY_COUNT := 0 ONLY_IF ACCEPT_PAIR
 
 Any positive stdout byte count means at least one non-empty configuration item exists in one of the exact queried subtrees and is a material rejection. Any nonzero exit or stderr byte is also a rejection; it must not be reinterpreted as hook absence.
 
-## 9. Separation from Stage A
+## 9. Separation from Stage A and mandatory same-container recheck
 
-004C1AZ does not authorize the observation or Stage A. A future hook-preflight execution successor must run only the frozen `apt-config` observation pair. Even a qualifying pair does not itself run `apt-get`; it must be recorded and reconciled on Issue #7 first.
+004C1AZ does not authorize the observation or Stage A. A future hook-preflight execution successor must run only the frozen `apt-config` observation pair. A qualifying pair establishes that this observation method is deterministic and that the exact selected image/configuration currently yields no non-empty executable-hook entry. It is **not** a substitute for the canonical 004C1AY requirement to revalidate hook absence immediately before `apt-get`.
+
+Any later Stage A execution harness must therefore perform the same exact 32-token `apt-config` hook query again **inside the same Stage A container**, after the exact image/environment/input-root/configuration preconditions have been verified and immediately before the repaired Stage A `apt-get` invocation. It must fail before `apt-get` unless that in-container query returns exit `0` with exactly zero stdout bytes and zero stderr bytes. No environment, APT configuration, source/list/status input, image state, or other execution-control input may change between the successful hook query and `apt-get`.
+
+The future combined Stage A harness, including how it captures and gates this immediate query without contaminating canonical input inventories, is not frozen by 004C1AZ. It requires its own exact command/script identity and fresh Issue #7 execution authority after the standalone preflight pair qualifies.
 
 ```text
 APT_CONFIG_REPLAY_PAIR = FUTURE_SEPARATELY_AUTHORIZED_EXECUTION_ONLY
-APT_GET_IN_SAME_CONTAINER_OR_COMMAND = PROHIBITED_BY_004C1AZ
+STANDALONE_PREFLIGHT_PAIR_SUFFICIENT_FOR_STAGE_A = FALSE
+SAME_CONTAINER_IMMEDIATE_HOOK_RECHECK_BEFORE_APT_GET = REQUIRED
+INTERVENING_CONFIG_ENV_INPUT_MUTATION = PROHIBITED
+FAILED_OR_NONEMPTY_IMMEDIATE_RECHECK = FAIL_BEFORE_APT_GET
 STAGE_A_ARGV_SHA256 = dceeccc5096bbc9eb0c661b93be5a5091f459a2ffaeed808b4bebb212ebff96b
+STAGE_A_COMBINED_HARNESS_FREEZE = FUTURE_SEPARATE_AUTHORITY_REQUIRED
 STAGE_A_RETRY_AFTER_PREFLIGHT = REQUIRES_FRESH_ISSUE_7_AUTHORITY
 ```
 
-This keeps hook observation and solver execution as separate auditable events and prevents a preflight failure from being followed by solver execution.
+This preserves two distinct gates: first, qualify the observation method with an auditable replay pair; second, enforce the same predicate immediately before the eventual solver invocation in the same container. A preflight failure can never be followed by solver execution.
 
 ## 10. Fail-closed invariants
 
