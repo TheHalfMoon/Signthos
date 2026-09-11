@@ -163,13 +163,11 @@ Any different predecessor, package/version/architecture, relation, threshold res
 
 ## 6. Deterministic host-static evaluation
 
-The exact portable evaluator is `4738 / 059552554c401bdbcd8a88aee788899ec41145ad58077f0b3d1d80791eb61cb7`. It binds every input byte identity before use and reuses the canonical Stage C parser's Debian version comparator. Two independent macOS invocations produced identical result bytes; the same evaluator/input bytes on Windows Python produced the same result identity.
+The exact portable evaluator is `4738 / 059552554c401bdbcd8a88aee788899ec41145ad58077f0b3d1d80791eb61cb7`. It binds every input byte identity before use and reuses the canonical Stage C parser's Debian version comparator. Two independent macOS invocations produced identical result bytes. No cross-platform result is claimed by this unit without separately preserved execution evidence.
 
 ```text
 MACOS_STATIC_EVALUATION_A = PASS
 MACOS_STATIC_EVALUATION_B = PASS
-WINDOWS_STATIC_EVALUATION = PASS
-CROSS_ENVIRONMENT_RESULT_BYTES_EQUAL = TRUE
 QUALIFICATION_RESULT_BYTES = 722
 QUALIFICATION_RESULT_SHA256 = 6a208d5806f3f7e162e53c38efada2510f1b38aadaa058f091606fca3160443c
 ```
