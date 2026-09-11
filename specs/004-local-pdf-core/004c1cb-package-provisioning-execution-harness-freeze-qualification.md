@@ -756,7 +756,7 @@ CONTRACT_SHA256 = c93e4aa4a48f110ec5e8c2fd2ac912273120b3059a164777afac8c9b862e7f
 
 ## 10. Host-static qualification
 
-The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Fifteen negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, Stage A/B/C virtual-state lineage, two non-root argv controls, Recommends policy, evidence-root isolation, archive inventory identity, and signed package-index identity.
+The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Thirty-five negative fixtures tamper immutable image/config identity, snapshot identity, APT binary identity, stage order, a same-count root set, platform, container isolation controls, Stage A/B/C virtual-state lineage, non-root argv controls, Recommends policy, evidence-root isolation, archive/index identities, transport policy, retry/replacement policy, final-image authority, and freshness invalidation controls.
 
 ```python
 #!/usr/bin/env python3
@@ -774,12 +774,56 @@ def sha256(value):
     return hashlib.sha256(value).hexdigest()
 
 def validate(c):
+    require(c["authority"] == "github:issue-comment:5636128786", "authority")
     require(c["base"] == "7d096d947869ed93676c558c3a9c70e25962f46a", "base")
-    require(c["image"]["ref"].endswith("c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3"), "image")
-    require(c["image"]["platform"] == "linux/amd64", "platform")
-    require(c["snapshot"]["base"] == "https://snapshot.ubuntu.com/ubuntu/20260909T180000Z/", "snapshot")
-    require(c["container"]["network"] == "none", "network")
-    require(c["container"]["hostMounts"] == c["container"]["repositoryMounts"] == 0, "mounts")
+    require(c["tree"] == "621c6fa3776d60939e16316c58e20aa00b4e919e", "tree")
+    require(c["schema"] == "signthos.004c1cb.package-provisioning-harness.v1", "schema")
+    expected_image = {
+        "config": "sha256:6c08d5b78c2a32982d454cd13735f2370941c81040fccc667ac3c7f8482928d0",
+        "platform": "linux/amd64",
+        "ref": "docker.io/emscripten/emsdk@sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3",
+    }
+    require(c["image"] == expected_image, "image")
+    expected_snapshot = {
+        "architecture": "amd64",
+        "base": "https://snapshot.ubuntu.com/ubuntu/20260909T180000Z/",
+        "descriptorSha256": "3fcdd0b5ef962070795738f92f36ea70f8c05a3171ae72e832f46746f7bab199",
+        "id": "20260909T180000Z",
+    }
+    require(c["snapshot"] == expected_snapshot, "snapshot")
+    expected_container = {
+        "devices": [],
+        "extraCapabilities": [],
+        "hostMounts": 0,
+        "network": "none",
+        "noNewPrivileges": True,
+        "privileged": False,
+        "pull": "never",
+        "repositoryMounts": 0,
+        "writableRootfs": True,
+    }
+    require(c["container"] == expected_container, "container")
+    expected_apt = {
+        "aptConfigSha256": "ba6db2a7564f9fcd73e48d33c8aeb63c0623e18bbf091008e39eb1bbfce25d19",
+        "aptGetSha256": "9d1fc8d54586a897939bcd833071067dd32dd820c33736e4d4ed95016afdc196",
+        "simulationTokensForbidden": ["--simulate", "Dir::Bin::dpkg=/nonexistent-signthos-dpkg-prohibited"],
+    }
+    require(c["apt"] == expected_apt, "apt-binaries-and-simulation-controls")
+    expected_freshness = {
+        "dockerServer": "29.7.2/linux/arm64",
+        "invalidateOnMaterialDrift": True,
+        "kernel": "7.0.12-linuxkit",
+        "source": "004C1CA",
+    }
+    require(c["freshness"] == expected_freshness, "freshness")
+    require(c["attempts"] == {"authorizedHere": 0, "futureDefault": 1, "replacementWithoutAuthority": False, "silentRetry": False}, "attempt-policy")
+    require(c["finalImage"] == {"commitHere": False, "futureCommitNeedsSeparateAuthority": True, "push": False}, "final-image-policy")
+    require({k: c["transport"][k] for k in ("archiveAcquisitionIn004C1CB", "mode", "unexpectedArchive", "verify")} == {
+        "archiveAcquisitionIn004C1CB": False,
+        "mode": "PREVERIFIED_OFFLINE_APT_LISTS_AND_DEBS",
+        "unexpectedArchive": "FAIL_CLOSED",
+        "verify": "size+sha256 against canonical selected archive identities",
+    }, "transport-policy")
     er = c["evidenceRoot"]
     require(er["policy"] == "FRESH_HOST_DIRECTORY_OUTSIDE_SIGNTHOS_REPOSITORY", "evidence-root-policy")
     require(er["pathTemplate"].startswith("/tmp/signthos-004c1cc-package-provisioning-"), "evidence-root-template")
@@ -846,12 +890,22 @@ start = text.index("{", start)
 contract, _ = json.JSONDecoder().raw_decode(text[start:])
 validate(contract)
 mutations = [
-    ("image", lambda x: x["image"].__setitem__("ref", "bad")),
+    ("image", lambda x: x["image"].__setitem__("ref", "example.invalid/emsdk@sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3")),
+    ("image-config", lambda x: x["image"].__setitem__("config", "sha256:" + "0" * 64)),
     ("snapshot", lambda x: x["snapshot"].__setitem__("base", "https://archive.ubuntu.com/")),
+    ("snapshot-descriptor", lambda x: x["snapshot"].__setitem__("descriptorSha256", "0" * 64)),
+    ("apt-get", lambda x: x["apt"].__setitem__("aptGetSha256", "0" * 64)),
+    ("apt-config", lambda x: x["apt"].__setitem__("aptConfigSha256", "0" * 64)),
     ("order", lambda x: x["stages"].__setitem__(0, copy.deepcopy(x["stages"][2]))),
     ("root-set-same-count", lambda x: x["stages"][2]["roots"].__setitem__(0, "wget")),
     ("platform", lambda x: x["image"].__setitem__("platform", "linux/arm64")),
     ("network", lambda x: x["container"].__setitem__("network", "bridge")),
+    ("pull", lambda x: x["container"].__setitem__("pull", "always")),
+    ("privileged", lambda x: x["container"].__setitem__("privileged", True)),
+    ("no-new-privileges", lambda x: x["container"].__setitem__("noNewPrivileges", False)),
+    ("writable-rootfs", lambda x: x["container"].__setitem__("writableRootfs", False)),
+    ("added-capability", lambda x: x["container"]["extraCapabilities"].append("SYS_ADMIN")),
+    ("added-device", lambda x: x["container"]["devices"].append("/dev/kvm")),
     ("state-a", lambda x: x["states"]["A"].__setitem__("tx", "0" * 64)),
     ("state-b", lambda x: x["states"]["B"].__setitem__("out", "0" * 64)),
     ("state-c", lambda x: x["states"]["C"].__setitem__("out", "0" * 64)),
@@ -861,6 +915,16 @@ mutations = [
     ("evidence-root", lambda x: x["evidenceRoot"].__setitem__("repositoryLocalPathAllowed", True)),
     ("archive-inventory", lambda x: x["transport"]["archiveInventory"].__setitem__("count", 825)),
     ("package-index", lambda x: x["transport"]["signedIndexIdentitySet"]["packagesXz"][0].__setitem__("sha256", "0" * 64)),
+    ("transport-mode", lambda x: x["transport"].__setitem__("mode", "LIVE_NETWORK_APT")),
+    ("transport-acquisition", lambda x: x["transport"].__setitem__("archiveAcquisitionIn004C1CB", True)),
+    ("transport-unexpected", lambda x: x["transport"].__setitem__("unexpectedArchive", "ALLOW")),
+    ("transport-verify", lambda x: x["transport"].__setitem__("verify", "size-only")),
+    ("silent-retry", lambda x: x["attempts"].__setitem__("silentRetry", True)),
+    ("replacement", lambda x: x["attempts"].__setitem__("replacementWithoutAuthority", True)),
+    ("final-image-commit", lambda x: x["finalImage"].__setitem__("commitHere", True)),
+    ("final-image-push", lambda x: x["finalImage"].__setitem__("push", True)),
+    ("freshness-source", lambda x: x["freshness"].__setitem__("source", "004C1BZ")),
+    ("freshness-drift", lambda x: x["freshness"].__setitem__("invalidateOnMaterialDrift", False)),
 ]
 for name, mutate in mutations:
     candidate = copy.deepcopy(contract)
@@ -871,14 +935,14 @@ for name, mutate in mutations:
         continue
     raise RuntimeError("tamper accepted: " + name)
 print("STATIC_VALIDATION=PASS")
-print("NEGATIVE_TAMPER_CASES=15/15_REJECTED")
+print("NEGATIVE_TAMPER_CASES=35/35_REJECTED")
 ```
 
 ```text
-VALIDATOR_BYTES = 8793
-VALIDATOR_SHA256 = ccc69021b077cd4ac79264a50d79a02937c8dde11617be40cfd9d0515e6ec694
+VALIDATOR_BYTES = 12746
+VALIDATOR_SHA256 = 39f365e30462fd6a6de066a631fc4f862a6302c9fdd8fda7f36603a817133ca9
 STATIC_VALIDATION = PASS
-NEGATIVE_TAMPER_CASES = 15/15_REJECTED
+NEGATIVE_TAMPER_CASES = 35/35_REJECTED
 DOCKER_EXECUTION_DURING_VALIDATION = 0
 APT_DPKG_EXECUTION_DURING_VALIDATION = 0
 ```
