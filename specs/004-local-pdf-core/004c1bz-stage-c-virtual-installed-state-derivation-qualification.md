@@ -160,8 +160,8 @@ if __name__=='__main__': main()
 The harness invokes the frozen transformer twice from the same exact bytes, requires byte identity with the retained canonical outputs, validates the 905-key delta, and proves exact-input tamper rejection for both predecessor and transaction identities.
 
 ```text
-QUALIFICATION_HARNESS_BYTES = 2989
-QUALIFICATION_HARNESS_SHA256 = 9e60caa37e5239c6dbb3006fadcb4f82f4922587d76023b39de4f6786f0c6d2f
+QUALIFICATION_HARNESS_BYTES = 3971
+QUALIFICATION_HARNESS_SHA256 = 6734571f3e7b1253bdf52e72d36a2c1ddc974a05248b4f700069a23f2881bbfe
 ```
 
 ````python
@@ -171,6 +171,8 @@ from pathlib import Path
 W=Path(__file__).resolve().parent
 EXPECTED_STATE=(99059,'8801230a86014a849c052da1f85740def6e5fcd204584e914b67017472bb71be')
 EXPECTED_MANIFEST=(1770,'df6028b9f45b0982697f34028b4cf366841a3b559a8745c5c184864dde9fb84d')
+def require(cond,msg):
+ if not cond: raise RuntimeError(msg)
 def ident(p):
  b=Path(p).read_bytes(); return len(b),hashlib.sha256(b).hexdigest()
 def run(pre,tx,out):
@@ -182,23 +184,29 @@ def main():
   td=Path(td); a=td/'a'; b=td/'b'; a.mkdir(); b.mkdir()
   cpa,sa,ma=run(W/'predecessor-installed.json',W/'transaction.jsonl',a)
   cpb,sb,mb=run(W/'predecessor-installed.json',W/'transaction.jsonl',b)
-  assert cpa.returncode==0,(cpa.stdout,cpa.stderr); assert cpb.returncode==0,(cpb.stdout,cpb.stderr)
-  assert ident(sa)==EXPECTED_STATE==ident(sb)
-  assert ident(ma)==EXPECTED_MANIFEST==ident(mb)
-  assert sa.read_bytes()==sb.read_bytes()==(W/'virtual-installed-state.json').read_bytes()
-  assert ma.read_bytes()==mb.read_bytes()==(W/'transition-manifest.json').read_bytes()
-  state=json.loads(sa.read_text()); assert len(state)==905
-  keys={(r['package'],r['architecture']):r for r in state}; assert len(keys)==905
-  assert ('pkgconf','amd64') not in keys
-  assert keys[('pkg-config','amd64')]['version']=='0.29.2-1ubuntu3'
-  assert keys[('rsync','amd64')]['version']=='3.2.7-0ubuntu0.22.04.7'
-  assert keys[('build-essential','amd64')]['version']=='12.9ubuntu3'
-  assert keys[('curl','amd64')]['version']=='7.81.0-1ubuntu1.27'
-  assert {r['status'] for r in state}=={'install ok installed'}
+  require(cpa.returncode==0,f'derivation A failed stdout={cpa.stdout!r} stderr={cpa.stderr!r}')
+  require(cpb.returncode==0,f'derivation B failed stdout={cpb.stdout!r} stderr={cpb.stderr!r}')
+  require(ident(sa)==EXPECTED_STATE,f'derivation A state identity mismatch {ident(sa)}')
+  require(ident(sb)==EXPECTED_STATE,f'derivation B state identity mismatch {ident(sb)}')
+  require(ident(ma)==EXPECTED_MANIFEST,f'derivation A manifest identity mismatch {ident(ma)}')
+  require(ident(mb)==EXPECTED_MANIFEST,f'derivation B manifest identity mismatch {ident(mb)}')
+  retained_state=(W/'virtual-installed-state.json').read_bytes(); retained_manifest=(W/'transition-manifest.json').read_bytes()
+  require(sa.read_bytes()==sb.read_bytes()==retained_state,'derived state byte identity mismatch')
+  require(ma.read_bytes()==mb.read_bytes()==retained_manifest,'derived manifest byte identity mismatch')
+  state=json.loads(sa.read_text()); require(len(state)==905,f'output package count mismatch {len(state)}')
+  keys={(r['package'],r['architecture']):r for r in state}; require(len(keys)==905,f'output unique-key count mismatch {len(keys)}')
+  require(('pkgconf','amd64') not in keys,'pkgconf survived output state')
+  require(keys.get(('pkg-config','amd64'),{}).get('version')=='0.29.2-1ubuntu3','pkg-config output mismatch')
+  require(keys.get(('rsync','amd64'),{}).get('version')=='3.2.7-0ubuntu0.22.04.7','rsync output mismatch')
+  require(keys.get(('build-essential','amd64'),{}).get('version')=='12.9ubuntu3','build-essential output mismatch')
+  require(keys.get(('curl','amd64'),{}).get('version')=='7.81.0-1ubuntu1.27','curl output mismatch')
+  require({r['status'] for r in state}=={'install ok installed'},'output status-set mismatch')
   pre_bad=td/'pre-bad.json'; pre_bad.write_bytes((W/'predecessor-installed.json').read_bytes()+b'\n')
-  bad1=td/'bad1'; bad1.mkdir(); cp1,_,_=run(pre_bad,W/'transaction.jsonl',bad1); assert cp1.returncode!=0
+  bad1=td/'bad1'; bad1.mkdir(); cp1,_,_=run(pre_bad,W/'transaction.jsonl',bad1)
+  require(cp1.returncode!=0,'tampered predecessor was accepted')
   tx_bad=td/'tx-bad.jsonl'; tx_bad.write_bytes((W/'transaction.jsonl').read_bytes()+b'\n')
-  bad2=td/'bad2'; bad2.mkdir(); cp2,_,_=run(W/'predecessor-installed.json',tx_bad,bad2); assert cp2.returncode!=0
+  bad2=td/'bad2'; bad2.mkdir(); cp2,_,_=run(W/'predecessor-installed.json',tx_bad,bad2)
+  require(cp2.returncode!=0,'tampered transaction was accepted')
   result={'schema':'signthos.004c1bz.static-stage-c-virtual-state-qualification.v1','exactDerivationReplayAB':'PASS','predecessorTamperRejected':True,'transactionTamperRejected':True,'predecessorCount':904,'installCount':2,'removeCount':1,'unchangedRequestedRootCount':2,'outputPackageCount':905,'outputUniquePackageKeyCount':905,'pkgconfRemoved':True,'pkgConfigInstalledExact':True,'rsyncInstalledExact':True,'unchangedRootsPreserved':True,'allOutputStatusesInstalled':True,'virtualInstalledState':{'bytes':EXPECTED_STATE[0],'sha256':EXPECTED_STATE[1]},'transitionManifest':{'bytes':EXPECTED_MANIFEST[0],'sha256':EXPECTED_MANIFEST[1]},'genericRemoveAcceptance':False,'dockerAptDpkgExecution':0}
   out=(json.dumps(result,sort_keys=True,separators=(',',':'))+'\n').encode(); sys.stdout.buffer.write(out)
 if __name__=='__main__': main()
@@ -206,7 +214,7 @@ if __name__=='__main__': main()
 
 ## 6. Qualification result and exact derived state
 
-Two independent host-only derivation runs and two qualification-harness runs produced byte-identical artifacts. No Docker, APT, apt-config, dpkg, package operation, provider, or PDFium execution occurred.
+Two independent host-only derivation runs plus qualification-harness runs under both normal Python and optimized `python -O` produced byte-identical artifacts. No Docker, APT, apt-config, dpkg, package operation, provider, or PDFium execution occurred.
 
 ```text
 DERIVATION_REPLAY_A_B = PASS
@@ -451,8 +459,8 @@ A reviewer can reproduce 004C1BZ from this document alone:
 3. require the exact five-member sorted USTAR set and normalized metadata;
 4. extract the frozen transformer and qualification harness from their four-backtick Python fences with one terminal LF;
 5. place the extracted scripts beside the five retained files;
-6. run `qualify.py` with the active Python interpreter;
-7. require exact `754 / bee4e62f2d9be05f90bb26db021061a3d83cd2f67c96157f4ca839a346f70ea2` output.
+6. run `qualify.py` with the active Python interpreter and again with optimization enabled (`python -O`);
+7. require both executions to return exact `754 / bee4e62f2d9be05f90bb26db021061a3d83cd2f67c96157f4ca839a346f70ea2` output.
 
 Any identity mismatch, duplicate key, action-cardinality drift, unexpected removal, install collision, unchanged-root mismatch, output cardinality drift, or tampering fails closed.
 
