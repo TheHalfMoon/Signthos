@@ -140,7 +140,7 @@ Logical member order is deterministic:
 1. all required directories sorted lexicographically;
 2. all required regular files sorted lexicographically.
 
-Exact normalization:
+Exact normalization and retained-byte consumption boundary:
 
 ```text
 TAR_FORMAT = USTAR
@@ -155,7 +155,16 @@ SPECIAL_FILES = PROHIBITED
 PATH_TRAVERSAL = PROHIBITED
 DUPLICATE_PATHS = PROHIBITED
 UNBOUND_MEMBERS = PROHIBITED
+QUALIFIED_TAR_BASENAME = offline-input.tar
+QUALIFIED_TAR_BYTES = 522393600
+QUALIFIED_TAR_SHA256 = b56949fa868d2738a3f511a13ccef66c67b8bfa0797ee09e26f5907c50da49ed
+TAR_REGENERATION_AUTHORITY = ABSENT
+ALTERNATE_USTAR_WRITER_OUTPUT = NOT_QUALIFIED
 ```
+
+004C1CC qualifies the two already-retained, byte-identical `offline-input.tar` artifacts only. It does not grant a future consumer authority to regenerate the tar from the logical manifest, even when an alternate writer would produce a semantically equivalent POSIX USTAR archive. In particular, no future unit may reinterpret long-path `name`/`prefix` header splitting, checksum formatting, numeric-field encoding, padding, end-of-archive blocks, or any other raw USTAR header encoding and still inherit this qualification.
+
+A later authorized provisioning attempt may consume only a retained tar whose full-file byte length is exactly `522393600` and whose full-file SHA-256 is exactly `b56949fa868d2738a3f511a13ccef66c67b8bfa0797ee09e26f5907c50da49ed`. If both retained copies are absent, if either selected copy fails the full-file identity check, or if regeneration is required for any reason, 004C1CC eligibility fails closed before attempt consumption and fresh authority plus a new transport qualification are required.
 
 Required directories:
 
@@ -216,7 +225,7 @@ REPLAY_A_TRANSPORT_ROOT = /private/tmp/signthos-004c1cc-transport-A
 REPLAY_B_TRANSPORT_ROOT = /private/tmp/signthos-004c1cc-transport-B
 ```
 
-These paths are locality evidence, not portable project inputs. Eligibility for later execution requires retained bytes to be rechecked immediately before any provisioning attempt.
+These paths are locality evidence, not portable project inputs. Eligibility for later execution requires the selected retained `offline-input.tar` bytes to be rechecked immediately before any provisioning attempt against the exact qualified byte length and SHA-256 above. No inherited authority permits rebuilding the tar if the retained bytes are unavailable or drifted.
 
 ## 7. Independent full tar readback
 
@@ -269,7 +278,8 @@ RETAINED_SIGNED_METADATA_LOCALITY = PRESENT_AND_IDENTITY_PASS
 RETAINED_UNCOMPRESSED_PACKAGES_LOCALITY = PRESENT_AND_IDENTITY_PASS
 APT_CACHE_STORE_FILENAME_MAPPING = ESTABLISHED
 DETERMINISTIC_TRANSPORT_MANIFEST = ESTABLISHED
-DETERMINISTIC_TRANSPORT_USTAR = ESTABLISHED
+DETERMINISTIC_TRANSPORT_USTAR = ESTABLISHED_FOR_RETAINED_EXACT_BYTES
+TAR_REGENERATION_AUTHORITY = ABSENT
 TWO_REPLAY_TRANSPORT_DETERMINISM = PASS
 CONTAINER_VISIBLE_PLACEMENT_FOR_004C1CB_ROOT = NOT_EXECUTED_NOT_ESTABLISHED
 APT_OFFLINE_ARCHIVE_CONSUMPTION = NOT_EXECUTED_NOT_ESTABLISHED
@@ -294,7 +304,7 @@ The candidate is merge-eligible only if:
 3. all retained 004C1AK A/B archives rehash with zero mismatch and exact canonical inventory identity;
 4. retained 004C1AG/004C1AU signed metadata and uncompressed package-list bytes match canonical identities;
 5. the APT 2.4.13 `StoreFilename` derivation is bound to exact canonical source provenance and yields exactly 826 unique cache names;
-6. both independent USTAR materializations have exactly 850 logical members and identical bytes/SHA-256;
+6. both independent USTAR materializations have exactly 850 logical members and identical bytes/SHA-256, the selected retained `offline-input.tar` rehashes to exactly `522393600 / b56949fa868d2738a3f511a13ccef66c67b8bfa0797ee09e26f5907c50da49ed`, and no regenerated or alternate-writer tar is treated as qualified;
 7. independent full tar readback returns zero content or metadata mismatch for both transports;
 8. no network, Docker, APT, dpkg, package action, toolchain/source acquisition, PDFium build, provider/PDF runtime, or repository external-byte import occurs;
 9. fresh independent substantive exact-head review reports no unresolved material finding;
