@@ -756,7 +756,7 @@ CONTRACT_SHA256 = c93e4aa4a48f110ec5e8c2fd2ac912273120b3059a164777afac8c9b862e7f
 
 ## 10. Host-static qualification
 
-The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Thirteen negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, final virtual-state identity, two non-root argv controls, Recommends policy, evidence-root isolation, archive inventory identity, and signed package-index identity.
+The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Fifteen negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, Stage A/B/C virtual-state lineage, two non-root argv controls, Recommends policy, evidence-root isolation, archive inventory identity, and signed package-index identity.
 
 ```python
 #!/usr/bin/env python3
@@ -830,8 +830,12 @@ def validate(c):
         require("Acquire::Retries=0" in argv, "retry-policy")
         require(not any("Dir::Bin::dpkg=" in y for y in argv), "fake-dpkg")
         require(argv[-len(x["roots"]):] == x["roots"], "root-order")
-    require(c["states"]["C"]["out"] == "8801230a86014a849c052da1f85740def6e5fcd204584e914b67017472bb71be", "final-state")
-    require(c["states"]["C"]["count"] == 905, "final-count")
+    expected_states = {
+        "A": {"count": 255, "out": "14d0da8d33b804702e4b23fa0a8ee99da33feb32641afe5c8e8649504f731ae7", "tx": "64de571251fd51da1df513b6be7e588b4479556153d9ce5d58e99bddf2d4fc20"},
+        "B": {"count": 904, "out": "42d5059095be4a8cff9661702803ce17a1b504e0fd425231cd746ae928e608ea", "tx": "eb4851027ba426113da526f23a6f1b6edcf12a832ab6c9df53c767c2656ec317"},
+        "C": {"count": 905, "out": "8801230a86014a849c052da1f85740def6e5fcd204584e914b67017472bb71be", "tx": "72585f7eac1b14089c69f3c35167bd2e75108435e8b84c3d53456e7757307f7f"},
+    }
+    require(c["states"] == expected_states, "virtual-state-lineage")
     require(c["attempts"]["authorizedHere"] == 0, "attempt-authority")
     require(not any(c["boundaries"].values()), "boundary")
 
@@ -848,7 +852,9 @@ mutations = [
     ("root-set-same-count", lambda x: x["stages"][2]["roots"].__setitem__(0, "wget")),
     ("platform", lambda x: x["image"].__setitem__("platform", "linux/arm64")),
     ("network", lambda x: x["container"].__setitem__("network", "bridge")),
-    ("state", lambda x: x["states"]["C"].__setitem__("out", "0" * 64)),
+    ("state-a", lambda x: x["states"]["A"].__setitem__("tx", "0" * 64)),
+    ("state-b", lambda x: x["states"]["B"].__setitem__("out", "0" * 64)),
+    ("state-c", lambda x: x["states"]["C"].__setitem__("out", "0" * 64)),
     ("argv-y", lambda x: x["stages"][0]["offlineInstallArgv"].remove("-y")),
     ("argv-retries", lambda x: x["stages"][1]["offlineInstallArgv"].__setitem__(x["stages"][1]["offlineInstallArgv"].index("Acquire::Retries=0"), "Acquire::Retries=9")),
     ("recommends", lambda x: x["stages"][1].__setitem__("recommends", "NO_INSTALL_RECOMMENDS")),
@@ -865,14 +871,14 @@ for name, mutate in mutations:
         continue
     raise RuntimeError("tamper accepted: " + name)
 print("STATIC_VALIDATION=PASS")
-print("NEGATIVE_TAMPER_CASES=13/13_REJECTED")
+print("NEGATIVE_TAMPER_CASES=15/15_REJECTED")
 ```
 
 ```text
-VALIDATOR_BYTES = 8194
-VALIDATOR_SHA256 = 72f6b58fedecfff98e170b4a01e5bc8b9700f231ea8d313bcd1233d0b9803ce1
+VALIDATOR_BYTES = 8793
+VALIDATOR_SHA256 = ccc69021b077cd4ac79264a50d79a02937c8dde11617be40cfd9d0515e6ec694
 STATIC_VALIDATION = PASS
-NEGATIVE_TAMPER_CASES = 13/13_REJECTED
+NEGATIVE_TAMPER_CASES = 15/15_REJECTED
 DOCKER_EXECUTION_DURING_VALIDATION = 0
 APT_DPKG_EXECUTION_DURING_VALIDATION = 0
 ```
