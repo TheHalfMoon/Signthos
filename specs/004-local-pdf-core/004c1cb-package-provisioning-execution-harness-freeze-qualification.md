@@ -97,7 +97,7 @@ Any missing archive fails because network is none; no online fallback is permitt
 
 ## 7. Evidence, side effects, and attempt accounting
 
-Before Stage A, a separately authorized future attempt must verify substrate/image freshness, exact transport identity, exact archive inventory, exact index identities, absence of unexpected archives, and every frozen argv hash. For every stage it must preserve argv JSON, stdout, stderr, exit status, normalized `dpkg-query` state, `/var/lib/dpkg/status` identity, APT history/terminal logs, dpkg log, and archive inventory.
+Before Stage A, a separately authorized future attempt must verify substrate/image freshness, exact transport identity, exact archive inventory, exact index identities, absence of unexpected archives, and every frozen argv hash. Before consuming an attempt, it must also create a fresh empty host evidence directory matching the frozen external-root policy, prove that it is outside the Signthos repository, and fail closed without consuming the attempt if the destination is repository-local or otherwise violates that policy. For every stage it must preserve argv JSON, stdout, stderr, exit status, normalized `dpkg-query` state, `/var/lib/dpkg/status` identity, APT history/terminal logs, dpkg log, and archive inventory.
 
 After each successful stage, observed package state must compare against the corresponding canonical virtual state. Equality is necessary transaction-accounting evidence only; it does not prove filesystem reproducibility or completeness of maintainer-script, trigger, alternatives, diversion, service, or other side effects. Those remain separately evidenced and qualified.
 
@@ -150,6 +150,16 @@ The named container remains until evidence is extracted. 004C1CB does not author
     "pull": "never",
     "repositoryMounts": 0,
     "writableRootfs": true
+  },
+  "evidenceRoot": {
+    "attemptConsumptionOnValidationFailure": false,
+    "createFreshBeforeAttempt": true,
+    "hostMountIntoProvisioningContainer": false,
+    "pathTemplate": "/tmp/signthos-004c1cc-package-provisioning-<UTC>-<PID>",
+    "policy": "FRESH_HOST_DIRECTORY_OUTSIDE_SIGNTHOS_REPOSITORY",
+    "repositoryLocalPathAllowed": false,
+    "requireEmptyBeforeAttempt": true,
+    "validateOutsideRepositoryBeforeAttempt": true
   },
   "finalImage": {
     "commitHere": false,
@@ -636,22 +646,28 @@ The named container remains until evidence is extracted. 004C1CB does not author
 ```
 
 ```text
-CONTRACT_BYTES = 8935
-CONTRACT_SHA256 = 204792bc4c82fefe027cbcdd26a49258fa6eb74823ab9ebf24e32e664ce7d68a
+CONTRACT_BYTES = 9319
+CONTRACT_SHA256 = ad46a64b2576f7db60343a8a843d38bc1424c93db2771c00a4d8b68bc54a0ee6
 ```
 
 ## 10. Host-static qualification
 
-The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Seven negative fixtures tamper image identity, snapshot origin, stage order, Stage C roots, platform, network mode, and final virtual-state identity.
+The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Eleven negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, final virtual-state identity, two non-root argv controls, Recommends policy, and evidence-root isolation.
 
 ```python
 #!/usr/bin/env python3
-import copy, json, re, sys
+import copy, hashlib, json, sys
 from pathlib import Path
 
 def require(cond, label):
     if not cond:
         raise RuntimeError(label)
+
+def canonical_bytes(value):
+    return (json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n").encode()
+
+def sha256(value):
+    return hashlib.sha256(value).hexdigest()
 
 def validate(c):
     require(c["base"] == "7d096d947869ed93676c558c3a9c70e25962f46a", "base")
@@ -660,12 +676,27 @@ def validate(c):
     require(c["snapshot"]["base"] == "https://snapshot.ubuntu.com/ubuntu/20260909T180000Z/", "snapshot")
     require(c["container"]["network"] == "none", "network")
     require(c["container"]["hostMounts"] == c["container"]["repositoryMounts"] == 0, "mounts")
+    er = c["evidenceRoot"]
+    require(er["policy"] == "FRESH_HOST_DIRECTORY_OUTSIDE_SIGNTHOS_REPOSITORY", "evidence-root-policy")
+    require(er["pathTemplate"].startswith("/tmp/signthos-004c1cc-package-provisioning-"), "evidence-root-template")
+    require(er["repositoryLocalPathAllowed"] is False and er["hostMountIntoProvisioningContainer"] is False, "evidence-root-isolation")
+    require(er["createFreshBeforeAttempt"] is True and er["requireEmptyBeforeAttempt"] is True, "evidence-root-freshness")
+    require(er["validateOutsideRepositoryBeforeAttempt"] is True and er["attemptConsumptionOnValidationFailure"] is False, "evidence-root-preflight")
     require([x["stageId"] for x in c["stages"]] == ["STAGE_A", "STAGE_B", "STAGE_C"], "stage-order")
     require([len(x["roots"]) for x in c["stages"]] == [12, 145, 4], "root-counts")
     require([x["recommends"] for x in c["stages"]] == ["NO_INSTALL_RECOMMENDS", "DEFAULT_APT_RECOMMENDS", "NO_INSTALL_RECOMMENDS"], "recommends")
-    for x in c["stages"]:
+    expected_root_hashes = [
+        "410065f69855eae58ab4daef3cadc253fb3284a9eb4f75537b2c1bace9d5a649",
+        "f354c23dc9671e5d1daf0db5158b7f1eef0afc205b7620c67ecd948da23b8184",
+        "c0ee3f407b0591988df41f7dbe3d0bd975e32312079b221bf8414d74094d19d7",
+    ]
+    for x, expected_root_hash in zip(c["stages"], expected_root_hashes, strict=True):
+        require(sha256(canonical_bytes(x["roots"])) == expected_root_hash, "root-set-hash")
+        require(x["rootsSha256"] == expected_root_hash, "recorded-root-set-hash")
         argv = x["offlineInstallArgv"]
-        require("--simulate" not in argv and "--no-download" in argv, "simulation-token")
+        require(sha256(canonical_bytes(argv)) == x["offlineInstallArgvSha256"], "argv-hash")
+        require("--simulate" not in argv and "--no-download" in argv and "-y" in argv, "simulation-token")
+        require("Acquire::Retries=0" in argv, "retry-policy")
         require(not any("Dir::Bin::dpkg=" in y for y in argv), "fake-dpkg")
         require(argv[-len(x["roots"]):] == x["roots"], "root-order")
     require(c["states"]["C"]["out"] == "8801230a86014a849c052da1f85740def6e5fcd204584e914b67017472bb71be", "final-state")
@@ -683,10 +714,14 @@ mutations = [
     ("image", lambda x: x["image"].__setitem__("ref", "bad")),
     ("snapshot", lambda x: x["snapshot"].__setitem__("base", "https://archive.ubuntu.com/")),
     ("order", lambda x: x["stages"].__setitem__(0, copy.deepcopy(x["stages"][2]))),
-    ("roots", lambda x: x["stages"][2].__setitem__("roots", ["curl"])),
+    ("root-set-same-count", lambda x: x["stages"][2]["roots"].__setitem__(0, "wget")),
     ("platform", lambda x: x["image"].__setitem__("platform", "linux/arm64")),
     ("network", lambda x: x["container"].__setitem__("network", "bridge")),
     ("state", lambda x: x["states"]["C"].__setitem__("out", "0" * 64)),
+    ("argv-y", lambda x: x["stages"][0]["offlineInstallArgv"].remove("-y")),
+    ("argv-retries", lambda x: x["stages"][1]["offlineInstallArgv"].__setitem__(x["stages"][1]["offlineInstallArgv"].index("Acquire::Retries=0"), "Acquire::Retries=9")),
+    ("recommends", lambda x: x["stages"][1].__setitem__("recommends", "NO_INSTALL_RECOMMENDS")),
+    ("evidence-root", lambda x: x["evidenceRoot"].__setitem__("repositoryLocalPathAllowed", True)),
 ]
 for name, mutate in mutations:
     candidate = copy.deepcopy(contract)
@@ -697,14 +732,14 @@ for name, mutate in mutations:
         continue
     raise RuntimeError("tamper accepted: " + name)
 print("STATIC_VALIDATION=PASS")
-print("NEGATIVE_TAMPER_CASES=7/7_REJECTED")
+print("NEGATIVE_TAMPER_CASES=11/11_REJECTED")
 ```
 
 ```text
-VALIDATOR_BYTES = 2721
-VALIDATOR_SHA256 = 6bf1863f3f557141bc503731a1866c6ac3a697aa05d769f322302c5e604430f7
+VALIDATOR_BYTES = 4712
+VALIDATOR_SHA256 = 51861aa87ea578ff1343f8bfae6be37a3f9e29a9505db5d77639cf2183764585
 STATIC_VALIDATION = PASS
-NEGATIVE_TAMPER_CASES = 7/7_REJECTED
+NEGATIVE_TAMPER_CASES = 11/11_REJECTED
 DOCKER_EXECUTION_DURING_VALIDATION = 0
 APT_DPKG_EXECUTION_DURING_VALIDATION = 0
 ```
