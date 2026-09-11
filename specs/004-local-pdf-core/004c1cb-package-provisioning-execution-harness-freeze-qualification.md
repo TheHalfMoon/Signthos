@@ -639,20 +639,124 @@ The named container remains until evidence is extracted. 004C1CB does not author
     "archiveAcquisitionIn004C1CB": false,
     "mode": "PREVERIFIED_OFFLINE_APT_LISTS_AND_DEBS",
     "unexpectedArchive": "FAIL_CLOSED",
-    "verify": "size+sha256 against canonical selected archive identities"
+    "verify": "size+sha256 against canonical selected archive identities",
+    "archiveInventory": {
+      "count": 826,
+      "totalBytes": 317223784,
+      "inventoryBytes": 439991,
+      "inventorySha256": "38b36863380150df62a42e6e77c3582244b61f4a083da52619de6e56ccf7ef98",
+      "archiveIdentitySetSha256": "8ac7e3c9a44831e5f8c4a03a81862644990b504f7d2043102a1ab1a0fd69810d",
+      "missingExtraChangedPolicy": "FAIL_CLOSED_BEFORE_ATTEMPT_CONSUMPTION"
+    },
+    "signedIndexIdentitySet": {
+      "inRelease": [
+        {
+          "suite": "jammy",
+          "bytes": 270087,
+          "sha256": "c14060cd8c6d625874dfcb9523a35a395bf4865c28b6b6a82569ef326fe92dc6"
+        },
+        {
+          "suite": "jammy-updates",
+          "bytes": 128049,
+          "sha256": "78e5c7e6f16f418c394d2d6caa4d8d10fafa715b08b038c02a8c73cd6dc4587b"
+        },
+        {
+          "suite": "jammy-security",
+          "bytes": 128927,
+          "sha256": "b2eb2336d267611f596e47fe9bad879db22371598047363db841d8f5f586d450"
+        }
+      ],
+      "packagesXz": [
+        {
+          "suite": "jammy",
+          "component": "main",
+          "bytes": 1394768,
+          "sha256": "37cb57f1554cbfa71c5a29ee9ffee18a9a8c1782bb0568e0874b7ff4ce8f9c11"
+        },
+        {
+          "suite": "jammy",
+          "component": "restricted",
+          "bytes": 129256,
+          "sha256": "92102b5d9dfb7804293891528d5e57c3d05949df71af613d4f99fcb7d6a3f488"
+        },
+        {
+          "suite": "jammy",
+          "component": "universe",
+          "bytes": 14090084,
+          "sha256": "d29cb24c93fec5f43255706bce7eb46d4779952039d8c68ac1bb14a6f3655ce2"
+        },
+        {
+          "suite": "jammy",
+          "component": "multiverse",
+          "bytes": 216948,
+          "sha256": "e24bf9b5daf5387aa5311f69367b248b1d46d37d72480760f91f5a312c7eb43c"
+        },
+        {
+          "suite": "jammy-updates",
+          "component": "main",
+          "bytes": 3794492,
+          "sha256": "fc3ca7fd8c51bfcaef4c60146d82f07771d5c81843def876d3b4296acffad473"
+        },
+        {
+          "suite": "jammy-updates",
+          "component": "restricted",
+          "bytes": 6542404,
+          "sha256": "a9d99a9e6dd5952ec639e7e28763275c3aa5df18b69f06973cc3c6ab1fac434d"
+        },
+        {
+          "suite": "jammy-updates",
+          "component": "universe",
+          "bytes": 1282472,
+          "sha256": "e63677ef4f3f73a0ac7ac29be177222ddb2bf169ba0fe2bc16448342f71a53db"
+        },
+        {
+          "suite": "jammy-updates",
+          "component": "multiverse",
+          "bytes": 76800,
+          "sha256": "eb52bf4941c406f9d9fe486128453060fadb2d0172750cbe84f2896d1ecf4e71"
+        },
+        {
+          "suite": "jammy-security",
+          "component": "main",
+          "bytes": 3526324,
+          "sha256": "6fed35b19b0a467d391330554308eb2bcfc679a13604635f3298dd8ef383e7a4"
+        },
+        {
+          "suite": "jammy-security",
+          "component": "restricted",
+          "bytes": 6304508,
+          "sha256": "c82967cb499e44f680aa67fd9972db8a396eed44d3733261ccdc8b3dd57a8287"
+        },
+        {
+          "suite": "jammy-security",
+          "component": "universe",
+          "bytes": 1048048,
+          "sha256": "c06fe8a63c3debf947fd2f717d369e9c205f31a0eea25d07e8b92e106ee84757"
+        },
+        {
+          "suite": "jammy-security",
+          "component": "multiverse",
+          "bytes": 69092,
+          "sha256": "8b79f9054d123125a830170dbaea7c7053572dba1a0f9187313c5229245ae384"
+        }
+      ],
+      "packageIndexCount": 12,
+      "packageIndexCompressedBytes": 38475196,
+      "missingExtraChangedPolicy": "FAIL_CLOSED_BEFORE_ATTEMPT_CONSUMPTION"
+    }
   },
   "tree": "621c6fa3776d60939e16316c58e20aa00b4e919e"
 }
 ```
 
 ```text
-CONTRACT_BYTES = 9319
-CONTRACT_SHA256 = ad46a64b2576f7db60343a8a843d38bc1424c93db2771c00a4d8b68bc54a0ee6
+CONTRACT_BYTES = 11837
+CONTRACT_SHA256 = c93e4aa4a48f110ec5e8c2fd2ac912273120b3059a164777afac8c9b862e7fe5
 ```
 
 ## 10. Host-static qualification
 
-The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Eleven negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, final virtual-state identity, two non-root argv controls, Recommends policy, and evidence-root isolation.
+The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Thirteen negative fixtures tamper image identity, snapshot origin, stage order, a same-count root set, platform, network mode, final virtual-state identity, two non-root argv controls, Recommends policy, evidence-root isolation, archive inventory identity, and signed package-index identity.
 
 ```python
 #!/usr/bin/env python3
@@ -682,6 +786,32 @@ def validate(c):
     require(er["repositoryLocalPathAllowed"] is False and er["hostMountIntoProvisioningContainer"] is False, "evidence-root-isolation")
     require(er["createFreshBeforeAttempt"] is True and er["requireEmptyBeforeAttempt"] is True, "evidence-root-freshness")
     require(er["validateOutsideRepositoryBeforeAttempt"] is True and er["attemptConsumptionOnValidationFailure"] is False, "evidence-root-preflight")
+    archive = c["transport"]["archiveInventory"]
+    require(archive == {"count": 826, "totalBytes": 317223784, "inventoryBytes": 439991, "inventorySha256": "38b36863380150df62a42e6e77c3582244b61f4a083da52619de6e56ccf7ef98", "archiveIdentitySetSha256": "8ac7e3c9a44831e5f8c4a03a81862644990b504f7d2043102a1ab1a0fd69810d", "missingExtraChangedPolicy": "FAIL_CLOSED_BEFORE_ATTEMPT_CONSUMPTION"}, "archive-inventory")
+    indexes = c["transport"]["signedIndexIdentitySet"]
+    expected_inrelease = [
+        {"suite": "jammy", "bytes": 270087, "sha256": "c14060cd8c6d625874dfcb9523a35a395bf4865c28b6b6a82569ef326fe92dc6"},
+        {"suite": "jammy-updates", "bytes": 128049, "sha256": "78e5c7e6f16f418c394d2d6caa4d8d10fafa715b08b038c02a8c73cd6dc4587b"},
+        {"suite": "jammy-security", "bytes": 128927, "sha256": "b2eb2336d267611f596e47fe9bad879db22371598047363db841d8f5f586d450"},
+    ]
+    expected_packages = [
+        {"suite": "jammy", "component": "main", "bytes": 1394768, "sha256": "37cb57f1554cbfa71c5a29ee9ffee18a9a8c1782bb0568e0874b7ff4ce8f9c11"},
+        {"suite": "jammy", "component": "restricted", "bytes": 129256, "sha256": "92102b5d9dfb7804293891528d5e57c3d05949df71af613d4f99fcb7d6a3f488"},
+        {"suite": "jammy", "component": "universe", "bytes": 14090084, "sha256": "d29cb24c93fec5f43255706bce7eb46d4779952039d8c68ac1bb14a6f3655ce2"},
+        {"suite": "jammy", "component": "multiverse", "bytes": 216948, "sha256": "e24bf9b5daf5387aa5311f69367b248b1d46d37d72480760f91f5a312c7eb43c"},
+        {"suite": "jammy-updates", "component": "main", "bytes": 3794492, "sha256": "fc3ca7fd8c51bfcaef4c60146d82f07771d5c81843def876d3b4296acffad473"},
+        {"suite": "jammy-updates", "component": "restricted", "bytes": 6542404, "sha256": "a9d99a9e6dd5952ec639e7e28763275c3aa5df18b69f06973cc3c6ab1fac434d"},
+        {"suite": "jammy-updates", "component": "universe", "bytes": 1282472, "sha256": "e63677ef4f3f73a0ac7ac29be177222ddb2bf169ba0fe2bc16448342f71a53db"},
+        {"suite": "jammy-updates", "component": "multiverse", "bytes": 76800, "sha256": "eb52bf4941c406f9d9fe486128453060fadb2d0172750cbe84f2896d1ecf4e71"},
+        {"suite": "jammy-security", "component": "main", "bytes": 3526324, "sha256": "6fed35b19b0a467d391330554308eb2bcfc679a13604635f3298dd8ef383e7a4"},
+        {"suite": "jammy-security", "component": "restricted", "bytes": 6304508, "sha256": "c82967cb499e44f680aa67fd9972db8a396eed44d3733261ccdc8b3dd57a8287"},
+        {"suite": "jammy-security", "component": "universe", "bytes": 1048048, "sha256": "c06fe8a63c3debf947fd2f717d369e9c205f31a0eea25d07e8b92e106ee84757"},
+        {"suite": "jammy-security", "component": "multiverse", "bytes": 69092, "sha256": "8b79f9054d123125a830170dbaea7c7053572dba1a0f9187313c5229245ae384"},
+    ]
+    require(indexes["inRelease"] == expected_inrelease, "inrelease-identity-set")
+    require(indexes["packagesXz"] == expected_packages, "packages-index-identity-set")
+    require(indexes["packageIndexCount"] == 12 and indexes["packageIndexCompressedBytes"] == 38475196, "packages-index-summary")
+    require(indexes["missingExtraChangedPolicy"] == "FAIL_CLOSED_BEFORE_ATTEMPT_CONSUMPTION", "packages-index-policy")
     require([x["stageId"] for x in c["stages"]] == ["STAGE_A", "STAGE_B", "STAGE_C"], "stage-order")
     require([len(x["roots"]) for x in c["stages"]] == [12, 145, 4], "root-counts")
     require([x["recommends"] for x in c["stages"]] == ["NO_INSTALL_RECOMMENDS", "DEFAULT_APT_RECOMMENDS", "NO_INSTALL_RECOMMENDS"], "recommends")
@@ -690,7 +820,8 @@ def validate(c):
         "f354c23dc9671e5d1daf0db5158b7f1eef0afc205b7620c67ecd948da23b8184",
         "c0ee3f407b0591988df41f7dbe3d0bd975e32312079b221bf8414d74094d19d7",
     ]
-    for x, expected_root_hash in zip(c["stages"], expected_root_hashes, strict=True):
+    require(len(c["stages"]) == len(expected_root_hashes), "root-hash-cardinality")
+    for x, expected_root_hash in zip(c["stages"], expected_root_hashes):
         require(sha256(canonical_bytes(x["roots"])) == expected_root_hash, "root-set-hash")
         require(x["rootsSha256"] == expected_root_hash, "recorded-root-set-hash")
         argv = x["offlineInstallArgv"]
@@ -722,6 +853,8 @@ mutations = [
     ("argv-retries", lambda x: x["stages"][1]["offlineInstallArgv"].__setitem__(x["stages"][1]["offlineInstallArgv"].index("Acquire::Retries=0"), "Acquire::Retries=9")),
     ("recommends", lambda x: x["stages"][1].__setitem__("recommends", "NO_INSTALL_RECOMMENDS")),
     ("evidence-root", lambda x: x["evidenceRoot"].__setitem__("repositoryLocalPathAllowed", True)),
+    ("archive-inventory", lambda x: x["transport"]["archiveInventory"].__setitem__("count", 825)),
+    ("package-index", lambda x: x["transport"]["signedIndexIdentitySet"]["packagesXz"][0].__setitem__("sha256", "0" * 64)),
 ]
 for name, mutate in mutations:
     candidate = copy.deepcopy(contract)
@@ -732,14 +865,14 @@ for name, mutate in mutations:
         continue
     raise RuntimeError("tamper accepted: " + name)
 print("STATIC_VALIDATION=PASS")
-print("NEGATIVE_TAMPER_CASES=11/11_REJECTED")
+print("NEGATIVE_TAMPER_CASES=13/13_REJECTED")
 ```
 
 ```text
-VALIDATOR_BYTES = 4712
-VALIDATOR_SHA256 = 51861aa87ea578ff1343f8bfae6be37a3f9e29a9505db5d77639cf2183764585
+VALIDATOR_BYTES = 8194
+VALIDATOR_SHA256 = 72f6b58fedecfff98e170b4a01e5bc8b9700f231ea8d313bcd1233d0b9803ce1
 STATIC_VALIDATION = PASS
-NEGATIVE_TAMPER_CASES = 11/11_REJECTED
+NEGATIVE_TAMPER_CASES = 13/13_REJECTED
 DOCKER_EXECUTION_DURING_VALIDATION = 0
 APT_DPKG_EXECUTION_DURING_VALIDATION = 0
 ```
