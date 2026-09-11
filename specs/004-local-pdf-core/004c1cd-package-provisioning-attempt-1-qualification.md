@@ -154,6 +154,7 @@ The original launch-side evidence root was preserved after the Docker daemon bec
 ```text
 ORIGINAL_ATTEMPT_EVIDENCE_ROOT = /tmp/signthos-004c1cc-package-provisioning-20260911T192230Z-29808
 containers-before.txt = 1979 / ffe3631238b0d152a6150f896f0b9334afb734bb8b9fe94825fdb2c4ee1c765e
+preflight.json = 656 / df95427bdbb3e4cc0aaf462173f3a4444aa9d1f6963d482c51828b6e1361b17a
 docker.stdout = 0 / e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 docker.stderr = 0 / e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 ```
