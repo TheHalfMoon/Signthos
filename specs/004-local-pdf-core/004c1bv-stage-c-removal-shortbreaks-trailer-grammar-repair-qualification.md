@@ -91,9 +91,9 @@ PRESERVED_BLOCKER_LINE = Remv pkgconf [1.8.0-1] [libglib2.0-dev:amd64 libgudev-1
 
 ## 5. Static qualification methodology
 
-The exact qualification harness is `6942 / db1c4ada67e5b83a24429b220a94f4588cc7ce820a97fbcefd33de02b22783ba`. It verifies all bound input identities before use, verifies the exact APT source markers and ordering for `RealRemove()`/`ShortBreaks()`, reproduces the candidate parser from the transformer, exercises positive and strict-negative `Remv` trailer fixtures, proves `Purg` remains fail-closed, passes the canonical lookup datasets through `read_bound_json`, reparses the exact preserved Replay A bytes twice, requires byte-identical outputs, and rejects a tampered predecessor input.
+The exact portable qualification harness is `6939 / a67745c3b22ecd5976a895b7fa81916d3430a4687ff79ffebf56163276f3bb0d`. It resolves its staging directory from `Path(__file__).resolve().parent`, invokes the active interpreter through `sys.executable`, verifies all bound input identities before use, verifies the exact APT source markers and ordering for `RealRemove()`/`ShortBreaks()`, reproduces the candidate parser from the transformer, exercises positive and strict-negative `Remv` trailer fixtures, proves `Purg` remains fail-closed, passes the canonical lookup datasets through `read_bound_json`, reparses the exact preserved Replay A bytes twice, requires byte-identical outputs, and rejects a tampered predecessor input.
 
-The same input/parser/transformer/harness bytes were exercised on macOS Python 3.14.5 and Windows Python 3.14.7. Both runs produced the same canonical `qualification-result.json` bytes and the same parser result, transaction JSONL, and selected archive identity set.
+The same input/parser/transformer/portable-harness bytes were exercised on macOS Python 3.14.5 and Windows Python 3.14.7 from platform-native staging directories. Both runs produced the same canonical `qualification-result.json` bytes and the same parser result, transaction JSONL, and selected archive identity set.
 
 ```text
 MACOS_STATIC_QUALIFICATION = PASS
@@ -1073,9 +1073,9 @@ if __name__ == "__main__":
 
 ````python
 #!/usr/bin/env python3
-import hashlib, importlib.util, json, re, subprocess, tempfile
+import hashlib, importlib.util, json, re, subprocess, sys, tempfile
 from pathlib import Path
-W=Path('/private/tmp/signthos-004c1bv-static')
+W=Path(__file__).resolve().parent
 BASE=W/'base-parser.py'; CAND=W/'candidate-parser.py'; TRANS=W/'transform.py'; RAW=W/'replay-a-apt.stdout'; CLOSURE=W/'resolved-closure.json'; INSTALLED=W/'predecessor-installed.json'; ARCHIVES=W/'verified-archives.json'; SOURCE=W/'algorithms.cc'
 EXP={
 'base':(19203,'9111e814a779576a5a522c3cbc2d868228e66d00e00cf7dd36e53e757f5708af'),
@@ -1098,7 +1098,7 @@ assert all(x in s for x in markers)
 assert s.index('Describe(Pkg,cout,true,false);') < s.index('ShortBreaks();',s.index('bool pkgSimulate::RealRemove'))
 # Transformer reproduces candidate exactly.
 with tempfile.TemporaryDirectory() as td:
- out=Path(td)/'p.py'; cp=subprocess.run(['python3',str(TRANS),str(BASE),str(out)],capture_output=True,text=True)
+ out=Path(td)/'p.py'; cp=subprocess.run([sys.executable,str(TRANS),str(BASE),str(out)],capture_output=True,text=True)
  assert cp.returncode==0,(cp.returncode,cp.stdout,cp.stderr); assert out.read_bytes()==CAND.read_bytes()
 # Import candidate.
 spec=importlib.util.spec_from_file_location('p',CAND); p=importlib.util.module_from_spec(spec); spec.loader.exec_module(p)
