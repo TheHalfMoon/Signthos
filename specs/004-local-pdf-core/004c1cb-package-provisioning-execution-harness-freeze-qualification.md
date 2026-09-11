@@ -756,7 +756,7 @@ CONTRACT_SHA256 = c93e4aa4a48f110ec5e8c2fd2ac912273120b3059a164777afac8c9b862e7f
 
 ## 10. Host-static qualification
 
-The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Thirty-five negative fixtures tamper immutable image/config identity, snapshot identity, APT binary identity, stage order, a same-count root set, platform, container isolation controls, Stage A/B/C virtual-state lineage, non-root argv controls, Recommends policy, evidence-root isolation, archive/index identities, transport policy, retry/replacement policy, final-image authority, and freshness invalidation controls.
+The following self-contained validator reads the frozen JSON block from this document. It invokes no subprocess and performs no Docker/APT/dpkg/network operation. Thirty-eight negative fixtures tamper immutable image/config identity, snapshot identity, APT binary identity, stage order, a same-count root set, platform, container isolation controls, Stage A/B/C virtual-state lineage, non-root argv controls, Recommends policy, exact evidence-root shape/template, exact boundary shape, archive/index identities, transport policy, retry/replacement policy, final-image authority, and freshness invalidation controls.
 
 ```python
 #!/usr/bin/env python3
@@ -774,6 +774,7 @@ def sha256(value):
     return hashlib.sha256(value).hexdigest()
 
 def validate(c):
+    require(sha256(canonical_bytes(c)) == "c93e4aa4a48f110ec5e8c2fd2ac912273120b3059a164777afac8c9b862e7fe5", "contract-identity")
     require(c["authority"] == "github:issue-comment:5636128786", "authority")
     require(c["base"] == "7d096d947869ed93676c558c3a9c70e25962f46a", "base")
     require(c["tree"] == "621c6fa3776d60939e16316c58e20aa00b4e919e", "tree")
@@ -824,12 +825,17 @@ def validate(c):
         "unexpectedArchive": "FAIL_CLOSED",
         "verify": "size+sha256 against canonical selected archive identities",
     }, "transport-policy")
-    er = c["evidenceRoot"]
-    require(er["policy"] == "FRESH_HOST_DIRECTORY_OUTSIDE_SIGNTHOS_REPOSITORY", "evidence-root-policy")
-    require(er["pathTemplate"].startswith("/tmp/signthos-004c1cc-package-provisioning-"), "evidence-root-template")
-    require(er["repositoryLocalPathAllowed"] is False and er["hostMountIntoProvisioningContainer"] is False, "evidence-root-isolation")
-    require(er["createFreshBeforeAttempt"] is True and er["requireEmptyBeforeAttempt"] is True, "evidence-root-freshness")
-    require(er["validateOutsideRepositoryBeforeAttempt"] is True and er["attemptConsumptionOnValidationFailure"] is False, "evidence-root-preflight")
+    expected_evidence_root = {
+        "attemptConsumptionOnValidationFailure": False,
+        "createFreshBeforeAttempt": True,
+        "hostMountIntoProvisioningContainer": False,
+        "pathTemplate": "/tmp/signthos-004c1cc-package-provisioning-<UTC>-<PID>",
+        "policy": "FRESH_HOST_DIRECTORY_OUTSIDE_SIGNTHOS_REPOSITORY",
+        "repositoryLocalPathAllowed": False,
+        "requireEmptyBeforeAttempt": True,
+        "validateOutsideRepositoryBeforeAttempt": True,
+    }
+    require(c["evidenceRoot"] == expected_evidence_root, "evidence-root")
     archive = c["transport"]["archiveInventory"]
     require(archive == {"count": 826, "totalBytes": 317223784, "inventoryBytes": 439991, "inventorySha256": "38b36863380150df62a42e6e77c3582244b61f4a083da52619de6e56ccf7ef98", "archiveIdentitySetSha256": "8ac7e3c9a44831e5f8c4a03a81862644990b504f7d2043102a1ab1a0fd69810d", "missingExtraChangedPolicy": "FAIL_CLOSED_BEFORE_ATTEMPT_CONSUMPTION"}, "archive-inventory")
     indexes = c["transport"]["signedIndexIdentitySet"]
@@ -881,7 +887,12 @@ def validate(c):
     }
     require(c["states"] == expected_states, "virtual-state-lineage")
     require(c["attempts"]["authorizedHere"] == 0, "attempt-authority")
-    require(not any(c["boundaries"].values()), "boundary")
+    expected_boundaries = {
+        "004C2": False, "004D": False, "005": False, "acquisition": False,
+        "apt": False, "docker": False, "dpkg": False, "install": False,
+        "pdfium": False, "provider": False, "toolchain": False,
+    }
+    require(c["boundaries"] == expected_boundaries, "boundary")
 
 text = Path(sys.argv[1]).read_text()
 heading = "## 9. Canonical frozen contract"
@@ -913,6 +924,9 @@ mutations = [
     ("argv-retries", lambda x: x["stages"][1]["offlineInstallArgv"].__setitem__(x["stages"][1]["offlineInstallArgv"].index("Acquire::Retries=0"), "Acquire::Retries=9")),
     ("recommends", lambda x: x["stages"][1].__setitem__("recommends", "NO_INSTALL_RECOMMENDS")),
     ("evidence-root", lambda x: x["evidenceRoot"].__setitem__("repositoryLocalPathAllowed", True)),
+    ("evidence-template", lambda x: x["evidenceRoot"].__setitem__("pathTemplate", "/tmp/signthos-004c1cc-package-provisioning-arbitrary")),
+    ("evidence-extra-property", lambda x: x["evidenceRoot"].__setitem__("allowExistingDirectory", True)),
+    ("boundary-extra-property", lambda x: x["boundaries"].__setitem__("futureExecution", False)),
     ("archive-inventory", lambda x: x["transport"]["archiveInventory"].__setitem__("count", 825)),
     ("package-index", lambda x: x["transport"]["signedIndexIdentitySet"]["packagesXz"][0].__setitem__("sha256", "0" * 64)),
     ("transport-mode", lambda x: x["transport"].__setitem__("mode", "LIVE_NETWORK_APT")),
@@ -935,14 +949,14 @@ for name, mutate in mutations:
         continue
     raise RuntimeError("tamper accepted: " + name)
 print("STATIC_VALIDATION=PASS")
-print("NEGATIVE_TAMPER_CASES=35/35_REJECTED")
+print("NEGATIVE_TAMPER_CASES=38/38_REJECTED")
 ```
 
 ```text
-VALIDATOR_BYTES = 12746
-VALIDATOR_SHA256 = 39f365e30462fd6a6de066a631fc4f862a6302c9fdd8fda7f36603a817133ca9
+VALIDATOR_BYTES = 13373
+VALIDATOR_SHA256 = 3377f72a1cbeb1c60384d7b42f576e2088669b65d90cb297a68210f3dcce1580
 STATIC_VALIDATION = PASS
-NEGATIVE_TAMPER_CASES = 35/35_REJECTED
+NEGATIVE_TAMPER_CASES = 38/38_REJECTED
 DOCKER_EXECUTION_DURING_VALIDATION = 0
 APT_DPKG_EXECUTION_DURING_VALIDATION = 0
 ```
