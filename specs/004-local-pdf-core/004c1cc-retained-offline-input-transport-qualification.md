@@ -90,6 +90,19 @@ CURRENT_RETAINED_SIGNED_METADATA_IDENTITY_MATCH = PASS
 
 Canonical 004C1AU Replay A/B inputs and uncompressed package outputs remain under `/private/tmp/signthos-004c1au-repaired-20260909T232220Z`. Every input selected for the transport was rebound to the canonical compressed or uncompressed byte identity before use.
 
+The shared canonical source descriptor was independently full-hashed inside each Replay A/B builder invocation before it was bound as `tmp/signthos-provision/etc/snapshot.sources` and before either USTAR stream was materialized:
+
+```text
+SNAPSHOT_SOURCE_DESCRIPTOR_BYTES = 242
+SNAPSHOT_SOURCE_DESCRIPTOR_SHA256 = 3fcdd0b5ef962070795738f92f36ea70f8c05a3171ae72e832f46746f7bab199
+REPLAY_A_SOURCE_DESCRIPTOR_INPUT_REVALIDATION = PASS
+REPLAY_B_SOURCE_DESCRIPTOR_INPUT_REVALIDATION = PASS
+SOURCE_DESCRIPTOR_REVALIDATION_POINT = BEFORE_MEMBER_BINDING_AND_TAR_MATERIALIZATION
+CURRENT_RETAINED_SOURCE_DESCRIPTOR_IDENTITY_MATCH = PASS
+```
+
+The retained builder enforces `(desc_n, desc_h) == (242, 3fcdd0b5ef962070795738f92f36ea70f8c05a3171ae72e832f46746f7bab199)` separately inside `build('A')` and `build('B')`; a mismatch aborts before descriptor-member construction or tar creation. The current retained descriptor was rehashed again during this qualification repair and still matches the same canonical identity.
+
 No reacquisition was performed because the exact predecessor bytes are still present and valid.
 
 ## 4. Exact APT 2.4.13 archive-cache filename semantics
