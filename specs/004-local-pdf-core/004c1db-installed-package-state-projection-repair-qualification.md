@@ -178,6 +178,8 @@ status
 version
 ```
 
+Record framing is byte-exact. Raw evidence must be valid UTF-8, must end in exactly the ordinary LF record convention, and LF byte `0x0A` is the only accepted record separator. CR, CRLF, vertical tab, form feed, NEL (`U+0085`), Unicode line separator (`U+2028`), Unicode paragraph separator (`U+2029`), empty records, missing final LF, and invalid UTF-8 all fail closed. No Unicode line-boundary helper such as `splitlines()` may be used to reinterpret malformed framing.
+
 Malformed rows fail closed.
 
 The future canonicalizer must also fail closed on duplicate `(package, architecture)` keys. A duplicate cannot be resolved by ordering, last-write-wins behavior, or arbitrary selection.
@@ -234,12 +236,27 @@ def canonical_json_lf(rows):
     ).encode("utf-8")
 
 
-def project_dpkg_query(raw_tsv_text):
+FORBIDDEN_RECORD_SEPARATORS = {"\r", "\v", "\f", "\x85", "\u2028", "\u2029"}
+
+
+def project_dpkg_query(raw_tsv_bytes):
+    if not isinstance(raw_tsv_bytes, bytes):
+        raise TypeError("raw dpkg-query evidence must be bytes")
+    if not raw_tsv_bytes.endswith(b"\n"):
+        raise ValueError("raw dpkg-query evidence must end with LF")
+
+    raw_tsv_text = raw_tsv_bytes.decode("utf-8", errors="strict")
+    if any(separator in raw_tsv_text for separator in FORBIDDEN_RECORD_SEPARATORS):
+        raise ValueError("non-LF record separator is forbidden")
+
     installed = []
     residual = []
     seen = set()
+    records = raw_tsv_text[:-1].split("\n")
+    if any(record == "" for record in records):
+        raise ValueError("empty dpkg-query record is forbidden")
 
-    for line_number, line in enumerate(raw_tsv_text.splitlines(), 1):
+    for line_number, line in enumerate(records, 1):
         fields = line.split("\t")
         if len(fields) != 4:
             raise ValueError(f"malformed dpkg-query row {line_number}")
@@ -312,6 +329,16 @@ A future static validator for this repair must prove at least these cases:
 | recovered Stage B raw state | projected expected hash/count PASS |
 | malformed three-field row | reject |
 | malformed five-field row | reject |
+| missing final LF | reject |
+| CRLF framing | reject |
+| CR-only framing | reject |
+| vertical-tab framing | reject |
+| form-feed framing | reject |
+| NEL (`U+0085`) framing | reject |
+| line-separator (`U+2028`) framing | reject |
+| paragraph-separator (`U+2029`) framing | reject |
+| empty record from doubled LF | reject |
+| invalid UTF-8 | reject |
 | duplicate package/architecture key | reject |
 | unexpected `half-installed` status | reject |
 | unexpected `unpacked` status | reject |
