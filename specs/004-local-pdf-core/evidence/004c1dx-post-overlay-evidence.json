@@ -1,0 +1,1368 @@
+{
+  "replay1_cipd_events": [
+    {
+      "exit_code": 0,
+      "index": 1,
+      "logical_path": "buildtools/linux64"
+    },
+    {
+      "exit_code": 0,
+      "index": 2,
+      "logical_path": "buildtools/reclient"
+    },
+    {
+      "exit_code": 0,
+      "index": 3,
+      "logical_path": "third_party/ninja"
+    },
+    {
+      "exit_code": 0,
+      "index": 4,
+      "logical_path": "third_party/siso/cipd"
+    },
+    {
+      "exit_code": 0,
+      "index": 5,
+      "logical_path": "tools/resultdb"
+    },
+    {
+      "exit_code": 0,
+      "index": 6,
+      "logical_path": "tools/skia_goldctl/linux"
+    }
+  ],
+  "replay1_gcs_events": [
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 1,
+      "kind": "tar",
+      "logical_path": "third_party/llvm-build/Release+Asserts",
+      "members": 460,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 2,
+      "kind": "tar",
+      "logical_path": "third_party/llvm-build/Release+Asserts",
+      "members": 8,
+      "preexisting_member_paths": [
+        "bin",
+        "bin/llvm-nm"
+      ]
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 3,
+      "kind": "tar",
+      "logical_path": "third_party/rust-toolchain",
+      "members": 8690,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 4,
+      "kind": "tar",
+      "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+      "members": 20806,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 5,
+      "kind": "tar",
+      "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+      "members": 20771,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 6,
+      "kind": "direct",
+      "logical_path": "buildtools/linux64-format/clang-format",
+      "output_mode": "0755",
+      "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 7,
+      "kind": "tar",
+      "logical_path": "third_party/instrumented_libs/binaries",
+      "members": 1488,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 8,
+      "kind": "tar",
+      "logical_path": "third_party/instrumented_libs/binaries",
+      "members": 1488,
+      "preexisting_member_paths": []
+    }
+  ],
+  "replay1_git_materialization_events": [
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "pdfium",
+      "revision": "cb29e78f2ba00c9298714d5f4a8bf7765f1e802f",
+      "tree": "5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "base/allocator/partition_allocator",
+      "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+      "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "build",
+      "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+      "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "buildtools",
+      "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+      "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "testing/corpus",
+      "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+      "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/abseil-cpp",
+      "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+      "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/brotli",
+      "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+      "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/clang-format/script",
+      "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+      "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/depot_tools",
+      "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+      "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/dragonbox/src",
+      "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+      "tree": "176383f02746d0248e7b04409367f691cc231cef"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/fast_float/src",
+      "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+      "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/fp16/src",
+      "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+      "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/freetype/src",
+      "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+      "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/googletest/src",
+      "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+      "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/harfbuzz-ng/src",
+      "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+      "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/highway/src",
+      "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+      "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/icu",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/instrumented_libs",
+      "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+      "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/jinja2",
+      "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+      "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libc++/src",
+      "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+      "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libc++abi/src",
+      "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+      "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libjpeg_turbo",
+      "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+      "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libpng",
+      "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+      "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/llvm-libc/src",
+      "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+      "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/markupsafe",
+      "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+      "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/nasm",
+      "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+      "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/simdutf",
+      "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+      "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/skia",
+      "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+      "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/test_fonts",
+      "revision": "7f51783942943e965cd56facf786544ccfc07713",
+      "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/zlib",
+      "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+      "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/clang",
+      "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+      "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/code_coverage",
+      "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+      "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/memory",
+      "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+      "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "v8",
+      "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+      "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+    }
+  ],
+  "replay1_post_overlay_git_verification": [
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "pdfium",
+      "revision": "cb29e78f2ba00c9298714d5f4a8bf7765f1e802f",
+      "tracked_status": "clean",
+      "tree": "5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "base/allocator/partition_allocator",
+      "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+      "tracked_status": "clean",
+      "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "build",
+      "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+      "tracked_status": "clean",
+      "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "?? linux64/",
+      "hooks_path": "/dev/null",
+      "logical_path": "buildtools",
+      "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+      "tracked_status": "clean",
+      "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "testing/corpus",
+      "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+      "tracked_status": "clean",
+      "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/abseil-cpp",
+      "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+      "tracked_status": "clean",
+      "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/brotli",
+      "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+      "tracked_status": "clean",
+      "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/clang-format/script",
+      "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+      "tracked_status": "clean",
+      "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/depot_tools",
+      "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+      "tracked_status": "clean",
+      "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/dragonbox/src",
+      "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+      "tracked_status": "clean",
+      "tree": "176383f02746d0248e7b04409367f691cc231cef"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/fast_float/src",
+      "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+      "tracked_status": "clean",
+      "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/fp16/src",
+      "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+      "tracked_status": "clean",
+      "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/freetype/src",
+      "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+      "tracked_status": "clean",
+      "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/googletest/src",
+      "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+      "tracked_status": "clean",
+      "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/harfbuzz-ng/src",
+      "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+      "tracked_status": "clean",
+      "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/highway/src",
+      "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+      "tracked_status": "clean",
+      "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/icu",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "tracked_status": "clean",
+      "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/instrumented_libs",
+      "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+      "tracked_status": "clean",
+      "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/jinja2",
+      "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+      "tracked_status": "clean",
+      "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libc++/src",
+      "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+      "tracked_status": "clean",
+      "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libc++abi/src",
+      "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+      "tracked_status": "clean",
+      "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libjpeg_turbo",
+      "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+      "tracked_status": "clean",
+      "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libpng",
+      "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+      "tracked_status": "clean",
+      "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/llvm-libc/src",
+      "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+      "tracked_status": "clean",
+      "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/markupsafe",
+      "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+      "tracked_status": "clean",
+      "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/nasm",
+      "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+      "tracked_status": "clean",
+      "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/simdutf",
+      "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+      "tracked_status": "clean",
+      "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/skia",
+      "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+      "tracked_status": "clean",
+      "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/test_fonts",
+      "revision": "7f51783942943e965cd56facf786544ccfc07713",
+      "tracked_status": "clean",
+      "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/zlib",
+      "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+      "tracked_status": "clean",
+      "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/clang",
+      "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+      "tracked_status": "clean",
+      "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/code_coverage",
+      "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+      "tracked_status": "clean",
+      "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/memory",
+      "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+      "tracked_status": "clean",
+      "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "v8",
+      "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+      "tracked_status": "clean",
+      "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+    }
+  ],
+  "replay2_cipd_events": [
+    {
+      "exit_code": 0,
+      "index": 1,
+      "logical_path": "buildtools/linux64"
+    },
+    {
+      "exit_code": 0,
+      "index": 2,
+      "logical_path": "buildtools/reclient"
+    },
+    {
+      "exit_code": 0,
+      "index": 3,
+      "logical_path": "third_party/ninja"
+    },
+    {
+      "exit_code": 0,
+      "index": 4,
+      "logical_path": "third_party/siso/cipd"
+    },
+    {
+      "exit_code": 0,
+      "index": 5,
+      "logical_path": "tools/resultdb"
+    },
+    {
+      "exit_code": 0,
+      "index": 6,
+      "logical_path": "tools/skia_goldctl/linux"
+    }
+  ],
+  "replay2_gcs_events": [
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 1,
+      "kind": "tar",
+      "logical_path": "third_party/llvm-build/Release+Asserts",
+      "members": 460,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 2,
+      "kind": "tar",
+      "logical_path": "third_party/llvm-build/Release+Asserts",
+      "members": 8,
+      "preexisting_member_paths": [
+        "bin",
+        "bin/llvm-nm"
+      ]
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 3,
+      "kind": "tar",
+      "logical_path": "third_party/rust-toolchain",
+      "members": 8690,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 4,
+      "kind": "tar",
+      "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+      "members": 20806,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 5,
+      "kind": "tar",
+      "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+      "members": 20771,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 6,
+      "kind": "direct",
+      "logical_path": "buildtools/linux64-format/clang-format",
+      "output_mode": "0755",
+      "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 7,
+      "kind": "tar",
+      "logical_path": "third_party/instrumented_libs/binaries",
+      "members": 1488,
+      "preexisting_member_paths": []
+    },
+    {
+      "extraction_mode": "extractall-filter",
+      "index": 8,
+      "kind": "tar",
+      "logical_path": "third_party/instrumented_libs/binaries",
+      "members": 1488,
+      "preexisting_member_paths": []
+    }
+  ],
+  "replay2_git_materialization_events": [
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "pdfium",
+      "revision": "cb29e78f2ba00c9298714d5f4a8bf7765f1e802f",
+      "tree": "5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "base/allocator/partition_allocator",
+      "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+      "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "build",
+      "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+      "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "buildtools",
+      "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+      "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "testing/corpus",
+      "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+      "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/abseil-cpp",
+      "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+      "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/brotli",
+      "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+      "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/clang-format/script",
+      "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+      "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/depot_tools",
+      "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+      "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/dragonbox/src",
+      "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+      "tree": "176383f02746d0248e7b04409367f691cc231cef"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/fast_float/src",
+      "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+      "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/fp16/src",
+      "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+      "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/freetype/src",
+      "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+      "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/googletest/src",
+      "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+      "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/harfbuzz-ng/src",
+      "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+      "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/highway/src",
+      "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+      "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/icu",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/instrumented_libs",
+      "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+      "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/jinja2",
+      "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+      "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libc++/src",
+      "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+      "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libc++abi/src",
+      "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+      "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libjpeg_turbo",
+      "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+      "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/libpng",
+      "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+      "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/llvm-libc/src",
+      "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+      "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/markupsafe",
+      "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+      "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/nasm",
+      "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+      "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/simdutf",
+      "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+      "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/skia",
+      "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+      "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/test_fonts",
+      "revision": "7f51783942943e965cd56facf786544ccfc07713",
+      "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "third_party/zlib",
+      "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+      "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/clang",
+      "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+      "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/code_coverage",
+      "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+      "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "tools/memory",
+      "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+      "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+    },
+    {
+      "active_hooks": [],
+      "hooks_path": "/dev/null",
+      "initial_status": "clean",
+      "logical_path": "v8",
+      "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+      "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+    }
+  ],
+  "replay2_post_overlay_git_verification": [
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "pdfium",
+      "revision": "cb29e78f2ba00c9298714d5f4a8bf7765f1e802f",
+      "tracked_status": "clean",
+      "tree": "5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "base/allocator/partition_allocator",
+      "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+      "tracked_status": "clean",
+      "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "build",
+      "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+      "tracked_status": "clean",
+      "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "?? linux64/",
+      "hooks_path": "/dev/null",
+      "logical_path": "buildtools",
+      "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+      "tracked_status": "clean",
+      "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "testing/corpus",
+      "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+      "tracked_status": "clean",
+      "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/abseil-cpp",
+      "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+      "tracked_status": "clean",
+      "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/brotli",
+      "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+      "tracked_status": "clean",
+      "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/clang-format/script",
+      "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+      "tracked_status": "clean",
+      "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/depot_tools",
+      "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+      "tracked_status": "clean",
+      "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/dragonbox/src",
+      "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+      "tracked_status": "clean",
+      "tree": "176383f02746d0248e7b04409367f691cc231cef"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/fast_float/src",
+      "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+      "tracked_status": "clean",
+      "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/fp16/src",
+      "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+      "tracked_status": "clean",
+      "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/freetype/src",
+      "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+      "tracked_status": "clean",
+      "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/googletest/src",
+      "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+      "tracked_status": "clean",
+      "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/harfbuzz-ng/src",
+      "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+      "tracked_status": "clean",
+      "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/highway/src",
+      "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+      "tracked_status": "clean",
+      "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/icu",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "tracked_status": "clean",
+      "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/instrumented_libs",
+      "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+      "tracked_status": "clean",
+      "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/jinja2",
+      "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+      "tracked_status": "clean",
+      "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libc++/src",
+      "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+      "tracked_status": "clean",
+      "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libc++abi/src",
+      "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+      "tracked_status": "clean",
+      "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libjpeg_turbo",
+      "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+      "tracked_status": "clean",
+      "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/libpng",
+      "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+      "tracked_status": "clean",
+      "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/llvm-libc/src",
+      "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+      "tracked_status": "clean",
+      "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/markupsafe",
+      "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+      "tracked_status": "clean",
+      "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/nasm",
+      "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+      "tracked_status": "clean",
+      "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/simdutf",
+      "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+      "tracked_status": "clean",
+      "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/skia",
+      "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+      "tracked_status": "clean",
+      "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/test_fonts",
+      "revision": "7f51783942943e965cd56facf786544ccfc07713",
+      "tracked_status": "clean",
+      "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "third_party/zlib",
+      "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+      "tracked_status": "clean",
+      "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/clang",
+      "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+      "tracked_status": "clean",
+      "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/code_coverage",
+      "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+      "tracked_status": "clean",
+      "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "tools/memory",
+      "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+      "tracked_status": "clean",
+      "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+    },
+    {
+      "active_hooks": [],
+      "full_status": "",
+      "hooks_path": "/dev/null",
+      "logical_path": "v8",
+      "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+      "tracked_status": "clean",
+      "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "authority": "github:issue-comment:5647458005",
+  "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+  "canonical_base": "d2300b8a99c0e5a7629377acb6948b6f5a9b9110",
+  "cipd_client_pkg_deploy_executions": 6,
+  "cipd_package_count": 6,
+  "clang_executions": 0,
+  "correction_authority": "github:issue-comment:5647491294; github:issue-comment:5647633761; github:issue-comment:5647642202",
+  "freetype_gitlink_empty_dir": true,
+  "gclient_executions": 0,
+  "gcs_collision_events": [
+    {
+      "index": 1,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 2,
+      "preexisting_member_paths": [
+        "bin",
+        "bin/llvm-nm"
+      ]
+    },
+    {
+      "index": 3,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 4,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 5,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 6,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 7,
+      "preexisting_member_paths": []
+    },
+    {
+      "index": 8,
+      "preexisting_member_paths": []
+    }
+  ],
+  "gcs_object_count": 8,
+  "git_root_count": 33,
+  "gn_executions": 0,
+  "hook_executions": 0,
+  "host_mounts": 0,
+  "inventory_rows": 138380,
+  "inventory_sha256": "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5",
+  "inventory_type_counts": {
+    "dir": 13497,
+    "file": 122499,
+    "hardlink": 26,
+    "symlink": 2358
+  },
+  "manifest_sha256": "008d33f17370fb1273c992591758e3475f2520cfd0af238f9279691daeb016e4",
+  "materializer_sha256": "b6b39bdd3a42b70ecd6d800c8511607a2e37fd80d2f5dc4411ca45450606eda8",
+  "network_requests": 0,
+  "ninja_executions": 0,
+  "pdfium_build_or_runtime_executions": 0,
+  "pdfium_revision": "cb29e78f2ba00c9298714d5f4a8bf7765f1e802f",
+  "pdfium_tree": "5b402772057e8c3a676c95882a4825350bdf6988",
+  "reclient_executions": 0,
+  "regular_path_bytes": 5375902254,
+  "repository_mutations_during_runtime": 0,
+  "result": "PASS_EXACT_OFFLINE_COMBINED_PDFIUM_WORKSPACE_MATERIALIZATION",
+  "rust_toolchain_executions": 0,
+  "siso_executions": 0,
+  "skia_symlink_target": "../../../bazel/external/fontations/Cargo.toml",
+  "submodule_acquisitions": 0
+}
