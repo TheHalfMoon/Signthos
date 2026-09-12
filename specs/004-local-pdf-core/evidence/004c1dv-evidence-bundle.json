@@ -1,0 +1,1321 @@
+{
+  "authority": "github:issue-comment:5645950883",
+  "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+  "canonical_base": "8432d93ceab78b2fa4ea9595fc65b14383494484",
+  "equivalence": {
+    "events_byte_identical": true,
+    "inventories_byte_identical": true,
+    "inventory_rows": 53722,
+    "inventory_sha256": "fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f",
+    "summaries_byte_identical": true
+  },
+  "format": "signthos-004c1dv-evidence-v1",
+  "materializer": {
+    "bytes": 9941,
+    "content": "#!/usr/bin/env python3\nimport argparse, hashlib, inspect, json, os, pathlib, posixpath, shutil, stat, sys, tarfile\n\nOBJECTS = [\n    {\"i\":1,\"rel\":\"third_party/llvm-build/Release+Asserts\",\"sha\":\"d373cde5b6f1c0da245ebcad93e4883252323c1ff283df96f0eb2e9180f1a537\",\"bytes\":57692132,\"members\":460,\"kind\":\"tar\"},\n    {\"i\":2,\"rel\":\"third_party/llvm-build/Release+Asserts\",\"sha\":\"28df84ef25bae64ab82a48295bd09aa6689e436449bd78cdc83f58ef05bfdd6a\",\"bytes\":5818392,\"members\":8,\"kind\":\"tar\"},\n    {\"i\":3,\"rel\":\"third_party/rust-toolchain\",\"sha\":\"aff16507e3f1623a9948cf9b14bd90827fd702b58adbc5f5cc277b60682a6608\",\"bytes\":265701736,\"members\":8690,\"kind\":\"tar\"},\n    {\"i\":4,\"rel\":\"build/linux/debian_bullseye_amd64-sysroot\",\"sha\":\"36a164623d03f525e3dfb783a5e9b8a00e98e1ddd2b5cff4e449bd016dd27e50\",\"bytes\":20781612,\"members\":20806,\"kind\":\"tar\"},\n    {\"i\":5,\"rel\":\"build/linux/debian_bullseye_i386-sysroot\",\"sha\":\"63f0e5128b84f7b0421956a4a40affa472be8da0e58caf27e9acbc84072daee7\",\"bytes\":20786772,\"members\":20771,\"kind\":\"tar\"},\n    {\"i\":6,\"rel\":\"buildtools/linux64-format/clang-format\",\"sha\":\"889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a\",\"bytes\":3899440,\"members\":0,\"kind\":\"direct\"},\n    {\"i\":7,\"rel\":\"third_party/instrumented_libs/binaries\",\"sha\":\"9329714322846c2b47dd518ac08e437b8c7d8075c514dc7ec3eb3e3a1e0faeb6\",\"bytes\":514553540,\"members\":1488,\"kind\":\"tar\"},\n    {\"i\":8,\"rel\":\"third_party/instrumented_libs/binaries\",\"sha\":\"a749c9e47cb4584bc944c887440b1d1c51501f7d9bb99eea276ebcba0aa6c1ec\",\"bytes\":493707167,\"members\":1488,\"kind\":\"tar\"},\n]\n\ndef sha256_file(path):\n    h=hashlib.sha256()\n    with open(path,'rb') as f:\n        for b in iter(lambda:f.read(1024*1024), b''): h.update(b)\n    return h.hexdigest()\n\ndef cleaned(name):\n    return name[2:] if name.startswith('./') and len(name)>2 else name\n\ndef inside(root, candidate):\n    rr=os.path.realpath(root); cc=os.path.realpath(candidate)\n    return cc == rr or cc.startswith(rr + os.sep)\n\ndef validate_tar(path, expected_members):\n    with tarfile.open(path,'r:*') as t:\n        ms=t.getmembers()\n        if len(ms)!=expected_members: raise RuntimeError(f'member count mismatch: {len(ms)} != {expected_members}')\n        formatted=[cleaned(m.name) for m in ms]\n        prefixes={n.split('/')[0] for n in formatted}\n        counts={\"file\":0,\"dir\":0,\"symlink\":0,\"hardlink\":0}\n        for m,n in zip(ms,formatted):\n            if not n or n.startswith('/') or '../' in n or '..\\\\' in n or not any(n.startswith(p) for p in prefixes):\n                raise RuntimeError(f'invalid member path: {m.name!r}')\n            parts=pathlib.PurePosixPath(n).parts\n            if any(x in ('','..') for x in parts): raise RuntimeError(f'unsafe member components: {m.name!r}')\n            if m.isfile(): counts['file']+=1\n            elif m.isdir(): counts['dir']+=1\n            elif m.issym(): counts['symlink']+=1\n            elif m.islnk(): counts['hardlink']+=1\n            else: raise RuntimeError(f'unsupported tar type: {m.name!r} type={m.type!r}')\n            if m.issym() or m.islnk():\n                if posixpath.isabs(m.linkname): raise RuntimeError(f'absolute link: {m.name!r}')\n                target=posixpath.normpath(posixpath.join(posixpath.dirname(m.name),m.linkname))\n                ct=cleaned(target)\n                if not any(ct.startswith(p) for p in prefixes) or ct.startswith('../') or ct == '..':\n                    raise RuntimeError(f'escaping link: {m.name!r} -> {m.linkname!r}')\n        return ms, counts, sorted(prefixes)\n\ndef existing_member_count(outdir, members):\n    c=0\n    for m in members:\n        n=cleaned(m.name)\n        if os.path.lexists(os.path.join(outdir,n)): c+=1\n    return c\n\ndef extract_tar(path, outdir, members):\n    os.makedirs(outdir, exist_ok=True)\n    with tarfile.open(path,'r:*') as t:\n        # Re-read members from this TarFile so extraction uses owned TarInfo objects.\n        ms=t.getmembers()\n        def filt(member, target_path):\n            member.mtime=None\n            if sys.version_info >= (3,14) and hasattr(tarfile,'data_filter'):\n                return tarfile.data_filter(member,target_path)\n            if hasattr(tarfile,'fully_trusted_filter'):\n                return tarfile.fully_trusted_filter(member,target_path)\n            return member\n        params=inspect.signature(t.extractall).parameters\n        if 'filter' in params:\n            t.extractall(path=outdir, members=ms, filter=filt)\n            mode='extractall-filter'\n        else:\n            # Entire archive was validated before extraction; this branch is for older Python.\n            t.extractall(path=outdir, members=ms)\n            mode='extractall-prevalidated'\n    # Strong postcondition: every lexical member location and every resolved location stays in outdir.\n    for m in members:\n        n=cleaned(m.name); p=os.path.join(outdir,n)\n        if not inside(outdir,p): raise RuntimeError(f'post-extract path escaped: {n!r}')\n        if os.path.lexists(p) and not inside(outdir,os.path.realpath(p)):\n            raise RuntimeError(f'post-extract resolved path escaped: {n!r}')\n    return mode\n\ndef inventory(root):\n    records=[]; all_entries=[]\n    for base, dirs, files in os.walk(root, topdown=True, followlinks=False):\n        dirs.sort(); files.sort()\n        for name in dirs+files:\n            p=os.path.join(base,name); rel=os.path.relpath(p,root).replace(os.sep,'/')\n            all_entries.append((rel,p))\n    all_entries.sort()\n    first_inode={}\n    for rel,p in all_entries:\n        st=os.lstat(p); mode=f'{stat.S_IMODE(st.st_mode):04o}'\n        if stat.S_ISLNK(st.st_mode):\n            r={\"path\":rel,\"type\":\"symlink\",\"mode\":mode,\"size\":st.st_size,\"target\":os.readlink(p)}\n        elif stat.S_ISDIR(st.st_mode):\n            r={\"path\":rel,\"type\":\"dir\",\"mode\":mode,\"size\":0}\n        elif stat.S_ISREG(st.st_mode):\n            key=(st.st_dev,st.st_ino)\n            digest=sha256_file(p)\n            if st.st_nlink>1 and key in first_inode:\n                r={\"path\":rel,\"type\":\"hardlink\",\"mode\":mode,\"size\":st.st_size,\"sha256\":digest,\"target\":first_inode[key]}\n            else:\n                first_inode[key]=rel\n                r={\"path\":rel,\"type\":\"file\",\"mode\":mode,\"size\":st.st_size,\"sha256\":digest}\n        else:\n            raise RuntimeError(f'unsupported materialized type: {rel}')\n        records.append(r)\n    return records\n\ndef dump_json(path,obj):\n    pathlib.Path(path).write_text(json.dumps(obj,sort_keys=True,indent=2)+'\\n',encoding='utf-8')\n\ndef main():\n    ap=argparse.ArgumentParser(); ap.add_argument('--input-dir',required=True); ap.add_argument('--output-root'); ap.add_argument('--evidence-dir'); ap.add_argument('--validate-only',action='store_true'); a=ap.parse_args()\n    validations=[]\n    for o in OBJECTS:\n        p=os.path.join(a.input_dir,f\"{o['i']}.bin\")\n        if os.path.getsize(p)!=o['bytes']: raise RuntimeError(f\"body {o['i']} byte mismatch\")\n        got=sha256_file(p)\n        if got!=o['sha']: raise RuntimeError(f\"body {o['i']} sha mismatch {got}\")\n        v={\"index\":o['i'],\"path\":o['rel'],\"kind\":o['kind'],\"bytes\":o['bytes'],\"sha256\":got,\"expected_members\":o['members']}\n        if o['kind']=='tar':\n            ms,counts,prefixes=validate_tar(p,o['members']); v.update({\"member_counts\":counts,\"prefixes\":prefixes})\n        validations.append(v)\n    if a.validate_only:\n        print(json.dumps({\"result\":\"PASS_VALIDATE_ONLY\",\"objects\":validations},sort_keys=True)); return\n    if not a.output_root or not a.evidence_dir: raise RuntimeError('output/evidence required')\n    if os.path.exists(a.output_root) and os.listdir(a.output_root): raise RuntimeError('output root not empty')\n    os.makedirs(a.output_root,exist_ok=True); os.makedirs(a.evidence_dir,exist_ok=True)\n    events=[]\n    for o in OBJECTS:\n        p=os.path.join(a.input_dir,f\"{o['i']}.bin\")\n        if o['kind']=='direct':\n            dst=os.path.join(a.output_root,o['rel']); os.makedirs(os.path.dirname(dst),exist_ok=True)\n            if os.path.lexists(dst): raise RuntimeError('unexpected direct-output collision')\n            with open(p,'rb') as src, open(dst,'wb') as out: shutil.copyfileobj(src,out,1024*1024)\n            os.chmod(dst,0o755)\n            events.append({\"index\":o['i'],\"kind\":\"direct\",\"logical_path\":o['rel'],\"preexisting_member_paths\":0,\"output_mode\":\"0755\",\"output_sha256\":sha256_file(dst),\"output_bytes\":os.path.getsize(dst)})\n        else:\n            ms,counts,prefixes=validate_tar(p,o['members']); outdir=os.path.join(a.output_root,o['rel'])\n            collisions=existing_member_count(outdir,ms) if os.path.exists(outdir) else 0\n            extraction_mode=extract_tar(p,outdir,ms)\n            events.append({\"index\":o['i'],\"kind\":\"tar\",\"logical_path\":o['rel'],\"members\":len(ms),\"member_counts\":counts,\"prefixes\":prefixes,\"preexisting_member_paths\":collisions,\"extraction_mode\":extraction_mode})\n    recs=inventory(a.output_root)\n    inv_path=os.path.join(a.evidence_dir,'inventory.jsonl')\n    with open(inv_path,'w',encoding='utf-8',newline='\\n') as f:\n        for r in recs: f.write(json.dumps(r,sort_keys=True,separators=(',',':'))+'\\n')\n    inv_sha=sha256_file(inv_path)\n    counts={}\n    total_regular_bytes=0\n    for r in recs:\n        counts[r['type']]=counts.get(r['type'],0)+1\n        if r['type'] in ('file','hardlink'): total_regular_bytes+=r['size']\n    summary={\"result\":\"PASS\",\"python\":sys.version.split()[0],\"objects\":validations,\"events\":events,\"inventory_rows\":len(recs),\"inventory_sha256\":inv_sha,\"inventory_type_counts\":counts,\"regular_path_bytes\":total_regular_bytes,\"payload_executions\":0,\"network_requests\":0,\"git_operations\":0,\"cipd_operations\":0,\"gclient_executions\":0}\n    dump_json(os.path.join(a.evidence_dir,'summary.json'),summary)\n    dump_json(os.path.join(a.evidence_dir,'events.json'),events)\n    print(json.dumps({\"result\":\"PASS\",\"inventory_rows\":len(recs),\"inventory_sha256\":inv_sha,\"type_counts\":counts},sort_keys=True))\nif __name__=='__main__': main()\n",
+    "sha256": "a79c848fad3c1c7504fe0f6b07fc1b957abd74f06f65ea9a8263216fb2971cc5"
+  },
+  "non_grants": [
+    "gclient execution",
+    "Git-root materialization",
+    "CIPD action",
+    "payload/tool execution",
+    "PDFium build/runtime",
+    "project completion"
+  ],
+  "replays": {
+    "replay1": {
+      "container_id": "94509ffb99e47a8f766798866f91e8a74577a739074e8c79370a7c5b242ed976",
+      "docker_diff": {
+        "gzip_bytes": 329034,
+        "gzip_sha256": "32f563c2483b0d0dedbe58366ce1bb6917f7aa2ce69da236072650d8747cedcc",
+        "lines": 53739,
+        "roots": [
+          "/tmp",
+          "/work"
+        ],
+        "sha256": "20d03590c923e5f8f7146d71791316d49a32ca3ec8d46a71f48f6ed51830523b",
+        "unexpected_roots": []
+      },
+      "events": [
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 1,
+          "kind": "tar",
+          "logical_path": "third_party/llvm-build/Release+Asserts",
+          "member_counts": {
+            "dir": 27,
+            "file": 421,
+            "hardlink": 0,
+            "symlink": 12
+          },
+          "members": 460,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "bin",
+            "cr_build_revision",
+            "lib"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 2,
+          "kind": "tar",
+          "logical_path": "third_party/llvm-build/Release+Asserts",
+          "member_counts": {
+            "dir": 1,
+            "file": 6,
+            "hardlink": 0,
+            "symlink": 1
+          },
+          "members": 8,
+          "preexisting_member_paths": 2,
+          "prefixes": [
+            "bin",
+            "llvmobjdump_build_revision"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 3,
+          "kind": "tar",
+          "logical_path": "third_party/rust-toolchain",
+          "member_counts": {
+            "dir": 1604,
+            "file": 7084,
+            "hardlink": 0,
+            "symlink": 2
+          },
+          "members": 8690,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "VERSION",
+            "bin",
+            "etc",
+            "lib",
+            "libexec",
+            "share"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 4,
+          "kind": "tar",
+          "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+          "member_counts": {
+            "dir": 2708,
+            "file": 17229,
+            "hardlink": 13,
+            "symlink": 856
+          },
+          "members": 20806,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "lib64",
+            "sbin",
+            "usr",
+            "var"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 5,
+          "kind": "tar",
+          "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+          "member_counts": {
+            "dir": 2696,
+            "file": 17209,
+            "hardlink": 13,
+            "symlink": 853
+          },
+          "members": 20771,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "sbin",
+            "usr",
+            "var"
+          ]
+        },
+        {
+          "index": 6,
+          "kind": "direct",
+          "logical_path": "buildtools/linux64-format/clang-format",
+          "output_bytes": 3899440,
+          "output_mode": "0755",
+          "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+          "preexisting_member_paths": 0
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 7,
+          "kind": "tar",
+          "logical_path": "third_party/instrumented_libs/binaries",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "members": 1488,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "msan-chained-origins-noble-lib"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 8,
+          "kind": "tar",
+          "logical_path": "third_party/instrumented_libs/binaries",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "members": 1488,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "msan-no-origins-noble-lib"
+          ]
+        }
+      ],
+      "events_sha256": "bf7dab8af97ed1c062861ce10d2e579c554fb97095fc90702b09d4345c62f9d7",
+      "exit_code": 0,
+      "inventory_bytes": 10895848,
+      "inventory_gzip_bytes": 2217706,
+      "inventory_gzip_sha256": "324e9b93c4b9f3902ace12890a1e1933bc2a8e0933d6a5b25126d9102511d89d",
+      "inventory_sha256": "fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f",
+      "post_inspect": {
+        "Config": {
+          "Cmd": [
+            "-c",
+            "set -eu; mkdir -p /work/gcs /work/evidence; python3 /tmp/materialize_gcs.py --input-dir /tmp/inputs --output-root /work/gcs --evidence-dir /work/evidence"
+          ],
+          "Entrypoint": [
+            "/bin/sh"
+          ],
+          "WorkingDir": "/src"
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "94509ffb99e47a8f766798866f91e8a74577a739074e8c79370a7c5b242ed976",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "Dead": false,
+          "Error": "",
+          "ExitCode": 0,
+          "FinishedAt": "2026-09-12T15:20:45.212393426Z",
+          "OOMKilled": false,
+          "Paused": false,
+          "Pid": 0,
+          "Restarting": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T15:17:36.088637214Z",
+          "Status": "exited"
+        }
+      },
+      "post_inspect_sha256": "0fb250c51e17f7a7b89f92212adec6ca9197d227ce0af11f7a46c83b1696ee98",
+      "post_state": "none 0 exited false 0 false",
+      "prestart_inspect": {
+        "Config": {
+          "Cmd": [
+            "-c",
+            "set -eu; mkdir -p /work/gcs /work/evidence; python3 /tmp/materialize_gcs.py --input-dir /tmp/inputs --output-root /work/gcs --evidence-dir /work/evidence"
+          ],
+          "Entrypoint": [
+            "/bin/sh"
+          ],
+          "WorkingDir": "/src"
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "94509ffb99e47a8f766798866f91e8a74577a739074e8c79370a7c5b242ed976",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "Dead": false,
+          "Error": "",
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Paused": false,
+          "Pid": 0,
+          "Restarting": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "prestart_inspect_sha256": "b455c8e986c82fe0adf19297ad8e6dfbd1bebab46886cd035793ca5c621a940d",
+      "prestart_state": "none 0 created false",
+      "stderr": "",
+      "stdout": "{\"inventory_rows\": 53722, \"inventory_sha256\": \"fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f\", \"result\": \"PASS\", \"type_counts\": {\"dir\": 7439, \"file\": 43911, \"hardlink\": 26, \"symlink\": 2346}}\n",
+      "summary": {
+        "cipd_operations": 0,
+        "events": [
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 1,
+            "kind": "tar",
+            "logical_path": "third_party/llvm-build/Release+Asserts",
+            "member_counts": {
+              "dir": 27,
+              "file": 421,
+              "hardlink": 0,
+              "symlink": 12
+            },
+            "members": 460,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "bin",
+              "cr_build_revision",
+              "lib"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 2,
+            "kind": "tar",
+            "logical_path": "third_party/llvm-build/Release+Asserts",
+            "member_counts": {
+              "dir": 1,
+              "file": 6,
+              "hardlink": 0,
+              "symlink": 1
+            },
+            "members": 8,
+            "preexisting_member_paths": 2,
+            "prefixes": [
+              "bin",
+              "llvmobjdump_build_revision"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 3,
+            "kind": "tar",
+            "logical_path": "third_party/rust-toolchain",
+            "member_counts": {
+              "dir": 1604,
+              "file": 7084,
+              "hardlink": 0,
+              "symlink": 2
+            },
+            "members": 8690,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "VERSION",
+              "bin",
+              "etc",
+              "lib",
+              "libexec",
+              "share"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 4,
+            "kind": "tar",
+            "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+            "member_counts": {
+              "dir": 2708,
+              "file": 17229,
+              "hardlink": 13,
+              "symlink": 856
+            },
+            "members": 20806,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "lib64",
+              "sbin",
+              "usr",
+              "var"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 5,
+            "kind": "tar",
+            "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+            "member_counts": {
+              "dir": 2696,
+              "file": 17209,
+              "hardlink": 13,
+              "symlink": 853
+            },
+            "members": 20771,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "sbin",
+              "usr",
+              "var"
+            ]
+          },
+          {
+            "index": 6,
+            "kind": "direct",
+            "logical_path": "buildtools/linux64-format/clang-format",
+            "output_bytes": 3899440,
+            "output_mode": "0755",
+            "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+            "preexisting_member_paths": 0
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 7,
+            "kind": "tar",
+            "logical_path": "third_party/instrumented_libs/binaries",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "members": 1488,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "msan-chained-origins-noble-lib"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 8,
+            "kind": "tar",
+            "logical_path": "third_party/instrumented_libs/binaries",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "members": 1488,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "msan-no-origins-noble-lib"
+            ]
+          }
+        ],
+        "gclient_executions": 0,
+        "git_operations": 0,
+        "inventory_rows": 53722,
+        "inventory_sha256": "fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f",
+        "inventory_type_counts": {
+          "dir": 7439,
+          "file": 43911,
+          "hardlink": 26,
+          "symlink": 2346
+        },
+        "network_requests": 0,
+        "objects": [
+          {
+            "bytes": 57692132,
+            "expected_members": 460,
+            "index": 1,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 27,
+              "file": 421,
+              "hardlink": 0,
+              "symlink": 12
+            },
+            "path": "third_party/llvm-build/Release+Asserts",
+            "prefixes": [
+              "bin",
+              "cr_build_revision",
+              "lib"
+            ],
+            "sha256": "d373cde5b6f1c0da245ebcad93e4883252323c1ff283df96f0eb2e9180f1a537"
+          },
+          {
+            "bytes": 5818392,
+            "expected_members": 8,
+            "index": 2,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 1,
+              "file": 6,
+              "hardlink": 0,
+              "symlink": 1
+            },
+            "path": "third_party/llvm-build/Release+Asserts",
+            "prefixes": [
+              "bin",
+              "llvmobjdump_build_revision"
+            ],
+            "sha256": "28df84ef25bae64ab82a48295bd09aa6689e436449bd78cdc83f58ef05bfdd6a"
+          },
+          {
+            "bytes": 265701736,
+            "expected_members": 8690,
+            "index": 3,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 1604,
+              "file": 7084,
+              "hardlink": 0,
+              "symlink": 2
+            },
+            "path": "third_party/rust-toolchain",
+            "prefixes": [
+              "VERSION",
+              "bin",
+              "etc",
+              "lib",
+              "libexec",
+              "share"
+            ],
+            "sha256": "aff16507e3f1623a9948cf9b14bd90827fd702b58adbc5f5cc277b60682a6608"
+          },
+          {
+            "bytes": 20781612,
+            "expected_members": 20806,
+            "index": 4,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 2708,
+              "file": 17229,
+              "hardlink": 13,
+              "symlink": 856
+            },
+            "path": "build/linux/debian_bullseye_amd64-sysroot",
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "lib64",
+              "sbin",
+              "usr",
+              "var"
+            ],
+            "sha256": "36a164623d03f525e3dfb783a5e9b8a00e98e1ddd2b5cff4e449bd016dd27e50"
+          },
+          {
+            "bytes": 20786772,
+            "expected_members": 20771,
+            "index": 5,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 2696,
+              "file": 17209,
+              "hardlink": 13,
+              "symlink": 853
+            },
+            "path": "build/linux/debian_bullseye_i386-sysroot",
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "sbin",
+              "usr",
+              "var"
+            ],
+            "sha256": "63f0e5128b84f7b0421956a4a40affa472be8da0e58caf27e9acbc84072daee7"
+          },
+          {
+            "bytes": 3899440,
+            "expected_members": 0,
+            "index": 6,
+            "kind": "direct",
+            "path": "buildtools/linux64-format/clang-format",
+            "sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a"
+          },
+          {
+            "bytes": 514553540,
+            "expected_members": 1488,
+            "index": 7,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "path": "third_party/instrumented_libs/binaries",
+            "prefixes": [
+              "msan-chained-origins-noble-lib"
+            ],
+            "sha256": "9329714322846c2b47dd518ac08e437b8c7d8075c514dc7ec3eb3e3a1e0faeb6"
+          },
+          {
+            "bytes": 493707167,
+            "expected_members": 1488,
+            "index": 8,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "path": "third_party/instrumented_libs/binaries",
+            "prefixes": [
+              "msan-no-origins-noble-lib"
+            ],
+            "sha256": "a749c9e47cb4584bc944c887440b1d1c51501f7d9bb99eea276ebcba0aa6c1ec"
+          }
+        ],
+        "payload_executions": 0,
+        "python": "3.10.12",
+        "regular_path_bytes": 3521795489,
+        "result": "PASS"
+      },
+      "summary_sha256": "5c60818c4bf79c3acad9045fe1fc7fe2e27cd58993e0eb42a62d65f72a11ed5f"
+    },
+    "replay2": {
+      "container_id": "03e7c886ad89789866fbbf7cffc0026e243b4f8101118518baa70a2488d4e45e",
+      "docker_diff": {
+        "gzip_bytes": 327792,
+        "gzip_sha256": "e876e815cc21384b1aaf5855f048ce80f701b729c32ff427a7657384949439ee",
+        "lines": 53739,
+        "roots": [
+          "/tmp",
+          "/work"
+        ],
+        "sha256": "8b42a47f102c9e27b59d2fcaee5d67df31b5e11ca32261d133e7d937c829420b",
+        "unexpected_roots": []
+      },
+      "events": [
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 1,
+          "kind": "tar",
+          "logical_path": "third_party/llvm-build/Release+Asserts",
+          "member_counts": {
+            "dir": 27,
+            "file": 421,
+            "hardlink": 0,
+            "symlink": 12
+          },
+          "members": 460,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "bin",
+            "cr_build_revision",
+            "lib"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 2,
+          "kind": "tar",
+          "logical_path": "third_party/llvm-build/Release+Asserts",
+          "member_counts": {
+            "dir": 1,
+            "file": 6,
+            "hardlink": 0,
+            "symlink": 1
+          },
+          "members": 8,
+          "preexisting_member_paths": 2,
+          "prefixes": [
+            "bin",
+            "llvmobjdump_build_revision"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 3,
+          "kind": "tar",
+          "logical_path": "third_party/rust-toolchain",
+          "member_counts": {
+            "dir": 1604,
+            "file": 7084,
+            "hardlink": 0,
+            "symlink": 2
+          },
+          "members": 8690,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "VERSION",
+            "bin",
+            "etc",
+            "lib",
+            "libexec",
+            "share"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 4,
+          "kind": "tar",
+          "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+          "member_counts": {
+            "dir": 2708,
+            "file": 17229,
+            "hardlink": 13,
+            "symlink": 856
+          },
+          "members": 20806,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "lib64",
+            "sbin",
+            "usr",
+            "var"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 5,
+          "kind": "tar",
+          "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+          "member_counts": {
+            "dir": 2696,
+            "file": 17209,
+            "hardlink": 13,
+            "symlink": 853
+          },
+          "members": 20771,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "sbin",
+            "usr",
+            "var"
+          ]
+        },
+        {
+          "index": 6,
+          "kind": "direct",
+          "logical_path": "buildtools/linux64-format/clang-format",
+          "output_bytes": 3899440,
+          "output_mode": "0755",
+          "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+          "preexisting_member_paths": 0
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 7,
+          "kind": "tar",
+          "logical_path": "third_party/instrumented_libs/binaries",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "members": 1488,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "msan-chained-origins-noble-lib"
+          ]
+        },
+        {
+          "extraction_mode": "extractall-filter",
+          "index": 8,
+          "kind": "tar",
+          "logical_path": "third_party/instrumented_libs/binaries",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "members": 1488,
+          "preexisting_member_paths": 0,
+          "prefixes": [
+            "msan-no-origins-noble-lib"
+          ]
+        }
+      ],
+      "events_sha256": "bf7dab8af97ed1c062861ce10d2e579c554fb97095fc90702b09d4345c62f9d7",
+      "exit_code": 0,
+      "inventory_bytes": 10895848,
+      "inventory_gzip_bytes": 2217706,
+      "inventory_gzip_sha256": "324e9b93c4b9f3902ace12890a1e1933bc2a8e0933d6a5b25126d9102511d89d",
+      "inventory_sha256": "fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f",
+      "post_inspect": {
+        "Config": {
+          "Cmd": [
+            "-c",
+            "set -eu; mkdir -p /work/gcs /work/evidence; python3 /tmp/materialize_gcs.py --input-dir /tmp/inputs --output-root /work/gcs --evidence-dir /work/evidence"
+          ],
+          "Entrypoint": [
+            "/bin/sh"
+          ],
+          "WorkingDir": "/src"
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "03e7c886ad89789866fbbf7cffc0026e243b4f8101118518baa70a2488d4e45e",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "Dead": false,
+          "Error": "",
+          "ExitCode": 0,
+          "FinishedAt": "2026-09-12T15:26:42.659192717Z",
+          "OOMKilled": false,
+          "Paused": false,
+          "Pid": 0,
+          "Restarting": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T15:23:11.606239508Z",
+          "Status": "exited"
+        }
+      },
+      "post_inspect_sha256": "843592054166f158c503ca2ebbc23ca9398cc8dd69b311c605bfb991247f078e",
+      "post_state": "none 0 exited false 0 false",
+      "prestart_inspect": {
+        "Config": {
+          "Cmd": [
+            "-c",
+            "set -eu; mkdir -p /work/gcs /work/evidence; python3 /tmp/materialize_gcs.py --input-dir /tmp/inputs --output-root /work/gcs --evidence-dir /work/evidence"
+          ],
+          "Entrypoint": [
+            "/bin/sh"
+          ],
+          "WorkingDir": "/src"
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "03e7c886ad89789866fbbf7cffc0026e243b4f8101118518baa70a2488d4e45e",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "Dead": false,
+          "Error": "",
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Paused": false,
+          "Pid": 0,
+          "Restarting": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "prestart_inspect_sha256": "1942813e4f7f3d592dc19dbb07dd1748d1fd68e556773694d99e91a46a366afc",
+      "prestart_state": "none 0 created false",
+      "stderr": "",
+      "stdout": "{\"inventory_rows\": 53722, \"inventory_sha256\": \"fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f\", \"result\": \"PASS\", \"type_counts\": {\"dir\": 7439, \"file\": 43911, \"hardlink\": 26, \"symlink\": 2346}}\n",
+      "summary": {
+        "cipd_operations": 0,
+        "events": [
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 1,
+            "kind": "tar",
+            "logical_path": "third_party/llvm-build/Release+Asserts",
+            "member_counts": {
+              "dir": 27,
+              "file": 421,
+              "hardlink": 0,
+              "symlink": 12
+            },
+            "members": 460,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "bin",
+              "cr_build_revision",
+              "lib"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 2,
+            "kind": "tar",
+            "logical_path": "third_party/llvm-build/Release+Asserts",
+            "member_counts": {
+              "dir": 1,
+              "file": 6,
+              "hardlink": 0,
+              "symlink": 1
+            },
+            "members": 8,
+            "preexisting_member_paths": 2,
+            "prefixes": [
+              "bin",
+              "llvmobjdump_build_revision"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 3,
+            "kind": "tar",
+            "logical_path": "third_party/rust-toolchain",
+            "member_counts": {
+              "dir": 1604,
+              "file": 7084,
+              "hardlink": 0,
+              "symlink": 2
+            },
+            "members": 8690,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "VERSION",
+              "bin",
+              "etc",
+              "lib",
+              "libexec",
+              "share"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 4,
+            "kind": "tar",
+            "logical_path": "build/linux/debian_bullseye_amd64-sysroot",
+            "member_counts": {
+              "dir": 2708,
+              "file": 17229,
+              "hardlink": 13,
+              "symlink": 856
+            },
+            "members": 20806,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "lib64",
+              "sbin",
+              "usr",
+              "var"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 5,
+            "kind": "tar",
+            "logical_path": "build/linux/debian_bullseye_i386-sysroot",
+            "member_counts": {
+              "dir": 2696,
+              "file": 17209,
+              "hardlink": 13,
+              "symlink": 853
+            },
+            "members": 20771,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "sbin",
+              "usr",
+              "var"
+            ]
+          },
+          {
+            "index": 6,
+            "kind": "direct",
+            "logical_path": "buildtools/linux64-format/clang-format",
+            "output_bytes": 3899440,
+            "output_mode": "0755",
+            "output_sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a",
+            "preexisting_member_paths": 0
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 7,
+            "kind": "tar",
+            "logical_path": "third_party/instrumented_libs/binaries",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "members": 1488,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "msan-chained-origins-noble-lib"
+            ]
+          },
+          {
+            "extraction_mode": "extractall-filter",
+            "index": 8,
+            "kind": "tar",
+            "logical_path": "third_party/instrumented_libs/binaries",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "members": 1488,
+            "preexisting_member_paths": 0,
+            "prefixes": [
+              "msan-no-origins-noble-lib"
+            ]
+          }
+        ],
+        "gclient_executions": 0,
+        "git_operations": 0,
+        "inventory_rows": 53722,
+        "inventory_sha256": "fe449e89fc2f99c394dfad20b0c553f775b8eac8d46582687735a0f74aaa0c4f",
+        "inventory_type_counts": {
+          "dir": 7439,
+          "file": 43911,
+          "hardlink": 26,
+          "symlink": 2346
+        },
+        "network_requests": 0,
+        "objects": [
+          {
+            "bytes": 57692132,
+            "expected_members": 460,
+            "index": 1,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 27,
+              "file": 421,
+              "hardlink": 0,
+              "symlink": 12
+            },
+            "path": "third_party/llvm-build/Release+Asserts",
+            "prefixes": [
+              "bin",
+              "cr_build_revision",
+              "lib"
+            ],
+            "sha256": "d373cde5b6f1c0da245ebcad93e4883252323c1ff283df96f0eb2e9180f1a537"
+          },
+          {
+            "bytes": 5818392,
+            "expected_members": 8,
+            "index": 2,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 1,
+              "file": 6,
+              "hardlink": 0,
+              "symlink": 1
+            },
+            "path": "third_party/llvm-build/Release+Asserts",
+            "prefixes": [
+              "bin",
+              "llvmobjdump_build_revision"
+            ],
+            "sha256": "28df84ef25bae64ab82a48295bd09aa6689e436449bd78cdc83f58ef05bfdd6a"
+          },
+          {
+            "bytes": 265701736,
+            "expected_members": 8690,
+            "index": 3,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 1604,
+              "file": 7084,
+              "hardlink": 0,
+              "symlink": 2
+            },
+            "path": "third_party/rust-toolchain",
+            "prefixes": [
+              "VERSION",
+              "bin",
+              "etc",
+              "lib",
+              "libexec",
+              "share"
+            ],
+            "sha256": "aff16507e3f1623a9948cf9b14bd90827fd702b58adbc5f5cc277b60682a6608"
+          },
+          {
+            "bytes": 20781612,
+            "expected_members": 20806,
+            "index": 4,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 2708,
+              "file": 17229,
+              "hardlink": 13,
+              "symlink": 856
+            },
+            "path": "build/linux/debian_bullseye_amd64-sysroot",
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "lib64",
+              "sbin",
+              "usr",
+              "var"
+            ],
+            "sha256": "36a164623d03f525e3dfb783a5e9b8a00e98e1ddd2b5cff4e449bd016dd27e50"
+          },
+          {
+            "bytes": 20786772,
+            "expected_members": 20771,
+            "index": 5,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 2696,
+              "file": 17209,
+              "hardlink": 13,
+              "symlink": 853
+            },
+            "path": "build/linux/debian_bullseye_i386-sysroot",
+            "prefixes": [
+              ".",
+              "bin",
+              "debian",
+              "etc",
+              "lib",
+              "sbin",
+              "usr",
+              "var"
+            ],
+            "sha256": "63f0e5128b84f7b0421956a4a40affa472be8da0e58caf27e9acbc84072daee7"
+          },
+          {
+            "bytes": 3899440,
+            "expected_members": 0,
+            "index": 6,
+            "kind": "direct",
+            "path": "buildtools/linux64-format/clang-format",
+            "sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a"
+          },
+          {
+            "bytes": 514553540,
+            "expected_members": 1488,
+            "index": 7,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "path": "third_party/instrumented_libs/binaries",
+            "prefixes": [
+              "msan-chained-origins-noble-lib"
+            ],
+            "sha256": "9329714322846c2b47dd518ac08e437b8c7d8075c514dc7ec3eb3e3a1e0faeb6"
+          },
+          {
+            "bytes": 493707167,
+            "expected_members": 1488,
+            "index": 8,
+            "kind": "tar",
+            "member_counts": {
+              "dir": 196,
+              "file": 981,
+              "hardlink": 0,
+              "symlink": 311
+            },
+            "path": "third_party/instrumented_libs/binaries",
+            "prefixes": [
+              "msan-no-origins-noble-lib"
+            ],
+            "sha256": "a749c9e47cb4584bc944c887440b1d1c51501f7d9bb99eea276ebcba0aa6c1ec"
+          }
+        ],
+        "payload_executions": 0,
+        "python": "3.10.12",
+        "regular_path_bytes": 3521795489,
+        "result": "PASS"
+      },
+      "summary_sha256": "5c60818c4bf79c3acad9045fe1fc7fe2e27cd58993e0eb42a62d65f72a11ed5f"
+    }
+  },
+  "validate_only": {
+    "bytes": 2589,
+    "content": {
+      "objects": [
+        {
+          "bytes": 57692132,
+          "expected_members": 460,
+          "index": 1,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 27,
+            "file": 421,
+            "hardlink": 0,
+            "symlink": 12
+          },
+          "path": "third_party/llvm-build/Release+Asserts",
+          "prefixes": [
+            "bin",
+            "cr_build_revision",
+            "lib"
+          ],
+          "sha256": "d373cde5b6f1c0da245ebcad93e4883252323c1ff283df96f0eb2e9180f1a537"
+        },
+        {
+          "bytes": 5818392,
+          "expected_members": 8,
+          "index": 2,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 1,
+            "file": 6,
+            "hardlink": 0,
+            "symlink": 1
+          },
+          "path": "third_party/llvm-build/Release+Asserts",
+          "prefixes": [
+            "bin",
+            "llvmobjdump_build_revision"
+          ],
+          "sha256": "28df84ef25bae64ab82a48295bd09aa6689e436449bd78cdc83f58ef05bfdd6a"
+        },
+        {
+          "bytes": 265701736,
+          "expected_members": 8690,
+          "index": 3,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 1604,
+            "file": 7084,
+            "hardlink": 0,
+            "symlink": 2
+          },
+          "path": "third_party/rust-toolchain",
+          "prefixes": [
+            "VERSION",
+            "bin",
+            "etc",
+            "lib",
+            "libexec",
+            "share"
+          ],
+          "sha256": "aff16507e3f1623a9948cf9b14bd90827fd702b58adbc5f5cc277b60682a6608"
+        },
+        {
+          "bytes": 20781612,
+          "expected_members": 20806,
+          "index": 4,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 2708,
+            "file": 17229,
+            "hardlink": 13,
+            "symlink": 856
+          },
+          "path": "build/linux/debian_bullseye_amd64-sysroot",
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "lib64",
+            "sbin",
+            "usr",
+            "var"
+          ],
+          "sha256": "36a164623d03f525e3dfb783a5e9b8a00e98e1ddd2b5cff4e449bd016dd27e50"
+        },
+        {
+          "bytes": 20786772,
+          "expected_members": 20771,
+          "index": 5,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 2696,
+            "file": 17209,
+            "hardlink": 13,
+            "symlink": 853
+          },
+          "path": "build/linux/debian_bullseye_i386-sysroot",
+          "prefixes": [
+            ".",
+            "bin",
+            "debian",
+            "etc",
+            "lib",
+            "sbin",
+            "usr",
+            "var"
+          ],
+          "sha256": "63f0e5128b84f7b0421956a4a40affa472be8da0e58caf27e9acbc84072daee7"
+        },
+        {
+          "bytes": 3899440,
+          "expected_members": 0,
+          "index": 6,
+          "kind": "direct",
+          "path": "buildtools/linux64-format/clang-format",
+          "sha256": "889266a51681d55bd4b9e02c9a104fa6ee22ecdfa7e8253532e5ea47e2e4cb4a"
+        },
+        {
+          "bytes": 514553540,
+          "expected_members": 1488,
+          "index": 7,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "path": "third_party/instrumented_libs/binaries",
+          "prefixes": [
+            "msan-chained-origins-noble-lib"
+          ],
+          "sha256": "9329714322846c2b47dd518ac08e437b8c7d8075c514dc7ec3eb3e3a1e0faeb6"
+        },
+        {
+          "bytes": 493707167,
+          "expected_members": 1488,
+          "index": 8,
+          "kind": "tar",
+          "member_counts": {
+            "dir": 196,
+            "file": 981,
+            "hardlink": 0,
+            "symlink": 311
+          },
+          "path": "third_party/instrumented_libs/binaries",
+          "prefixes": [
+            "msan-no-origins-noble-lib"
+          ],
+          "sha256": "a749c9e47cb4584bc944c887440b1d1c51501f7d9bb99eea276ebcba0aa6c1ec"
+        }
+      ],
+      "result": "PASS_VALIDATE_ONLY"
+    },
+    "sha256": "e00925debdde79e7e3c9a411821218006404f134a0a32211157b0029642190db"
+  }
+}
