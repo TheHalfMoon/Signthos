@@ -5,8 +5,8 @@
       "sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d"
     },
     "004c1dz-replay-equivalence.json": {
-      "bytes": 36880,
-      "sha256": "9ea44fb7d1fe3c6117aae7d6811242061494b97f5055b1ae2b8f537c5a376fdd"
+      "bytes": 48078,
+      "sha256": "234b26c4423b43d1ac54b81bad010669ed578093317d4595e114b28b1dcbcd33"
     },
     "004c1dz-replay1-docker-diff-sorted.txt.gz": {
       "bytes": 834714,
@@ -43,13 +43,14 @@
     "github:issue-comment:5648331314",
     "github:issue-comment:5648344486",
     "github:issue-comment:5648350377",
-    "github:issue-comment:5648510735"
+    "github:issue-comment:5648510735",
+    "github:issue-comment:5648552695"
   ],
   "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
   "byte_identical_evidence_paths": 26,
   "canonical_base": "de4fdf680450fc842794744061bd0185e95abc29",
   "canonical_base_tree": "5a8b490e1685bcaf706119df9dfb027718e1a7b8",
-  "cipd_diagnostic_comparison_proof_sha256": "52ed3432eb6d24933b71fb7e9fee4c8f30c7b61526ccb4f08c2b115a9680bfc6",
+  "cipd_diagnostic_comparison_proof_sha256": "d61becbc38a94693fcb28b280790778a8bc407c3ee66d6b89651f16734bcccc5",
   "control_bytes": 52747,
   "control_count": 11,
   "control_manifest_sha256": "663ac7ae7069a08db2e8a43c90035ba82d9f69980b066f88661cc3f29dfea007",
@@ -83,9 +84,10 @@
     "siso_executions": 0,
     "submodule_acquisitions": 0
   },
-  "replay_equivalence_classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION",
+  "replay_equivalence_classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_STRICT_EXPECTED_CIPD_DIAGNOSTIC_NORMALIZATION",
   "result": "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION_TWO_REPLAYS",
   "review_finding": "github:issue-comment:5648506136",
+  "review_finding_2": "github:issue-comment:5648542787",
   "topology_inventory_rows": 138402,
   "topology_inventory_sha256": "dbd6632edd5e86432b7cfed65383b6b6d44c37f868efe2a70f2ab76a9f46e507",
   "topology_regular_path_bytes": 5375955001,

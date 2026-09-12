@@ -1,6 +1,6 @@
 # 004C1DZ — Exact Offline Release Execution Topology Materialization Qualification
 
-Status: `QUALIFICATION_CANDIDATE / PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION`
+Status: `QUALIFICATION_CANDIDATE / PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_STRICT_EXPECTED_CIPD_DIAGNOSTIC_NORMALIZATION`
 Issue: #7
 Owning specification: `004-local-pdf-core`
 Canonical base: `de4fdf680450fc842794744061bd0185e95abc29`
@@ -13,6 +13,8 @@ Governance metadata correction: `github:issue-comment:5648471068`
 Runtime closeout and repository authority: `github:issue-comment:5648473181`
 Review finding: `github:issue-comment:5648506136`
 Forward-only review repair authority: `github:issue-comment:5648510735`
+Second review finding: `github:issue-comment:5648542787`
+Second forward-only review repair authority: `github:issue-comment:5648552695`
 
 ## 1. Purpose and authority boundary
 
@@ -104,7 +106,7 @@ The existing FreeType unresolved gitlink boundary remains an empty directory, th
 The exact replay-equivalence classification is:
 
 ```text
-PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION
+PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_STRICT_EXPECTED_CIPD_DIAGNOSTIC_NORMALIZATION
 EVIDENCE_PATHS_TOTAL = 32
 BYTE_IDENTICAL_EVIDENCE_PATHS = 26
 DIAGNOSTIC_VARIANCE_PATHS = 6
@@ -124,7 +126,7 @@ predecessor/cipd-05.stderr
 predecessor/cipd-06.stderr
 ```
 
-A fresh independent exact-head review correctly found that raw hashes alone did not make the diagnostic-only classification independently reviewable. The forward-only repair embeds the complete bounded text of all twelve retained stderr logs (six packages × two replays) directly in `004c1dz-replay-equivalence.json`, together with strict parsing/normalization rules, rejection rules, per-package stable semantic objects, raw hashes/sizes, dynamic-field records, and normalized semantic hashes. The comparison rejects unexpected message classes, levels, source locations, package instances, targets, install modes, archive totals, terminal states, or lifecycle order. It normalizes only PID, wall-clock timestamp, intermediate sampled extraction progress/throughput, and terminal elapsed-time text. All six package pairs produce byte-identical canonical stable-semantic JSON and zero unexpected lines. The diagnostic-only classification is therefore reviewable from the committed head without access to retained external stderr files. This document still does not claim that every diagnostic byte is deterministic.
+A fresh independent exact-head review correctly found that raw hashes alone did not make the diagnostic-only classification independently reviewable. The forward-only repair embeds the complete bounded text of all twelve retained stderr logs (six packages × two replays) directly in `004c1dz-replay-equivalence.json`, together with strict parsing/normalization rules, rejection rules, per-package stable semantic objects, raw hashes/sizes, dynamic-field records, and normalized semantic hashes. The first repair made the raw variance reviewable but an independent review correctly found that replay-to-replay equality alone could still accept mutually identical unexpected stable values. The second forward-only repair therefore freezes explicit expected values in the committed normalization specification: log level `I`; exact source location by lifecycle stage; and, for each of the six packages, exact package instance, deployment target, `copy-mode override` install mode, archive total, terminal state, minimum extraction-record count, and lifecycle. Each replay is validated independently against those constants before cross-replay equality is considered. The proof also records strict mutation probes for changed level, source, package instance, target, install mode, archive total, terminal state, and lifecycle order. Only PID, wall-clock timestamp, intermediate sampled extraction progress/throughput, and terminal elapsed-time text are normalized. All six package pairs satisfy the frozen expected semantics and produce byte-identical canonical stable-semantic JSON with zero unexpected lines. This document still does not claim that every diagnostic byte is deterministic.
 
 ### 6.1 Reviewable CIPD diagnostic comparison repair
 
@@ -140,6 +142,25 @@ RAW_HASH_BINDINGS_PRESERVED = 12 / 12
 ```
 
 This forward-only repair changes no runtime evidence or replay result; it makes the already-observed variance class independently inspectable from repository-visible evidence.
+
+### 6.2 Strict expected-value binding repair
+
+The second independent review identified that a grammar capable of comparing two logs does not by itself reject the same unexpected stable value appearing in both. The committed proof now treats expected values as validation inputs rather than values derived from replay equality.
+
+```text
+ALLOWED_LOG_LEVELS = I only
+EXPECTED_SOURCE_LOCATIONS = exact lifecycle-specific allowlist
+EXPECTED_PACKAGE_INSTANCES = 6 / 6 frozen
+EXPECTED_DEPLOYMENT_TARGETS = 6 / 6 frozen
+EXPECTED_INSTALL_MODE = copy-mode override
+EXPECTED_ARCHIVE_TOTALS = 6 / 6 frozen
+EXPECTED_TERMINAL_STATE = files_left 0 / percent 100
+EXPECTED_LIFECYCLE = deploying -> extract-start -> extract-complete -> moving -> cleaning -> deployed
+STRICT_REJECTION_PROBES = 8 / 8 REJECTED AS EXPECTED
+ALL_12_LOGS_MATCH_FROZEN_EXPECTED_SEMANTICS = true
+```
+
+The strict verifier must reject a changed level, source location, package instance, deployment target, install mode, archive total, terminal state, or lifecycle ordering even if an identical mutation is applied to both replays. Cross-replay semantic equality is checked only after each replay independently passes the frozen expected-value gates.
 
 ## 7. Deterministic inventory and Docker-diff evidence
 
@@ -206,8 +227,8 @@ No acquired source, package body, GCS body, Git object store, materialized works
 | Repository evidence file | Bytes | SHA-256 |
 | --- | ---: | --- |
 | `004c1dz-control-placement-identities.json` | 2924 | `cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d` |
-| `004c1dz-evidence-bundle.json` | 3989 | `3e9087f1c97e0fd746402ebd5b92f0f226d41a0aa70de2bbb5bf636a00bcb6d6` |
-| `004c1dz-replay-equivalence.json` | 36880 | `9ea44fb7d1fe3c6117aae7d6811242061494b97f5055b1ae2b8f537c5a376fdd` |
+| `004c1dz-evidence-bundle.json` | 4090 | `fa31541319ada92e585a5c8b67ccfe2069c7885def0d2821f0f9637f4f7f4cea` |
+| `004c1dz-replay-equivalence.json` | 48078 | `234b26c4423b43d1ac54b81bad010669ed578093317d4595e114b28b1dcbcd33` |
 | `004c1dz-replay1-docker-diff-sorted.txt.gz` | 834714 | `d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12` |
 | `004c1dz-replay1-summary.json` | 1740 | `2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad` |
 | `004c1dz-replay1-topology-inventory.jsonl.gz` | 6217522 | `6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64` |

@@ -1,17 +1,193 @@
 {
   "byte_identical_evidence_paths": 26,
   "cipd_diagnostic_comparison_proof": {
+    "all_packages_match_frozen_expected_semantics": true,
     "all_raw_hashes_bound": true,
     "all_six_normalized_semantics_equal": true,
+    "all_twelve_logs_match_frozen_expected_semantics": true,
     "all_unexpected_line_counts_zero": true,
     "normalization_spec": {
       "allowed_exact_messages": [
         "Moving files to their final destination...",
         "Cleaning up..."
       ],
-      "comparison_rule": "canonical sorted compact JSON + LF of stable semantic object must be byte-identical across replay1 and replay2",
+      "allowed_levels": [
+        "I"
+      ],
+      "comparison_rule": "Each replay log must independently satisfy the frozen expected per-package semantics and global level/source allowlists; only then canonical sorted compact JSON + LF of the stable semantic object must be byte-identical across replay1 and replay2.",
       "deploy_regex": "^Deploying (?P<instance>\\S+) into (?P<target>\\S+) \\(copy-mode override\\)$",
       "deployed_regex": "^Deployed (?P<instance>\\S+) in (?P<elapsed>[0-9.]+s)$",
+      "expected_package_semantics": [
+        {
+          "archive_total": "8.6 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC",
+          "path": "predecessor/cipd-01.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/buildtools/linux64(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        },
+        {
+          "archive_total": "370.0 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC",
+          "path": "predecessor/cipd-02.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/buildtools/reclient(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        },
+        {
+          "archive_total": "0.4 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC",
+          "path": "predecessor/cipd-03.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/third_party/ninja(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        },
+        {
+          "archive_total": "58.8 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC",
+          "path": "predecessor/cipd-04.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/third_party/siso/cipd(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        },
+        {
+          "archive_total": "25.9 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C",
+          "path": "predecessor/cipd-05.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/tools/resultdb(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        },
+        {
+          "archive_total": "55.0 MB",
+          "install_mode": "copy-mode override",
+          "log_level": "I",
+          "minimum_extract_records": 2,
+          "package_instance": "skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC",
+          "path": "predecessor/cipd-06.stderr",
+          "required_lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "source_by_lifecycle": {
+            "cleaning": "deployer.go:403",
+            "deployed": "deployer.go:409",
+            "deploying": "deployer.go:303",
+            "extract-complete": "reader.go:424",
+            "extract-sampled": "reader.go:424",
+            "extract-start": "reader.go:400",
+            "moving": "deployer.go:388"
+          },
+          "target": "/work/pdfium/tools/skia_goldctl/linux(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100
+        }
+      ],
+      "expected_values_origin": "Frozen from the already-bound exact CIPD deployment identities and targets carried by canonical 004C1DX/004C1DZ evidence; these constants are validation inputs, not values inferred by comparing replay1 with replay2 during verification.",
       "extract_regex": "^Extracting \\(\\s*(?P<files_left>\\d+) files left\\):\\s+(?P<done>[0-9.]+)/(?P<total>[0-9.]+) (?P<unit>[KMGT]?B) \\(\\s*(?P<percent>\\d+)%(?:, [^)]+)?\\)$",
       "line_prefix_regex": "^\\[P(?P<pid>\\d+) (?P<timestamp>\\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<source>[^ ]+) (?P<level>[A-Z])\\] (?P<message>.*)$",
       "normalized_only": [
@@ -25,14 +201,15 @@
         "reject malformed or non-UTF-8 log",
         "reject missing trailing LF",
         "reject unexpected message class",
-        "reject unexpected log level",
-        "reject unexpected source location",
-        "reject changed package instance",
-        "reject changed deployment target",
-        "reject changed install mode",
-        "reject changed archive total",
+        "reject level outside allowed_levels",
+        "reject lifecycle source outside source_by_lifecycle",
+        "reject package instance different from expected_package_semantics",
+        "reject deployment target different from expected_package_semantics",
+        "reject install mode different from expected_package_semantics",
+        "reject archive total different from expected_package_semantics",
         "reject nonzero terminal files-left",
         "reject non-100 terminal percent",
+        "reject fewer than minimum_extract_records",
         "reject lifecycle order drift"
       ],
       "required_lifecycle": [
@@ -42,6 +219,15 @@
         "cleaning",
         "deployed"
       ],
+      "source_by_lifecycle": {
+        "cleaning": "deployer.go:403",
+        "deployed": "deployer.go:409",
+        "deploying": "deployer.go:303",
+        "extract-complete": "reader.go:424",
+        "extract-sampled": "reader.go:424",
+        "extract-start": "reader.go:400",
+        "moving": "deployer.go:388"
+      },
       "stable_fields": [
         "package_instance",
         "target",
@@ -652,7 +838,109 @@
       }
     ],
     "proof_version": 1,
-    "scope": "six retained CIPD stderr artifacts from two successful 004C1DZ replays"
+    "scope": "six retained CIPD stderr artifacts from two successful 004C1DZ replays",
+    "strict_expected_value_binding": true,
+    "strict_rejection_probe_results": [
+      {
+        "name": "changed_log_level",
+        "observed_reason": "level outside allowed_levels",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_source_location",
+        "observed_reason": "source outside source_by_lifecycle",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_package_instance",
+        "observed_reason": "package instance mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_deployment_target",
+        "observed_reason": "deployment target mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_install_mode",
+        "observed_reason": "unexpected message class",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_archive_total",
+        "observed_reason": "archive total mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_terminal_state",
+        "observed_reason": "lifecycle order mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "name": "changed_lifecycle_order",
+        "observed_reason": "lifecycle order mismatch",
+        "observed_result": "REJECTED"
+      }
+    ],
+    "strict_rejection_probes": [
+      {
+        "expected_rejection": "level outside allowed_levels",
+        "mutation": "replace first ` I] ` with ` W] `",
+        "name": "changed_log_level",
+        "observed_reason": "level outside allowed_levels",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "source outside source_by_lifecycle",
+        "mutation": "replace first `deployer.go:303` with `arbitrary.go:999`",
+        "name": "changed_source_location",
+        "observed_reason": "source outside source_by_lifecycle",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "package instance mismatch",
+        "mutation": "replace expected package instance in deploying/deployed with `unexpected/package:instance`",
+        "name": "changed_package_instance",
+        "observed_reason": "package instance mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "deployment target mismatch",
+        "mutation": "replace deployment target with `/work/pdfium/unexpected-target(/)`",
+        "name": "changed_deployment_target",
+        "observed_reason": "deployment target mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "message grammar/install mode mismatch",
+        "mutation": "replace `(copy-mode override)` with `(unexpected-mode)`",
+        "name": "changed_install_mode",
+        "observed_reason": "unexpected message class",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "archive total mismatch",
+        "mutation": "replace first extract total with `999.9 MB`",
+        "name": "changed_archive_total",
+        "observed_reason": "archive total mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "terminal files-left mismatch/lifecycle",
+        "mutation": "replace terminal `(0 files left)` with `(1 files left)` while keeping `100%`",
+        "name": "changed_terminal_state",
+        "observed_reason": "lifecycle order mismatch",
+        "observed_result": "REJECTED"
+      },
+      {
+        "expected_rejection": "source/lifecycle order mismatch",
+        "mutation": "swap Moving and Cleaning lines",
+        "name": "changed_lifecycle_order",
+        "observed_reason": "lifecycle order mismatch",
+        "observed_result": "REJECTED"
+      }
+    ],
+    "strict_rejection_probes_passed": 8
   },
   "cipd_result_jsons": [
     {
@@ -686,7 +974,7 @@
       "sha256": "3c070227f1f23bd8d27a8f5c7bfb1f4412620408be024bb5162b308c738de3d8"
     }
   ],
-  "classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION",
+  "classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_STRICT_EXPECTED_CIPD_DIAGNOSTIC_NORMALIZATION",
   "control_input_identities_sha256": "a21806660cd609d9f59662bfc1b271958fd14dd64d327fd8a7d8481bbca12cb1",
   "control_placement_identities_sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d",
   "deterministic_identity_gates": [
@@ -892,7 +1180,9 @@
     "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION"
   ],
   "review_finding": "github:issue-comment:5648506136",
+  "review_finding_2": "github:issue-comment:5648542787",
   "review_repair_authority": "github:issue-comment:5648510735",
+  "review_repair_authority_2": "github:issue-comment:5648552695",
   "sorted_docker_diff_gzip_sha256": "d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12",
   "sorted_docker_diff_sha256": "08bf2dc649ca0141b761bd1dd2eb04437e0a36b22270fde174d3a812bc26aaa6",
   "storage_repair_authority": "github:issue-comment:5648331314; github:issue-comment:5648344486; github:issue-comment:5648350377",
