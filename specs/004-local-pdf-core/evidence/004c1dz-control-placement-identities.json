@@ -1,0 +1,79 @@
+[
+  {
+    "bytes": 954,
+    "destination": "/workspace/packages/pdfium/build/code/cpp/ext_api.h",
+    "mode": "0644",
+    "release_relative_path": "build/code/cpp/ext_api.h",
+    "sha256": "41c44c6d32ffaf629b4442aac7818e117eae82f023e1c46b05a702ecc30be345"
+  },
+  {
+    "bytes": 649,
+    "destination": "/workspace/packages/pdfium/build/code/cpp/filewriter.cpp",
+    "mode": "0644",
+    "release_relative_path": "build/code/cpp/filewriter.cpp",
+    "sha256": "4eba74b724bbef983c11946f54ac239aef8276cc62ce9f527f052506e2be0d77"
+  },
+  {
+    "bytes": 358,
+    "destination": "/workspace/packages/pdfium/build/code/cpp/filewriter.h",
+    "mode": "0644",
+    "release_relative_path": "build/code/cpp/filewriter.h",
+    "sha256": "36120dc4e17630fac81e200c8652bf8b79394f28e4de43b2b4047ca73d9f8263"
+  },
+  {
+    "bytes": 2751,
+    "destination": "/workspace/packages/pdfium/build/code/cpp/main.cpp",
+    "mode": "0644",
+    "release_relative_path": "build/code/cpp/main.cpp",
+    "sha256": "6f736a615dd1211d1a8703a3e8da367786389772c9457572e5e2421885c39edc"
+  },
+  {
+    "bytes": 639,
+    "destination": "/workspace/packages/pdfium/build/compile.esm.sh",
+    "mode": "0644",
+    "release_relative_path": "build/compile.esm.sh",
+    "sha256": "c7f7551a795ba573ca6e7d229ffbf6f168c9ab4b7c842d6620d1af6fce4795dd"
+  },
+  {
+    "bytes": 621,
+    "destination": "/workspace/packages/pdfium/build/compile.sh",
+    "mode": "0644",
+    "release_relative_path": "build/compile.sh",
+    "sha256": "7e8ba0a5c50cfe0d859b7cd8613c9e4a0bed4e9508b7907be956e54562fc61fc"
+  },
+  {
+    "bytes": 4170,
+    "destination": "/workspace/packages/pdfium/build/generate-functions.mjs",
+    "mode": "0644",
+    "release_relative_path": "build/generate-functions.mjs",
+    "sha256": "046c2a7c22c907c8bb221caf5593d305120acea569db0062cef99067505a4e01"
+  },
+  {
+    "bytes": 5285,
+    "destination": "/workspace/packages/pdfium/build/generate-runtime-methods.mjs",
+    "mode": "0644",
+    "release_relative_path": "build/generate-runtime-methods.mjs",
+    "sha256": "b32930f1eee7ca498649c6cf1f33c04294f6668a9a681d0d531f3e33ff87f63b"
+  },
+  {
+    "bytes": 33717,
+    "destination": "/workspace/packages/pdfium/build/patch/build/config/BUILDCONFIG.gn",
+    "mode": "0644",
+    "release_relative_path": "build/patch/build/config/BUILDCONFIG.gn",
+    "sha256": "77d0903797dc9c789a7f7d450b2164cb8d3534f920e87ce51d7f00b7326b5b55"
+  },
+  {
+    "bytes": 438,
+    "destination": "/workspace/packages/pdfium/build/patch/build/toolchain/wasm/BUILD.gn",
+    "mode": "0644",
+    "release_relative_path": "build/patch/build/toolchain/wasm/BUILD.gn",
+    "sha256": "852dfac27421a91363898d7d8afe273fd2c50d0318d1019da14e2fc8eba13e9d"
+  },
+  {
+    "bytes": 3165,
+    "destination": "/workspace/packages/pdfium/scripts/build.sh",
+    "mode": "0755",
+    "release_relative_path": "scripts/build.sh",
+    "sha256": "91f63a02f4cc79aff4ab3f47ee4203ae8b4ed5be1b8448554d55fe678b752a4e"
+  }
+]

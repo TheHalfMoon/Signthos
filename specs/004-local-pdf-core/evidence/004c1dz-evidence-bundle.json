@@ -1,0 +1,96 @@
+{
+  "artifacts": {
+    "004c1dz-control-placement-identities.json": {
+      "bytes": 2924,
+      "sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d"
+    },
+    "004c1dz-replay-equivalence.json": {
+      "bytes": 48078,
+      "sha256": "234b26c4423b43d1ac54b81bad010669ed578093317d4595e114b28b1dcbcd33"
+    },
+    "004c1dz-replay1-docker-diff-sorted.txt.gz": {
+      "bytes": 834714,
+      "sha256": "d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12"
+    },
+    "004c1dz-replay1-summary.json": {
+      "bytes": 1740,
+      "sha256": "2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad"
+    },
+    "004c1dz-replay1-topology-inventory.jsonl.gz": {
+      "bytes": 6217522,
+      "sha256": "6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64"
+    },
+    "004c1dz-replay2-docker-diff-sorted.txt.gz": {
+      "bytes": 834714,
+      "sha256": "d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12"
+    },
+    "004c1dz-replay2-summary.json": {
+      "bytes": 1740,
+      "sha256": "2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad"
+    },
+    "004c1dz-replay2-topology-inventory.jsonl.gz": {
+      "bytes": 6217522,
+      "sha256": "6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64"
+    },
+    "004c1dz-storage-repair-summary.json": {
+      "bytes": 1030,
+      "sha256": "70aab3bf70bcefbb336cd5e85dc76580fbc349e84e8f750c65a52156c147f404"
+    }
+  },
+  "authority_chain": [
+    "github:issue-comment:5648203834",
+    "github:issue-comment:5648229499",
+    "github:issue-comment:5648331314",
+    "github:issue-comment:5648344486",
+    "github:issue-comment:5648350377",
+    "github:issue-comment:5648510735",
+    "github:issue-comment:5648552695"
+  ],
+  "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+  "byte_identical_evidence_paths": 26,
+  "canonical_base": "de4fdf680450fc842794744061bd0185e95abc29",
+  "canonical_base_tree": "5a8b490e1685bcaf706119df9dfb027718e1a7b8",
+  "cipd_diagnostic_comparison_proof_sha256": "d61becbc38a94693fcb28b280790778a8bc407c3ee66d6b89651f16734bcccc5",
+  "control_bytes": 52747,
+  "control_count": 11,
+  "control_manifest_sha256": "663ac7ae7069a08db2e8a43c90035ba82d9f69980b066f88661cc3f29dfea007",
+  "diagnostic_variance_only": [
+    "predecessor/cipd-01.stderr",
+    "predecessor/cipd-02.stderr",
+    "predecessor/cipd-03.stderr",
+    "predecessor/cipd-04.stderr",
+    "predecessor/cipd-05.stderr",
+    "predecessor/cipd-06.stderr"
+  ],
+  "diagnostic_variance_paths": 6,
+  "predecessor_inventory_rows": 138380,
+  "predecessor_inventory_sha256": "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5",
+  "predecessor_manifest_sha256": "008d33f17370fb1273c992591758e3475f2520cfd0af238f9279691daeb016e4",
+  "predecessor_materializer_sha256": "b6b39bdd3a42b70ecd6d800c8511607a2e37fd80d2f5dc4411ca45450606eda8",
+  "prohibited_activity": {
+    "clang_executions": 0,
+    "emscripten_executions": 0,
+    "gclient_executions": 0,
+    "gn_executions": 0,
+    "hook_executions": 0,
+    "host_mounts": 0,
+    "network_requests": 0,
+    "ninja_executions": 0,
+    "node_executions": 0,
+    "pdfium_build_or_runtime_executions": 0,
+    "reclient_executions": 0,
+    "repository_mutations_during_runtime": 0,
+    "rust_toolchain_executions": 0,
+    "siso_executions": 0,
+    "submodule_acquisitions": 0
+  },
+  "replay_equivalence_classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_STRICT_EXPECTED_CIPD_DIAGNOSTIC_NORMALIZATION",
+  "result": "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION_TWO_REPLAYS",
+  "review_finding": "github:issue-comment:5648506136",
+  "review_finding_2": "github:issue-comment:5648542787",
+  "topology_inventory_rows": 138402,
+  "topology_inventory_sha256": "dbd6632edd5e86432b7cfed65383b6b6d44c37f868efe2a70f2ab76a9f46e507",
+  "topology_regular_path_bytes": 5375955001,
+  "unit": "004C1DZ_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION_QUALIFICATION",
+  "wrapper_sha256": "724215cab67d9d22970d2afe7403ed0efdbd14213d8f8bb8aa90ceac8273e007"
+}
