@@ -1,0 +1,75 @@
+{
+  "authority_chain": [
+    "github:issue-comment:5647458005",
+    "github:issue-comment:5647491294",
+    "github:issue-comment:5647633761",
+    "github:issue-comment:5647642202",
+    "github:issue-comment:5647782239"
+  ],
+  "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+  "canonical_base": "d2300b8a99c0e5a7629377acb6948b6f5a9b9110",
+  "canonical_base_tree": "4e00f0dce38622e74baa064870e00c515990ebba",
+  "failed_attempt_summary_sha256": "88ee713157ae4905195022d686cd5d29da1ce5b85072feebb8e0e4753a1a64eb",
+  "post_overlay_evidence_sha256": "d669bd6ea97e540617b5f880707563148db63f21ab7da5e2df52aa54d80ffad7",
+  "prohibited_activity": {
+    "clang_executions": 0,
+    "gclient_executions": 0,
+    "gn_executions": 0,
+    "hook_executions": 0,
+    "host_mounts": 0,
+    "network_requests": 0,
+    "ninja_executions": 0,
+    "pdfium_build_or_runtime_executions": 0,
+    "reclient_executions": 0,
+    "repository_mutations_during_runtime": 0,
+    "rust_toolchain_executions": 0,
+    "siso_executions": 0,
+    "submodule_acquisitions": 0
+  },
+  "qualification": {
+    "core_evidence_byte_identical": [
+      "inventory.jsonl",
+      "summary.json",
+      "gcs-events.json",
+      "post-overlay-git-verification.json",
+      "git-materialization-events.json",
+      "cipd-events.json",
+      "input-identities.json"
+    ],
+    "failed_attempt_evidence_manifest_sha256": "33013d35367e6c2da67b77581833e0ce02244b0377237819c78f7762eb506cf7",
+    "failed_attempt_preserved": true,
+    "gcs_overlap": {
+      "index": 2,
+      "paths": [
+        "bin",
+        "bin/llvm-nm"
+      ]
+    },
+    "inventory_rows": 138380,
+    "inventory_sha256": "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5",
+    "inventory_type_counts": {
+      "dir": 13497,
+      "file": 122499,
+      "hardlink": 26,
+      "symlink": 2358
+    },
+    "manifest_sha256": "008d33f17370fb1273c992591758e3475f2520cfd0af238f9279691daeb016e4",
+    "materializer_sha256": "b6b39bdd3a42b70ecd6d800c8511607a2e37fd80d2f5dc4411ca45450606eda8",
+    "post_overlay_git_identity_count": 34,
+    "regular_path_bytes": 5375902254,
+    "replay1_docker_diff_gzip_sha256": "39124ddcf91b5ade1c196788c8b528fef3d91fbc84824e128a98d534f5758cca",
+    "replay1_inventory_gzip_sha256": "85e2011ae04a63cf324fc068bfe5c2f3f94816370e29afd71ac034c53e283844",
+    "replay2_docker_diff_gzip_sha256": "a5364bbde3e3905544813ae388cf180ba185b1ce9fb8b8d721db7682030e0c3a",
+    "replay2_inventory_gzip_sha256": "85e2011ae04a63cf324fc068bfe5c2f3f94816370e29afd71ac034c53e283844",
+    "result": "PASS_TWO_BYTE_IDENTICAL_SUCCESS_REPLAYS"
+  },
+  "successful_inventory_raw_sha256": [
+    "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5",
+    "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5"
+  ],
+  "successful_replay_summary_sha256": [
+    "921b8067882e6fb27ebf104ffa712b40c93577b00570a16b9299177ee3e5fc15",
+    "921b8067882e6fb27ebf104ffa712b40c93577b00570a16b9299177ee3e5fc15"
+  ],
+  "unit": "004C1DX_EXACT_OFFLINE_COMBINED_PDFIUM_WORKSPACE_MATERIALIZATION_QUALIFICATION"
+}

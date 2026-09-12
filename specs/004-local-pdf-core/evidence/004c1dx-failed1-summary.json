@@ -1,0 +1,15 @@
+{
+  "attempt": 1,
+  "authority": "github:issue-comment:5647458005",
+  "docker_diff_sha256": "623f35994430d2bdc849b90ceecaea5badfd1f8f961edb757b3192485ca8d2d5",
+  "evidence_manifest_sha256": "33013d35367e6c2da67b77581833e0ce02244b0377237819c78f7762eb506cf7",
+  "exit_code": 1,
+  "failure": "Python 3.10 tarfile.data_filter rejected a prevalidated Debian sysroot symlink whose normalized target remained within the combined workspace but outside the extraction subdirectory.",
+  "materializer_sha256": "271c6d71c9815aa4283a331c31173d55ab01b222316850caf8495f2e2d71eeeb",
+  "mounts": 0,
+  "network_mode": "none",
+  "oom_killed": false,
+  "repair_authority": "github:issue-comment:5647633761",
+  "result": "FAIL_CLOSED",
+  "stderr_sha256": "d3de63cf3e034e42401c433e47569e70c5273f7ad5ab56c4a631825cf7072ca8"
+}
