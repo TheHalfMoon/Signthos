@@ -1,0 +1,25 @@
+{
+  "authority": "github:issue-comment:5648331314",
+  "builder_image_preserved": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+  "closeout": "github:issue-comment:5648350377",
+  "docker_prune_executions": 0,
+  "image_removals": 0,
+  "legacy_containers_removed": 2,
+  "locator_repair_authority": "github:issue-comment:5648344486",
+  "preserved_evidence_manifest_sha256": "1fd62d2a239ac735e0cc4e041cbb0023e8504b2262c0e618472c20729bd052f7",
+  "preserved_file_count": 124,
+  "preserved_total_bytes": 12870058,
+  "removed_containers": [
+    {
+      "id": "5c4d37bf794b63edcafd852072c339fc2a9ff0597160b5cceddc288afb00d9d0",
+      "name": "signthos-004c1cz-replacement-20260911t223530z"
+    },
+    {
+      "id": "54a2dbb9955fa7bfab9054bc681b2db015b417a190c639e9f79ebfd348c6a105",
+      "name": "signthos-004c1dd-replacement-attempt1"
+    }
+  ],
+  "result": "PASS_BOUNDED_EVIDENCE_PRESERVING_STORAGE_REPAIR",
+  "source_or_external_evidence_deletions": 0,
+  "unit": "004C1DZ_STORAGE_HEADROOM_FORWARD_REPAIR"
+}

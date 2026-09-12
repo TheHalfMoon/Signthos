@@ -1,0 +1,249 @@
+{
+  "byte_identical_evidence_paths": 26,
+  "cipd_result_jsons": [
+    {
+      "bytes": 123,
+      "path": "predecessor/cipd-01.json",
+      "sha256": "01076dcb7e15f6ca6c64485e5b033f52d4880007a7fa3e6786b3526aacd5d948"
+    },
+    {
+      "bytes": 134,
+      "path": "predecessor/cipd-02.json",
+      "sha256": "12dd2a64d19fc2b343bc6307c3ae3f7672d8ebc9ffac302976c227f22ada9007"
+    },
+    {
+      "bytes": 139,
+      "path": "predecessor/cipd-03.json",
+      "sha256": "a943737fc48fdd04b5d1c61c43b56502be3122d15eb89d429ab0d7eab43c5ce3"
+    },
+    {
+      "bytes": 128,
+      "path": "predecessor/cipd-04.json",
+      "sha256": "535fa4f632fcb4f9c41dbef0be0321ac59bc5ad0da8d7c4fa6c312f9336d4939"
+    },
+    {
+      "bytes": 144,
+      "path": "predecessor/cipd-05.json",
+      "sha256": "a582c239043defb4a6f5b00507091978d28874cbdfc20149f065fa19a634458f"
+    },
+    {
+      "bytes": 136,
+      "path": "predecessor/cipd-06.json",
+      "sha256": "3c070227f1f23bd8d27a8f5c7bfb1f4412620408be024bb5162b308c738de3d8"
+    }
+  ],
+  "classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_CIPD_DIAGNOSTIC_LOG_VARIANCE_ONLY",
+  "control_input_identities_sha256": "a21806660cd609d9f59662bfc1b271958fd14dd64d327fd8a7d8481bbca12cb1",
+  "control_placement_identities_sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d",
+  "deterministic_identity_gates": [
+    {
+      "bytes": 1740,
+      "path": "summary.json",
+      "sha256": "2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad"
+    },
+    {
+      "bytes": 2715,
+      "path": "control-input-identities.json",
+      "sha256": "a21806660cd609d9f59662bfc1b271958fd14dd64d327fd8a7d8481bbca12cb1"
+    },
+    {
+      "bytes": 2924,
+      "path": "control-placement-identities.json",
+      "sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d"
+    },
+    {
+      "bytes": 27707663,
+      "path": "topology-inventory.jsonl",
+      "sha256": "dbd6632edd5e86432b7cfed65383b6b6d44c37f868efe2a70f2ab76a9f46e507"
+    },
+    {
+      "bytes": 6217522,
+      "path": "topology-inventory.jsonl.gz",
+      "sha256": "6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64"
+    },
+    {
+      "bytes": 27151651,
+      "path": "predecessor/inventory.jsonl",
+      "sha256": "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5"
+    },
+    {
+      "bytes": 2210,
+      "path": "predecessor/summary.json",
+      "sha256": "ef4426a3433654c8b4aa1da592d63506a22e5d2bfbeb9ea6eedf12b800e98b55"
+    },
+    {
+      "bytes": 1734,
+      "path": "predecessor/gcs-events.json",
+      "sha256": "8c4b93b103135866b89429fa8275af90d47fcc3193a8386d0333987b580c3f93"
+    },
+    {
+      "bytes": 9418,
+      "path": "predecessor/post-overlay-git-verification.json",
+      "sha256": "e6b3dbeb121d2f403016fe06d4bb7d4671344e7731b258b381fe0a6dab1f64a9"
+    },
+    {
+      "bytes": 8625,
+      "path": "predecessor/git-materialization-events.json",
+      "sha256": "454be0b8d0be093627b9c1ca9b0d1daafe8eeed5de7434709e1d49970d61c53b"
+    },
+    {
+      "bytes": 524,
+      "path": "predecessor/cipd-events.json",
+      "sha256": "c260bcdc0830f58a1551c4880886ebfdae4afd31ecfadac70de87f1bff579e49"
+    },
+    {
+      "bytes": 2524,
+      "path": "predecessor/input-identities.json",
+      "sha256": "18131f7326ba596a6900773443c504bcb593ef741ef2a39ca2206008ff86ae6c"
+    },
+    {
+      "bytes": 123,
+      "path": "predecessor/cipd-01.json",
+      "sha256": "01076dcb7e15f6ca6c64485e5b033f52d4880007a7fa3e6786b3526aacd5d948"
+    },
+    {
+      "bytes": 134,
+      "path": "predecessor/cipd-02.json",
+      "sha256": "12dd2a64d19fc2b343bc6307c3ae3f7672d8ebc9ffac302976c227f22ada9007"
+    },
+    {
+      "bytes": 139,
+      "path": "predecessor/cipd-03.json",
+      "sha256": "a943737fc48fdd04b5d1c61c43b56502be3122d15eb89d429ab0d7eab43c5ce3"
+    },
+    {
+      "bytes": 128,
+      "path": "predecessor/cipd-04.json",
+      "sha256": "535fa4f632fcb4f9c41dbef0be0321ac59bc5ad0da8d7c4fa6c312f9336d4939"
+    },
+    {
+      "bytes": 144,
+      "path": "predecessor/cipd-05.json",
+      "sha256": "a582c239043defb4a6f5b00507091978d28874cbdfc20149f065fa19a634458f"
+    },
+    {
+      "bytes": 136,
+      "path": "predecessor/cipd-06.json",
+      "sha256": "3c070227f1f23bd8d27a8f5c7bfb1f4412620408be024bb5162b308c738de3d8"
+    }
+  ],
+  "evidence_paths_total": 32,
+  "mount_counts": [
+    0,
+    0
+  ],
+  "network_modes": [
+    "none",
+    "none"
+  ],
+  "nondeterministic_diagnostic_paths": [
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC",
+      "path": "predecessor/cipd-01.stderr",
+      "replay1": {
+        "bytes": 592,
+        "sha256": "2efa0a33281b32fb131c7ba887fc6a40be5bfe5e187767a2ca964e57c5fdc16c"
+      },
+      "replay2": {
+        "bytes": 592,
+        "sha256": "a37cd630ef56511d7731502311400b24cba3c613620df8626b99a959be53c82b"
+      },
+      "target": "/work/pdfium/buildtools/linux64(/)"
+    },
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC",
+      "path": "predecessor/cipd-02.stderr",
+      "replay1": {
+        "bytes": 737,
+        "sha256": "d9e34013a70c2ac5591c0213b3e9f3d6491e829e4d540ff3642061668614908d"
+      },
+      "replay2": {
+        "bytes": 837,
+        "sha256": "5f4a096caa14b5e049f5deca04b9c249142a1def546d80ee42494d312ce18679"
+      },
+      "target": "/work/pdfium/buildtools/reclient(/)"
+    },
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC",
+      "path": "predecessor/cipd-03.stderr",
+      "replay1": {
+        "bytes": 623,
+        "sha256": "0f6e01b191c4df3ca367fdcc429540b3cb3cc5613e2ca8b55caad42cf7d991ed"
+      },
+      "replay2": {
+        "bytes": 623,
+        "sha256": "343545bfd5b7dcd50b57464b8f09b43728e2961a76c22e5ecef6bceb70950372"
+      },
+      "target": "/work/pdfium/third_party/ninja(/)"
+    },
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC",
+      "path": "predecessor/cipd-04.stderr",
+      "replay1": {
+        "bytes": 717,
+        "sha256": "f2be0f007d0aa9f30cf1fd1f1874de1f79ff2cb7962271b294e2425f165e0703"
+      },
+      "replay2": {
+        "bytes": 717,
+        "sha256": "7a8e2f71b4d881e5fd050053a1760dc3f137554d95c3ca3dcaa0ad66b8fa972e"
+      },
+      "target": "/work/pdfium/third_party/siso/cipd(/)"
+    },
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C",
+      "path": "predecessor/cipd-05.stderr",
+      "replay1": {
+        "bytes": 647,
+        "sha256": "726018b3ddfe838ff24625f4966891f820c04d1b6c9e88a00ec254cafe8c66d9"
+      },
+      "replay2": {
+        "bytes": 647,
+        "sha256": "53a1b3866eff6cbf6a0cd96c6f66ebb4b526f63668085c111a3dd507a408d644"
+      },
+      "target": "/work/pdfium/tools/resultdb(/)"
+    },
+    {
+      "classification": "NONDETERMINISTIC_DIAGNOSTIC_ONLY",
+      "package_instance": "skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC",
+      "path": "predecessor/cipd-06.stderr",
+      "replay1": {
+        "bytes": 738,
+        "sha256": "3ee753c058f62f08c57452249572bbd8500a4f38b736337b0994bd9fa4ac004b"
+      },
+      "replay2": {
+        "bytes": 736,
+        "sha256": "d49584a3d8893ce65ee0610628f2da681acefabb7f13c0321a8d9a749dcd0292"
+      },
+      "target": "/work/pdfium/tools/skia_goldctl/linux(/)"
+    }
+  ],
+  "predecessor_inventory_rows": 138380,
+  "predecessor_inventory_sha256": "7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5",
+  "prohibited_execution_counters": "ALL_ZERO",
+  "replay_exit_codes": [
+    0,
+    0
+  ],
+  "replay_oom_killed": [
+    false,
+    false
+  ],
+  "replay_results": [
+    "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION",
+    "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION"
+  ],
+  "sorted_docker_diff_gzip_sha256": "d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12",
+  "sorted_docker_diff_sha256": "08bf2dc649ca0141b761bd1dd2eb04437e0a36b22270fde174d3a812bc26aaa6",
+  "storage_repair_authority": "github:issue-comment:5648331314; github:issue-comment:5648344486; github:issue-comment:5648350377",
+  "storage_repair_evidence_manifest_sha256": "1fd62d2a239ac735e0cc4e041cbb0023e8504b2262c0e618472c20729bd052f7",
+  "summary_sha256": "2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad",
+  "topology_inventory_gzip_sha256": "6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64",
+  "topology_inventory_rows": 138402,
+  "topology_inventory_sha256": "dbd6632edd5e86432b7cfed65383b6b6d44c37f868efe2a70f2ab76a9f46e507",
+  "unit": "004C1DZ_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION_QUALIFICATION"
+}
