@@ -103,7 +103,8 @@ DEPOT_TOOLS_ORIGIN_EXPECTED = https://chromium.googlesource.com/chromium/tools/d
 DEPOT_TOOLS_ORIGIN_ACTUAL = https://chromium.googlesource.com/chromium/tools/depot_tools.git
 DEPOT_TOOLS_HEAD = 6235028c6b18b73e68f5414f935ec537a25ea51a
 DEPOT_TOOLS_TREE = 0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44
-DEPOT_TOOLS_PARENT_SET = <empty>
+DEPOT_TOOLS_RAW_PARENT = a93dab0adcacd279e85f231c6d885db988bb225e
+DEPOT_TOOLS_SHALLOW_BOUNDARY = 6235028c6b18b73e68f5414f935ec537a25ea51a
 DEPOT_TOOLS_AUTHOR = Nico Weber <thakis@chromium.org>
 DEPOT_TOOLS_AUTHOR_DATE = 2026-02-01T17:11:14-08:00
 DEPOT_TOOLS_COMMITTER = LUCI CQ <infra-scoped@luci-project-accounts.iam.gserviceaccount.com>
@@ -113,7 +114,7 @@ DEPOT_TOOLS_FSCK = PASS
 DEPOT_TOOLS_CHECKOUT_STATUS = CLEAN
 ```
 
-The shallow exact-commit acquisition contains a root commit object with no locally available parent in the shallow graph. 004C1DK does not infer ancestry beyond the acquired shallow object boundary.
+The shallow exact-commit acquisition marks the selected commit as a shallow boundary. Git revision-walk formatting therefore suppressed `%P`, but direct `git cat-file -p HEAD` inspection of the acquired commit object preserved and bound the raw parent OID above. 004C1DK does not fetch or infer ancestry beyond that parent reference.
 
 ## 6. depot_tools deterministic tree-content manifest
 
@@ -136,7 +137,8 @@ PDFIUM_ORIGIN_EXPECTED = https://github.com/embedpdf/pdfium.git
 PDFIUM_ORIGIN_ACTUAL = https://github.com/embedpdf/pdfium.git
 PDFIUM_HEAD = cb29e78f2ba00c9298714d5f4a8bf7765f1e802f
 PDFIUM_TREE = 5b402772057e8c3a676c95882a4825350bdf6988
-PDFIUM_PARENT_SET = <empty>
+PDFIUM_RAW_PARENT = 960d97c71bddb13b7eb238918c314fa5b865317a
+PDFIUM_SHALLOW_BOUNDARY = cb29e78f2ba00c9298714d5f4a8bf7765f1e802f
 PDFIUM_AUTHOR = Bob Singor <bob@singor.com>
 PDFIUM_AUTHOR_DATE = 2026-06-08T09:49:07+03:00
 PDFIUM_COMMITTER = Bob Singor <bob@singor.com>
@@ -146,7 +148,7 @@ PDFIUM_FSCK = PASS
 PDFIUM_CHECKOUT_STATUS = CLEAN
 ```
 
-As with depot_tools, the exact-SHA fetch used `--depth=1`. Parent absence in this acquired shallow graph is preserved as a boundary rather than misreported as proof that the upstream commit has no parent.
+As with depot_tools, the exact-SHA fetch used `--depth=1` and marks the selected commit as a shallow boundary. Direct commit-object inspection binds the raw parent OID above; the parent object itself was not acquired, and no ancestry beyond that reference is claimed.
 
 ## 8. PDFium deterministic tree-content manifest
 
@@ -189,14 +191,16 @@ No `DEPS` file was evaluated as executable Python and no gclient/CIPD behavior w
 
 ```text
 HOST_EVIDENCE_ROOT = /private/tmp/signthos-004c1dk-source-acquisition-20260912T012933Z-28175
-QUALIFICATION_SUMMARY_BYTES = 1708
-QUALIFICATION_SUMMARY_SHA256 = f5e749874d0f9d331e73f7538da35619f3f227c263ca03382524719ab3b62b29
-EVIDENCE_INVENTORY_FILES = 47
-EVIDENCE_INVENTORY_BYTES = 4382
-EVIDENCE_INVENTORY_SHA256 = 0649947b29e840e2578e18560cd3bd1469ed813d43932328b23b4d00f6dcd938
+QUALIFICATION_SUMMARY_V1_BYTES = 1708
+QUALIFICATION_SUMMARY_V1_SHA256 = f5e749874d0f9d331e73f7538da35619f3f227c263ca03382524719ab3b62b29
+QUALIFICATION_SUMMARY_V2_BYTES = 1232
+QUALIFICATION_SUMMARY_V2_SHA256 = 2e4ce58d1263acc6c6af7e9176ad7893bc8b7589f3e22942ede5ed313a7c1635
+EVIDENCE_INVENTORY_FILES = 54
+EVIDENCE_INVENTORY_BYTES = 5070
+EVIDENCE_INVENTORY_SHA256 = a6ea2177c6dba7a79eb1fa36f68632d8e1c0311947a80685cca3840b64deda61
 ```
 
-The evidence root includes exact expected/actual origins, fetch stdout/stderr, acquired commit and tree identities, commit metadata, fsck results, raw recursive Git tree listings, deterministic Git-object manifests, independent working-tree manifests, symlink manifests, source checkout status, preflight information, and the final qualification summary/inventory.
+The evidence root includes exact expected/actual origins, fetch stdout/stderr, acquired commit and tree identities, raw commit objects and raw parent OIDs, shallow-boundary files, commit metadata, fsck results, raw recursive Git tree listings, deterministic Git-object manifests, independent working-tree manifests, symlink manifests, source checkout status, preflight information, the preserved first summary, the corrected V2 summary, and the final inventory. The V2 summary repairs only the shallow-parent interpretation; no acquisition was rerun.
 
 ## 11. Existing Signthos working tree preservation
 
