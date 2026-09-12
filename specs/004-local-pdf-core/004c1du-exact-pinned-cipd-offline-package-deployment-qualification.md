@@ -5,6 +5,7 @@ Issue: #7
 Owning specification: `004-local-pdf-core`
 Canonical base: `9d772fb74aea2e1aedf5dfa3f5f934f3586ba823`
 Runtime authority: `github:issue-comment:5643948017`
+Review-repair authority: `github:issue-comment:5645883988`
 
 ## 1. Purpose and authority boundary
 
@@ -16,8 +17,9 @@ This grain does not claim that `cipd pkg-deploy` is equivalent to a full `gclien
 
 ```text
 004C1DU_AUTHORITY = EXACT_PINNED_CIPD_OFFLINE_PACKAGE_DEPLOYMENT_QUALIFICATION_ONLY
-ALLOWED_REPOSITORY_PATH = specs/004-local-pdf-core/004c1du-exact-pinned-cipd-offline-package-deployment-qualification.md
-MAX_CHANGED_REPOSITORY_FILES = 1
+ALLOWED_REPOSITORY_PATH_1 = specs/004-local-pdf-core/004c1du-exact-pinned-cipd-offline-package-deployment-qualification.md
+ALLOWED_REPOSITORY_PATH_2 = specs/004-local-pdf-core/evidence/004c1du-evidence-bundle.json
+MAX_CHANGED_REPOSITORY_FILES = 2
 NETWORK_MODE = none
 HOST_MOUNTS = 0
 IMAGE_PULL = 0
@@ -324,6 +326,27 @@ EVIDENCE_SUMMARY_SHA256 = 936598fa3ae0e99eff867d4fa480d04dc9a189d1f1bc2b351b22c0
 
 The evidence root preserves container argv/state/inspect/diff records, exact guest script bytes, input identities, per-package JSON/stdout/stderr/exit results, both deterministic inventories, version-file records, the pre-start failure, and closeout summaries.
 
+### Repository-visible evidence repair
+
+The first independent exact-head review of PR #214, `github:issue-comment:5645868469`, found one material actionable gap: the host-local evidence root was not accessible to the reviewer, so the central Docker/state/diff/package/inventory evidence could not be independently recomputed. The review reported no other material inconsistency. The finding is preserved rather than reclassified as a pass.
+
+Issue #7 granted one forward-only repair in `github:issue-comment:5645883988`. The repair publishes the complete current UTF-8 evidence-root file set as one deterministic repository-visible JSON bundle. The bundle contains every source file's relative path, byte count, SHA-256, mode, and exact UTF-8 content, sorted by relative path. It includes the 135 files covered by the external closure inventory plus the closure inventory and closure summary files themselves.
+
+```text
+EVIDENCE_BUNDLE_PATH = specs/004-local-pdf-core/evidence/004c1du-evidence-bundle.json
+EVIDENCE_BUNDLE_FORMAT = signthos-evidence-bundle-v1
+EVIDENCE_BUNDLE_SOURCE_FILES = 137
+EVIDENCE_BUNDLE_SOURCE_BYTES = 171041
+EVIDENCE_BUNDLE_MANIFEST_FORMAT = relative_path<TAB>bytes<TAB>sha256<TAB>mode<LF>
+EVIDENCE_BUNDLE_MANIFEST_SHA256 = d8d04036cd5e1e8d56dc4d42c345feb566dc61e4ba2f2d37f2af76713d5c4900
+EVIDENCE_BUNDLE_BYTES = 214794
+EVIDENCE_BUNDLE_SHA256 = 9747547669c7134dad35feb5713669d698b34b13a5610d4901f84963f62dbcd0
+EVIDENCE_BUNDLE_BUILDER_BYTES = 1236
+EVIDENCE_BUNDLE_BUILDER_SHA256 = 2f3c61e8b2e4d323e58b19bb57c10188c2a34408cc4d53c3daf8341502e909d1
+```
+
+An independent recomputation from the repository bundle verified all 137 embedded file byte counts and SHA-256 values, verified lexical path ordering, and reproduced the manifest SHA-256 exactly. The bundle does not add or alter runtime evidence; it makes the already-recorded evidence reviewable from the Git candidate itself.
+
 ## 14. Qualification result
 
 ```text
@@ -385,15 +408,15 @@ SUCCESSOR_AUTHORITY = NOT_GRANTED_BY_004C1DU
 This candidate may merge only if:
 
 1. canonical `main` remains `9d772fb74aea2e1aedf5dfa3f5f934f3586ba823` through immediate premerge race proof;
-2. exactly one qualification commit and exactly one authorized repository path change;
+2. exactly two commits are present: the original qualification commit plus one forward-only review-repair commit; exactly two authorized repository paths change;
 3. the discovery V1 pre-start failure remains preserved and is not rewritten as success;
 4. the exact 004C1DJ image and exact 004C1DT client identities remain bound;
 5. both independent deployments and the byte-identical deterministic inventories remain exact;
 6. no claim upgrades this local primitive into full `gclient ensure` equivalence;
 7. `git diff --check` passes;
 8. applicable exact-head checks are accounted truthfully;
-9. a fresh independent substantive exact-head review reports no material/actionable finding;
-10. any repair is forward-only and any changed head receives a fresh review;
+9. the initial exact-head material finding `github:issue-comment:5645868469` remains preserved, and the repository-visible evidence repair is bound exactly;
+10. a fresh independent substantive review of the repaired exact head reports no material/actionable finding; any further repair is forward-only and any changed head receives another fresh review;
 11. unresolved material review threads are zero;
 12. guarded normal merge uses the exact reviewed head;
 13. post-merge tree, ordered parents, signature, path/blob, workflow state, and open-PR frontier are mechanically verified;
