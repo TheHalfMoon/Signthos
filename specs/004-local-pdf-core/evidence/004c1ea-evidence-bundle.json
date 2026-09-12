@@ -1,0 +1,122 @@
+{
+  "authority": {
+    "runtime_preflight": "github:issue-comment:5648665987",
+    "inspect_format_correction": "github:issue-comment:5648673138",
+    "runtime_closeout_repository_authority": "github:issue-comment:5648709192"
+  },
+  "builder_image": {
+    "architecture": "amd64",
+    "id": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+    "os": "linux",
+    "working_directory": "/src"
+  },
+  "canonical_base": "9b0b7b97ef9c12ec27062280fbb2e8dcc78034d1",
+  "canonical_base_tree": "7580c8e7063074f5167a58ec5d47cc56afca2dda",
+  "external_evidence": {
+    "file_count": 4376,
+    "manifest_sha256": "03c2730040d2b0aa06a6bbe2c9be3892fc3b3ea5684ed131560d42d3939a9503",
+    "preflight_summary_sha256": "ccc271d04ed104ea61d715b2109af7049b10e2bde1981aacbdf173ba9504b82d"
+  },
+  "future_execution_envelope": {
+    "entrypoint": "/bin/bash",
+    "environment": {
+      "EMSDK": "/emsdk",
+      "EMSDK_PYTHON": "/usr/bin/python3",
+      "EM_CONFIG": "/emsdk/.emscripten",
+      "HOME": "/tmp/signthos-home",
+      "PYTHON": "/usr/bin/python3"
+    },
+    "path": [
+      "/workspace/packages/pdfium/pdfium-src/buildtools/linux64",
+      "/workspace/packages/pdfium/pdfium-src/third_party/ninja",
+      "/workspace/packages/pdfium/pdfium-src/third_party/llvm-build/Release+Asserts/bin",
+      "/emsdk/upstream/emscripten",
+      "/emsdk/node/20.18.0_64bit/bin",
+      "/usr/local/sbin",
+      "/usr/local/bin",
+      "/usr/sbin",
+      "/usr/bin",
+      "/sbin",
+      "/bin"
+    ],
+    "script": "/workspace/packages/pdfium/scripts/build.sh",
+    "user": "root",
+    "working_directory": "/workspace/packages/pdfium"
+  },
+  "image_runtime_identities": {
+    "bash": {
+      "path": "/bin/bash",
+      "sha256": "59474588a312b6b6e73e5a42a59bf71e62b55416b6c9d5e4a6e1c630c2a9ecd4"
+    },
+    "emcc_py": {
+      "path": "/emsdk/upstream/emscripten/emcc.py",
+      "sha256": "b8dd8bb2fa242301c894072ae91fa7c721bde080b8f2df8a39f44ad6cfaec2db"
+    },
+    "emscripten_config": {
+      "path": "/emsdk/.emscripten",
+      "sha256": "c6ea9c86006871df94395ed3214ebd6dea53064946a3cb0b99002fd75bf2ba1b"
+    },
+    "emxx": {
+      "path": "/emsdk/upstream/emscripten/em++",
+      "sha256": "b0c9551f9155fa9c028efa24591acdfd30f02f32fb247cf9266f5f0f2ede7589"
+    },
+    "emxx_py": {
+      "path": "/emsdk/upstream/emscripten/em++.py",
+      "sha256": "017f735c953318fdaaa4af68c8d4bf13936a787ddbd5dad804d532b0223b6c2f"
+    },
+    "node": {
+      "path": "/emsdk/node/20.18.0_64bit/bin/node",
+      "sha256": "94ea6cc6b866ec29a0f5924eb636783f814e0ef0e5925a1d3ccb5f55b91ac633"
+    },
+    "python3": {
+      "path": "/usr/bin/python3",
+      "symlink_target": "python3.10",
+      "target_sha256": "b94e9b56bc1f96b18d36a0f1d14308575bb7b5960eda94ae0520f0376e95d12d"
+    }
+  },
+  "prebuild_state": {
+    "build_wasm": "ABSENT",
+    "gclient_branch_expected": "SKIPPED_BY_EXISTING_LLVM_DIRECTORY",
+    "initial_gn_gen_expected": true,
+    "out": "ABSENT",
+    "out_wasm": "ABSENT",
+    "out_wasm_args_gn": "ABSENT",
+    "vendor_output_sink": "PRESENT_EMPTY_DIRECTORY"
+  },
+  "prohibited_execution": {
+    "build_sh": 0,
+    "clang": 0,
+    "container_execs": 0,
+    "container_starts": 0,
+    "emscripten": 0,
+    "gclient": 0,
+    "gn": 0,
+    "host_mounts": 0,
+    "network_requests": 0,
+    "ninja": 0,
+    "node": 0,
+    "pdfium": 0,
+    "rust": 0
+  },
+  "result": "PASS_EXECUTION_ENVELOPE_PREFLIGHT_NO_TOOL_EXECUTION",
+  "shadowing": {
+    "future_home_cargo_bin": "ABSENT_AT_PREFLIGHT_AND_FUTURE_HOME_IS_FRESH_ISOLATED",
+    "original_emsdk_node_candidate": "/emsdk/node (directory)",
+    "original_emsdk_root_omitted_from_future_path": true
+  },
+  "unit": "004C1EA_EXACT_OFFLINE_RELEASE_EXECUTION_ENVELOPE_PREFLIGHT_QUALIFICATION",
+  "workspace_tool_identities": {
+    "clang": {
+      "path": "/workspace/packages/pdfium/pdfium-src/third_party/llvm-build/Release+Asserts/bin/clang",
+      "sha256": "841fd88c234ac9e4dd346c99ba21137a8cd62f0d0e243b8b6a29cc84cbe2784a"
+    },
+    "gn": {
+      "path": "/workspace/packages/pdfium/pdfium-src/buildtools/linux64/gn",
+      "sha256": "f1a4546385818b08c8c792ce5cb5c46bfd5f46d663e8b2734c7307c4a5c6da7e"
+    },
+    "ninja": {
+      "path": "/workspace/packages/pdfium/pdfium-src/third_party/ninja/ninja",
+      "sha256": "09f0e5a8a2cf762b24b4d3ed464ffb2529e650d2efc36bab31da36aa93791efc"
+    }
+  }
+}
