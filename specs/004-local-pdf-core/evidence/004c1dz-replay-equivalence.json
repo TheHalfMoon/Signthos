@@ -1,5 +1,659 @@
 {
   "byte_identical_evidence_paths": 26,
+  "cipd_diagnostic_comparison_proof": {
+    "all_raw_hashes_bound": true,
+    "all_six_normalized_semantics_equal": true,
+    "all_unexpected_line_counts_zero": true,
+    "normalization_spec": {
+      "allowed_exact_messages": [
+        "Moving files to their final destination...",
+        "Cleaning up..."
+      ],
+      "comparison_rule": "canonical sorted compact JSON + LF of stable semantic object must be byte-identical across replay1 and replay2",
+      "deploy_regex": "^Deploying (?P<instance>\\S+) into (?P<target>\\S+) \\(copy-mode override\\)$",
+      "deployed_regex": "^Deployed (?P<instance>\\S+) in (?P<elapsed>[0-9.]+s)$",
+      "extract_regex": "^Extracting \\(\\s*(?P<files_left>\\d+) files left\\):\\s+(?P<done>[0-9.]+)/(?P<total>[0-9.]+) (?P<unit>[KMGT]?B) \\(\\s*(?P<percent>\\d+)%(?:, [^)]+)?\\)$",
+      "line_prefix_regex": "^\\[P(?P<pid>\\d+) (?P<timestamp>\\d{2}:\\d{2}:\\d{2}\\.\\d{3}) (?P<source>[^ ]+) (?P<level>[A-Z])\\] (?P<message>.*)$",
+      "normalized_only": [
+        "pid",
+        "wall-clock timestamp",
+        "intermediate sampled extraction progress",
+        "throughput text embedded in extraction samples",
+        "terminal elapsed-time text"
+      ],
+      "rejection_rules": [
+        "reject malformed or non-UTF-8 log",
+        "reject missing trailing LF",
+        "reject unexpected message class",
+        "reject unexpected log level",
+        "reject unexpected source location",
+        "reject changed package instance",
+        "reject changed deployment target",
+        "reject changed install mode",
+        "reject changed archive total",
+        "reject nonzero terminal files-left",
+        "reject non-100 terminal percent",
+        "reject lifecycle order drift"
+      ],
+      "required_lifecycle": [
+        "deploying",
+        "one-or-more extracting",
+        "moving",
+        "cleaning",
+        "deployed"
+      ],
+      "stable_fields": [
+        "package_instance",
+        "target",
+        "install_mode",
+        "archive_total",
+        "terminal_files_left",
+        "terminal_percent",
+        "log_level",
+        "stable_sources",
+        "unexpected_line_count"
+      ]
+    },
+    "packages": [
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-01.stderr",
+        "raw_replay1": {
+          "bytes": 592,
+          "lines": [
+            "[P1091 19:42:06.844 deployer.go:303 I] Deploying gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC into /work/pdfium/buildtools/linux64(/) (copy-mode override)",
+            "[P1091 19:42:06.851 reader.go:400 I] Extracting (3 files left): 0.0/8.6 MB (  0%)",
+            "[P1091 19:42:06.955 reader.go:424 I] Extracting (0 files left): 8.6/8.6 MB (100%)",
+            "[P1091 19:42:06.955 deployer.go:388 I] Moving files to their final destination...",
+            "[P1091 19:42:06.956 deployer.go:403 I] Cleaning up...",
+            "[P1091 19:42:06.957 deployer.go:409 I] Deployed gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC in 0.1s"
+          ],
+          "sha256": "2efa0a33281b32fb131c7ba887fc6a40be5bfe5e187767a2ca964e57c5fdc16c",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 592,
+          "lines": [
+            "[P1091 20:09:48.829 deployer.go:303 I] Deploying gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC into /work/pdfium/buildtools/linux64(/) (copy-mode override)",
+            "[P1091 20:09:48.836 reader.go:400 I] Extracting (3 files left): 0.0/8.6 MB (  0%)",
+            "[P1091 20:09:48.924 reader.go:424 I] Extracting (0 files left): 8.6/8.6 MB (100%)",
+            "[P1091 20:09:48.925 deployer.go:388 I] Moving files to their final destination...",
+            "[P1091 20:09:48.926 deployer.go:403 I] Cleaning up...",
+            "[P1091 20:09:48.927 deployer.go:409 I] Deployed gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC in 0.1s"
+          ],
+          "sha256": "a37cd630ef56511d7731502311400b24cba3c613620df8626b99a959be53c82b",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "0.1s",
+          "pids": [
+            1091
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "19:42:06.844",
+            "19:42:06.851",
+            "19:42:06.955",
+            "19:42:06.955",
+            "19:42:06.956",
+            "19:42:06.957"
+          ]
+        },
+        "replay1_normalized_sha256": "9f09fe122d94961cace1b3fefe897bc201c8baf8fe16471bca795c51b8df9b7b",
+        "replay2_dynamic_fields": {
+          "elapsed": "0.1s",
+          "pids": [
+            1091
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "20:09:48.829",
+            "20:09:48.836",
+            "20:09:48.924",
+            "20:09:48.925",
+            "20:09:48.926",
+            "20:09:48.927"
+          ]
+        },
+        "replay2_normalized_sha256": "9f09fe122d94961cace1b3fefe897bc201c8baf8fe16471bca795c51b8df9b7b",
+        "stable_semantics": {
+          "archive_total": "8.6 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "gn/gn/linux-amd64:qdyvoyVF792YFWTtJi04a3sw6x7Dffk3mrD7x0Ey0_sC",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/buildtools/linux64(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "9f09fe122d94961cace1b3fefe897bc201c8baf8fe16471bca795c51b8df9b7b",
+        "unexpected_line_count": 0
+      },
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-02.stderr",
+        "raw_replay1": {
+          "bytes": 737,
+          "lines": [
+            "[P1100 19:42:08.354 deployer.go:303 I] Deploying infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC into /work/pdfium/buildtools/reclient(/) (copy-mode override)",
+            "[P1100 19:42:08.361 reader.go:400 I] Extracting (20 files left):   0.0/370.0 MB (  0%)",
+            "[P1100 19:42:08.949 reader.go:424 I] Extracting (19 files left):  31.4/370.0 MB (  8%, 53.42 MB/s)",
+            "[P1100 19:42:09.434 reader.go:424 I] Extracting ( 0 files left): 370.0/370.0 MB (100%, 136.83 MB/s)",
+            "[P1100 19:42:09.435 deployer.go:388 I] Moving files to their final destination...",
+            "[P1100 19:42:09.436 deployer.go:403 I] Cleaning up...",
+            "[P1100 19:42:09.437 deployer.go:409 I] Deployed infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC in 1.1s"
+          ],
+          "sha256": "d9e34013a70c2ac5591c0213b3e9f3d6491e829e4d540ff3642061668614908d",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 837,
+          "lines": [
+            "[P1099 20:09:50.115 deployer.go:303 I] Deploying infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC into /work/pdfium/buildtools/reclient(/) (copy-mode override)",
+            "[P1099 20:09:50.124 reader.go:400 I] Extracting (20 files left):   0.0/370.0 MB (  0%)",
+            "[P1099 20:09:50.765 reader.go:424 I] Extracting (19 files left):  31.9/370.0 MB (  9%, 49.76 MB/s)",
+            "[P1099 20:09:51.336 reader.go:424 I] Extracting ( 4 files left): 315.7/370.0 MB ( 85%, 104.39 MB/s)",
+            "[P1099 20:09:51.374 reader.go:424 I] Extracting ( 0 files left): 370.0/370.0 MB (100%, 104.39 MB/s)",
+            "[P1099 20:09:51.375 deployer.go:388 I] Moving files to their final destination...",
+            "[P1099 20:09:51.377 deployer.go:403 I] Cleaning up...",
+            "[P1099 20:09:51.378 deployer.go:409 I] Deployed infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC in 1.3s"
+          ],
+          "sha256": "5f4a096caa14b5e049f5deca04b9c249142a1def546d80ee42494d312ce18679",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "1.1s",
+          "pids": [
+            1100
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "31.4",
+              "files_left": 19,
+              "percent": 8
+            }
+          ],
+          "timestamps": [
+            "19:42:08.354",
+            "19:42:08.361",
+            "19:42:08.949",
+            "19:42:09.434",
+            "19:42:09.435",
+            "19:42:09.436",
+            "19:42:09.437"
+          ]
+        },
+        "replay1_normalized_sha256": "ed49b8f6ff72c2874ad7bb799f34b18e596c35a8e50f6288fcd0e19b731bbcd7",
+        "replay2_dynamic_fields": {
+          "elapsed": "1.3s",
+          "pids": [
+            1099
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "31.9",
+              "files_left": 19,
+              "percent": 9
+            },
+            {
+              "done": "315.7",
+              "files_left": 4,
+              "percent": 85
+            }
+          ],
+          "timestamps": [
+            "20:09:50.115",
+            "20:09:50.124",
+            "20:09:50.765",
+            "20:09:51.336",
+            "20:09:51.374",
+            "20:09:51.375",
+            "20:09:51.377",
+            "20:09:51.378"
+          ]
+        },
+        "replay2_normalized_sha256": "ed49b8f6ff72c2874ad7bb799f34b18e596c35a8e50f6288fcd0e19b731bbcd7",
+        "stable_semantics": {
+          "archive_total": "370.0 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "infra/rbe/client/linux-amd64:ADvz6sQzvQcUUOl6LmYz9_kwRoKMi-QopcOTjGPdF2QC",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/buildtools/reclient(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "ed49b8f6ff72c2874ad7bb799f34b18e596c35a8e50f6288fcd0e19b731bbcd7",
+        "unexpected_line_count": 0
+      },
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-03.stderr",
+        "raw_replay1": {
+          "bytes": 623,
+          "lines": [
+            "[P1117 19:42:09.514 deployer.go:303 I] Deploying infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC into /work/pdfium/third_party/ninja(/) (copy-mode override)",
+            "[P1117 19:42:09.522 reader.go:400 I] Extracting (4 files left): 0.0/0.4 MB (  0%)",
+            "[P1117 19:42:09.531 reader.go:424 I] Extracting (0 files left): 0.4/0.4 MB (100%)",
+            "[P1117 19:42:09.532 deployer.go:388 I] Moving files to their final destination...",
+            "[P1117 19:42:09.532 deployer.go:403 I] Cleaning up...",
+            "[P1117 19:42:09.533 deployer.go:409 I] Deployed infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC in 0.0s"
+          ],
+          "sha256": "0f6e01b191c4df3ca367fdcc429540b3cb3cc5613e2ca8b55caad42cf7d991ed",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 623,
+          "lines": [
+            "[P1116 20:09:51.500 deployer.go:303 I] Deploying infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC into /work/pdfium/third_party/ninja(/) (copy-mode override)",
+            "[P1116 20:09:51.509 reader.go:400 I] Extracting (4 files left): 0.0/0.4 MB (  0%)",
+            "[P1116 20:09:51.518 reader.go:424 I] Extracting (0 files left): 0.4/0.4 MB (100%)",
+            "[P1116 20:09:51.519 deployer.go:388 I] Moving files to their final destination...",
+            "[P1116 20:09:51.520 deployer.go:403 I] Cleaning up...",
+            "[P1116 20:09:51.521 deployer.go:409 I] Deployed infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC in 0.0s"
+          ],
+          "sha256": "343545bfd5b7dcd50b57464b8f09b43728e2961a76c22e5ecef6bceb70950372",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "0.0s",
+          "pids": [
+            1117
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "19:42:09.514",
+            "19:42:09.522",
+            "19:42:09.531",
+            "19:42:09.532",
+            "19:42:09.532",
+            "19:42:09.533"
+          ]
+        },
+        "replay1_normalized_sha256": "ce27d65ae60dcdc52f29a6f7d24812576e33be34c979ca5a6ba67d0b386d8c78",
+        "replay2_dynamic_fields": {
+          "elapsed": "0.0s",
+          "pids": [
+            1116
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "20:09:51.500",
+            "20:09:51.509",
+            "20:09:51.518",
+            "20:09:51.519",
+            "20:09:51.520",
+            "20:09:51.521"
+          ]
+        },
+        "replay2_normalized_sha256": "ce27d65ae60dcdc52f29a6f7d24812576e33be34c979ca5a6ba67d0b386d8c78",
+        "stable_semantics": {
+          "archive_total": "0.4 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "infra/3pp/tools/ninja/linux-amd64:Px8cwPaaG8_fZ_tsK8dBmx3YEruNDnmvqb-oo1U7UIIC",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/third_party/ninja(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "ce27d65ae60dcdc52f29a6f7d24812576e33be34c979ca5a6ba67d0b386d8c78",
+        "unexpected_line_count": 0
+      },
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-04.stderr",
+        "raw_replay1": {
+          "bytes": 717,
+          "lines": [
+            "[P1128 19:42:09.838 deployer.go:303 I] Deploying build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC into /work/pdfium/third_party/siso/cipd(/) (copy-mode override)",
+            "[P1128 19:42:09.847 reader.go:400 I] Extracting (3 files left):  0.0/58.8 MB (  0%)",
+            "[P1128 19:42:10.524 reader.go:424 I] Extracting (1 files left): 58.8/58.8 MB (100%, 86.84 MB/s)",
+            "[P1128 19:42:10.525 reader.go:424 I] Extracting (0 files left): 58.8/58.8 MB (100%, 86.84 MB/s)",
+            "[P1128 19:42:10.525 deployer.go:388 I] Moving files to their final destination...",
+            "[P1128 19:42:10.526 deployer.go:403 I] Cleaning up...",
+            "[P1128 19:42:10.527 deployer.go:409 I] Deployed build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC in 0.7s"
+          ],
+          "sha256": "f2be0f007d0aa9f30cf1fd1f1874de1f79ff2cb7962271b294e2425f165e0703",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 717,
+          "lines": [
+            "[P1126 20:09:51.922 deployer.go:303 I] Deploying build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC into /work/pdfium/third_party/siso/cipd(/) (copy-mode override)",
+            "[P1126 20:09:51.929 reader.go:400 I] Extracting (3 files left):  0.0/58.8 MB (  0%)",
+            "[P1126 20:09:52.578 reader.go:424 I] Extracting (1 files left): 58.8/58.8 MB (100%, 90.55 MB/s)",
+            "[P1126 20:09:52.579 reader.go:424 I] Extracting (0 files left): 58.8/58.8 MB (100%, 90.55 MB/s)",
+            "[P1126 20:09:52.580 deployer.go:388 I] Moving files to their final destination...",
+            "[P1126 20:09:52.581 deployer.go:403 I] Cleaning up...",
+            "[P1126 20:09:52.582 deployer.go:409 I] Deployed build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC in 0.7s"
+          ],
+          "sha256": "7a8e2f71b4d881e5fd050053a1760dc3f137554d95c3ca3dcaa0ad66b8fa972e",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "0.7s",
+          "pids": [
+            1128
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "58.8",
+              "files_left": 1,
+              "percent": 100
+            }
+          ],
+          "timestamps": [
+            "19:42:09.838",
+            "19:42:09.847",
+            "19:42:10.524",
+            "19:42:10.525",
+            "19:42:10.525",
+            "19:42:10.526",
+            "19:42:10.527"
+          ]
+        },
+        "replay1_normalized_sha256": "7e688c49525939666a40d69ea961fcb01b61f1f41d159216bf96761c34786221",
+        "replay2_dynamic_fields": {
+          "elapsed": "0.7s",
+          "pids": [
+            1126
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "58.8",
+              "files_left": 1,
+              "percent": 100
+            }
+          ],
+          "timestamps": [
+            "20:09:51.922",
+            "20:09:51.929",
+            "20:09:52.578",
+            "20:09:52.579",
+            "20:09:52.580",
+            "20:09:52.581",
+            "20:09:52.582"
+          ]
+        },
+        "replay2_normalized_sha256": "7e688c49525939666a40d69ea961fcb01b61f1f41d159216bf96761c34786221",
+        "stable_semantics": {
+          "archive_total": "58.8 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "build/siso/linux-amd64:MF0YOMnae3v_65ZGQClhx1E-zz_I_O7jmYzSNpEfhqkC",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/third_party/siso/cipd(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "7e688c49525939666a40d69ea961fcb01b61f1f41d159216bf96761c34786221",
+        "unexpected_line_count": 0
+      },
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-05.stderr",
+        "raw_replay1": {
+          "bytes": 647,
+          "lines": [
+            "[P1138 19:42:10.709 deployer.go:303 I] Deploying infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C into /work/pdfium/tools/resultdb(/) (copy-mode override)",
+            "[P1138 19:42:10.716 reader.go:400 I] Extracting (3 files left):  0.0/25.9 MB (  0%)",
+            "[P1138 19:42:10.932 reader.go:424 I] Extracting (0 files left): 25.9/25.9 MB (100%, 120.12 MB/s)",
+            "[P1138 19:42:10.933 deployer.go:388 I] Moving files to their final destination...",
+            "[P1138 19:42:10.934 deployer.go:403 I] Cleaning up...",
+            "[P1138 19:42:10.935 deployer.go:409 I] Deployed infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C in 0.2s"
+          ],
+          "sha256": "726018b3ddfe838ff24625f4966891f820c04d1b6c9e88a00ec254cafe8c66d9",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 647,
+          "lines": [
+            "[P1137 20:09:52.859 deployer.go:303 I] Deploying infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C into /work/pdfium/tools/resultdb(/) (copy-mode override)",
+            "[P1137 20:09:52.868 reader.go:400 I] Extracting (3 files left):  0.0/25.9 MB (  0%)",
+            "[P1137 20:09:53.094 reader.go:424 I] Extracting (0 files left): 25.9/25.9 MB (100%, 114.62 MB/s)",
+            "[P1137 20:09:53.095 deployer.go:388 I] Moving files to their final destination...",
+            "[P1137 20:09:53.096 deployer.go:403 I] Cleaning up...",
+            "[P1137 20:09:53.097 deployer.go:409 I] Deployed infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C in 0.2s"
+          ],
+          "sha256": "53a1b3866eff6cbf6a0cd96c6f66ebb4b526f63668085c111a3dd507a408d644",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "0.2s",
+          "pids": [
+            1138
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "19:42:10.709",
+            "19:42:10.716",
+            "19:42:10.932",
+            "19:42:10.933",
+            "19:42:10.934",
+            "19:42:10.935"
+          ]
+        },
+        "replay1_normalized_sha256": "08f47f7968ff4fd08a9c0d1d568db1cdc356f1c9c65220a501c1cded54544999",
+        "replay2_dynamic_fields": {
+          "elapsed": "0.2s",
+          "pids": [
+            1137
+          ],
+          "sampled_extract_progress": [],
+          "timestamps": [
+            "20:09:52.859",
+            "20:09:52.868",
+            "20:09:53.094",
+            "20:09:53.095",
+            "20:09:53.096",
+            "20:09:53.097"
+          ]
+        },
+        "replay2_normalized_sha256": "08f47f7968ff4fd08a9c0d1d568db1cdc356f1c9c65220a501c1cded54544999",
+        "stable_semantics": {
+          "archive_total": "25.9 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "infra/tools/result_adapter/linux-amd64:v9d06vVBFkAEPeZc_T_Hlp7dru37V52eI1N19xBapo4C",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/tools/resultdb(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "08f47f7968ff4fd08a9c0d1d568db1cdc356f1c9c65220a501c1cded54544999",
+        "unexpected_line_count": 0
+      },
+      {
+        "normalized_semantics_equal": true,
+        "path": "predecessor/cipd-06.stderr",
+        "raw_replay1": {
+          "bytes": 738,
+          "lines": [
+            "[P1149 19:42:11.271 deployer.go:303 I] Deploying skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC into /work/pdfium/tools/skia_goldctl/linux(/) (copy-mode override)",
+            "[P1149 19:42:11.281 reader.go:400 I] Extracting (2 files left):  0.0/55.0 MB (  0%)",
+            "[P1149 19:42:11.820 reader.go:424 I] Extracting (1 files left): 55.0/55.0 MB (100%, 101.86 MB/s)",
+            "[P1149 19:42:11.821 reader.go:424 I] Extracting (0 files left): 55.0/55.0 MB (100%, 101.86 MB/s)",
+            "[P1149 19:42:11.821 deployer.go:388 I] Moving files to their final destination...",
+            "[P1149 19:42:11.822 deployer.go:403 I] Cleaning up...",
+            "[P1149 19:42:11.823 deployer.go:409 I] Deployed skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC in 0.6s"
+          ],
+          "sha256": "3ee753c058f62f08c57452249572bbd8500a4f38b736337b0994bd9fa4ac004b",
+          "trailing_lf": true
+        },
+        "raw_replay2": {
+          "bytes": 736,
+          "lines": [
+            "[P1147 20:09:53.516 deployer.go:303 I] Deploying skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC into /work/pdfium/tools/skia_goldctl/linux(/) (copy-mode override)",
+            "[P1147 20:09:53.523 reader.go:400 I] Extracting (2 files left):  0.0/55.0 MB (  0%)",
+            "[P1147 20:09:54.096 reader.go:424 I] Extracting (1 files left): 55.0/55.0 MB (100%, 95.90 MB/s)",
+            "[P1147 20:09:54.097 reader.go:424 I] Extracting (0 files left): 55.0/55.0 MB (100%, 95.90 MB/s)",
+            "[P1147 20:09:54.098 deployer.go:388 I] Moving files to their final destination...",
+            "[P1147 20:09:54.099 deployer.go:403 I] Cleaning up...",
+            "[P1147 20:09:54.100 deployer.go:409 I] Deployed skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC in 0.6s"
+          ],
+          "sha256": "d49584a3d8893ce65ee0610628f2da681acefabb7f13c0321a8d9a749dcd0292",
+          "trailing_lf": true
+        },
+        "replay1_dynamic_fields": {
+          "elapsed": "0.6s",
+          "pids": [
+            1149
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "55.0",
+              "files_left": 1,
+              "percent": 100
+            }
+          ],
+          "timestamps": [
+            "19:42:11.271",
+            "19:42:11.281",
+            "19:42:11.820",
+            "19:42:11.821",
+            "19:42:11.821",
+            "19:42:11.822",
+            "19:42:11.823"
+          ]
+        },
+        "replay1_normalized_sha256": "eee926605e1d823e83e3997baabf16748208bee819c49d7d0056ae8648e9cfcd",
+        "replay2_dynamic_fields": {
+          "elapsed": "0.6s",
+          "pids": [
+            1147
+          ],
+          "sampled_extract_progress": [
+            {
+              "done": "55.0",
+              "files_left": 1,
+              "percent": 100
+            }
+          ],
+          "timestamps": [
+            "20:09:53.516",
+            "20:09:53.523",
+            "20:09:54.096",
+            "20:09:54.097",
+            "20:09:54.098",
+            "20:09:54.099",
+            "20:09:54.100"
+          ]
+        },
+        "replay2_normalized_sha256": "eee926605e1d823e83e3997baabf16748208bee819c49d7d0056ae8648e9cfcd",
+        "stable_semantics": {
+          "archive_total": "55.0 MB",
+          "install_mode": "copy-mode override",
+          "lifecycle": [
+            "deploying",
+            "extract-start",
+            "extract-complete",
+            "moving",
+            "cleaning",
+            "deployed"
+          ],
+          "log_level": "I",
+          "package_instance": "skia/tools/goldctl/linux-amd64:-kBgGbJiTOk-cPfW3Hk9s0VTgDJ_LLFD0GjjiFdxQxMC",
+          "stable_sources": [
+            "deployer.go:303",
+            "reader.go:400",
+            "reader.go:424",
+            "deployer.go:388",
+            "deployer.go:403",
+            "deployer.go:409"
+          ],
+          "target": "/work/pdfium/tools/skia_goldctl/linux(/)",
+          "terminal_files_left": 0,
+          "terminal_percent": 100,
+          "unexpected_line_count": 0
+        },
+        "stable_semantics_canonical_json_lf_sha256": "eee926605e1d823e83e3997baabf16748208bee819c49d7d0056ae8648e9cfcd",
+        "unexpected_line_count": 0
+      }
+    ],
+    "proof_version": 1,
+    "scope": "six retained CIPD stderr artifacts from two successful 004C1DZ replays"
+  },
   "cipd_result_jsons": [
     {
       "bytes": 123,
@@ -32,7 +686,7 @@
       "sha256": "3c070227f1f23bd8d27a8f5c7bfb1f4412620408be024bb5162b308c738de3d8"
     }
   ],
-  "classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_CIPD_DIAGNOSTIC_LOG_VARIANCE_ONLY",
+  "classification": "PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION",
   "control_input_identities_sha256": "a21806660cd609d9f59662bfc1b271958fd14dd64d327fd8a7d8481bbca12cb1",
   "control_placement_identities_sha256": "cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d",
   "deterministic_identity_gates": [
@@ -237,6 +891,8 @@
     "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION",
     "PASS_EXACT_OFFLINE_RELEASE_EXECUTION_TOPOLOGY_MATERIALIZATION"
   ],
+  "review_finding": "github:issue-comment:5648506136",
+  "review_repair_authority": "github:issue-comment:5648510735",
   "sorted_docker_diff_gzip_sha256": "d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12",
   "sorted_docker_diff_sha256": "08bf2dc649ca0141b761bd1dd2eb04437e0a36b22270fde174d3a812bc26aaa6",
   "storage_repair_authority": "github:issue-comment:5648331314; github:issue-comment:5648344486; github:issue-comment:5648350377",

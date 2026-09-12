@@ -1,6 +1,6 @@
 # 004C1DZ — Exact Offline Release Execution Topology Materialization Qualification
 
-Status: `QUALIFICATION_CANDIDATE / PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_CIPD_DIAGNOSTIC_LOG_VARIANCE_ONLY`
+Status: `QUALIFICATION_CANDIDATE / PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION`
 Issue: #7
 Owning specification: `004-local-pdf-core`
 Canonical base: `de4fdf680450fc842794744061bd0185e95abc29`
@@ -11,6 +11,8 @@ Storage locator repair: `github:issue-comment:5648344486`
 Storage repair closeout: `github:issue-comment:5648350377`
 Governance metadata correction: `github:issue-comment:5648471068`
 Runtime closeout and repository authority: `github:issue-comment:5648473181`
+Review finding: `github:issue-comment:5648506136`
+Forward-only review repair authority: `github:issue-comment:5648510735`
 
 ## 1. Purpose and authority boundary
 
@@ -102,7 +104,7 @@ The existing FreeType unresolved gitlink boundary remains an empty directory, th
 The exact replay-equivalence classification is:
 
 ```text
-PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_CIPD_DIAGNOSTIC_LOG_VARIANCE_ONLY
+PASS_TWO_REPLAYS_DETERMINISTIC_IDENTITY_EQUAL_WITH_REVIEWABLE_CIPD_DIAGNOSTIC_NORMALIZATION
 EVIDENCE_PATHS_TOTAL = 32
 BYTE_IDENTICAL_EVIDENCE_PATHS = 26
 DIAGNOSTIC_VARIANCE_PATHS = 6
@@ -122,7 +124,22 @@ predecessor/cipd-05.stderr
 predecessor/cipd-06.stderr
 ```
 
-Their differences are diagnostic PID, wall-clock timestamp, progress sampling, throughput, and elapsed-time text. They do not change package instance identity, target, exit result, deployed bytes, CIPD JSON result, CIPD event record, or final workspace identity. This document therefore does not claim that every diagnostic byte is deterministic.
+A fresh independent exact-head review correctly found that raw hashes alone did not make the diagnostic-only classification independently reviewable. The forward-only repair embeds the complete bounded text of all twelve retained stderr logs (six packages × two replays) directly in `004c1dz-replay-equivalence.json`, together with strict parsing/normalization rules, rejection rules, per-package stable semantic objects, raw hashes/sizes, dynamic-field records, and normalized semantic hashes. The comparison rejects unexpected message classes, levels, source locations, package instances, targets, install modes, archive totals, terminal states, or lifecycle order. It normalizes only PID, wall-clock timestamp, intermediate sampled extraction progress/throughput, and terminal elapsed-time text. All six package pairs produce byte-identical canonical stable-semantic JSON and zero unexpected lines. The diagnostic-only classification is therefore reviewable from the committed head without access to retained external stderr files. This document still does not claim that every diagnostic byte is deterministic.
+
+### 6.1 Reviewable CIPD diagnostic comparison repair
+
+The repaired replay-equivalence artifact contains the complete bounded stderr text for every differing CIPD diagnostic log from both successful replays. Its parser accepts only the observed CIPD deployment lifecycle grammar and fails closed on every unexpected line/message/source/level or stable-field change. For each package pair, canonical sorted compact JSON + LF of the stable semantic object hashes identically across replays.
+
+```text
+CIPD_DIAGNOSTIC_LOG_PAIRS = 6
+RAW_LOGS_EMBEDDED = 12 / 12
+UNEXPECTED_LINES = 0
+NORMALIZED_SEMANTIC_EQUALITY = 6 / 6
+NORMALIZED_FIELDS = PID / WALL_CLOCK / INTERMEDIATE_PROGRESS_THROUGHPUT / ELAPSED_TIME_ONLY
+RAW_HASH_BINDINGS_PRESERVED = 12 / 12
+```
+
+This forward-only repair changes no runtime evidence or replay result; it makes the already-observed variance class independently inspectable from repository-visible evidence.
 
 ## 7. Deterministic inventory and Docker-diff evidence
 
@@ -189,8 +206,8 @@ No acquired source, package body, GCS body, Git object store, materialized works
 | Repository evidence file | Bytes | SHA-256 |
 | --- | ---: | --- |
 | `004c1dz-control-placement-identities.json` | 2924 | `cdaccf5d2c45a03d4c9b3e1a74deb3d836532e6b2fd2df9ab6e178b1a950389d` |
-| `004c1dz-evidence-bundle.json` | 3774 | `abfe5d3c1d1b2292dc12202e5f0c4415f204dff7801637c2052705d632959f9e` |
-| `004c1dz-replay-equivalence.json` | 9051 | `0e9a0f44cc785a1457db1aba7d0163c42bc367dafe5066abac7367237732db27` |
+| `004c1dz-evidence-bundle.json` | 3989 | `3e9087f1c97e0fd746402ebd5b92f0f226d41a0aa70de2bbb5bf636a00bcb6d6` |
+| `004c1dz-replay-equivalence.json` | 36880 | `9ea44fb7d1fe3c6117aae7d6811242061494b97f5055b1ae2b8f537c5a376fdd` |
 | `004c1dz-replay1-docker-diff-sorted.txt.gz` | 834714 | `d6b8245aedf2711a684dd2f6ff693d80fbd4ea65b66a4481dc81aab781d1df12` |
 | `004c1dz-replay1-summary.json` | 1740 | `2c222e6e29ea17d33613958b3ff5c392b95e51570aab4c82208a850eea1eb9ad` |
 | `004c1dz-replay1-topology-inventory.jsonl.gz` | 6217522 | `6f3ba6bb881dc6bef33d16611449de25cad77ff4960a682c9bb9910321ec0f64` |
