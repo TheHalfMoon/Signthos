@@ -148,7 +148,7 @@ COMPACT_EVIDENCE_INVENTORY_SHA256 = 77af829f29157ceae4ed8ba4ae2bab41f3a86812766a
 CLOSEOUT_JSON_SHA256 = 7ec834a5fe93a7f2e92f76b60210087ca6766b37279338a42c6352baeb6b1275
 ```
 
-The compact inventory excludes the six package body files because those bytes are already bound directly by their canonical instance SHA-256 values and exact acquired sizes. It also excludes raw signed-URL response bodies because their expiring query parameters are transport artifacts, not package identities. Request JSON, response headers, transport summaries, per-target result records, the acquisition script, target manifests, summary, and closeout material are included.
+The compact inventory excludes the six package body files because those bytes are already bound directly by their canonical instance SHA-256 values and exact acquired sizes. It also excludes raw signed-URL response bodies because their expiring query parameters are transport artifacts, not package identities. Request JSON, response headers, transport summaries, per-target result records, the acquisition script, target manifests, and summary are included. `closeout.json` was produced after compact-inventory closure and is bound separately by `CLOSEOUT_JSON_SHA256`; it is not claimed as an inventory member.
 
 ## 8. What 004C1DQ establishes
 
@@ -173,6 +173,7 @@ The remaining unresolved dependency-byte class is the admitted GCS object set es
 
 ```text
 CIPD_INSTALLATION = NOT_AUTHORIZED
+CIPD_ENSURE = NOT_AUTHORIZED
 CIPD_PACKAGE_EXTRACTION = NOT_AUTHORIZED
 CIPD_PACKAGE_EXECUTION = NOT_AUTHORIZED
 CIPD_CLIENT_BOOTSTRAP_OR_UPDATE = NOT_AUTHORIZED
