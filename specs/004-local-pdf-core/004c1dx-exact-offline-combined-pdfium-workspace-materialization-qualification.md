@@ -190,16 +190,16 @@ No acquired source repository, object store, CIPD package/client, GCS body, mate
 
 | Repository evidence file | Bytes | SHA-256 | Raw bytes | Raw SHA-256 | Raw lines |
 | --- | ---: | --- | ---: | --- | ---: |
-| `004c1dx-evidence-bundle.json` | 3090 | `b4563549d43fd2a29c3c21c989bd593d4c86481933ef6181b7d1b433025ef79e` | — | — | — |
+| `004c1dx-evidence-bundle.json` | 3090 | `f84fd55240486d117100f1e284fbc1c8ec8dd562d462e6df0b2a52c54d008871` | — | — | — |
 | `004c1dx-failed1-docker-diff.txt.gz` | 626819 | `236b6048907719a1287125e0fff0f34c06936fce48bf28da628f9e5fffdff587` | 7854076 | `623f35994430d2bdc849b90ceecaea5badfd1f8f961edb757b3192485ca8d2d5` | 101222 |
 | `004c1dx-failed1-summary.json` | 804 | `88ee713157ae4905195022d686cd5d29da1ce5b85072feebb8e0e4753a1a64eb` | — | — | — |
 | `004c1dx-post-overlay-evidence.json` | 43593 | `d669bd6ea97e540617b5f880707563148db63f21ab7da5e2df52aa54d80ffad7` | — | — | — |
 | `004c1dx-success1-docker-diff.txt.gz` | 881087 | `39124ddcf91b5ade1c196788c8b528fef3d91fbc84824e128a98d534f5758cca` | 12081760 | `b4aa2b57cb60259185b6487081b7d64c11c4f5cb24beefac08962f15ec764bc0` | 142164 |
 | `004c1dx-success1-inventory.jsonl.gz` | 6213675 | `85e2011ae04a63cf324fc068bfe5c2f3f94816370e29afd71ac034c53e283844` | 27151651 | `7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5` | 138380 |
-| `004c1dx-success1-summary.json` | 2210 | `ef4426a3433654c8b4aa1da592d63506a22e5d2bfbeb9ea6eedf12b800e98b55` | — | — | — |
+| `004c1dx-success1-summary.json` | 2251 | `921b8067882e6fb27ebf104ffa712b40c93577b00570a16b9299177ee3e5fc15` | — | — | — |
 | `004c1dx-success2-docker-diff.txt.gz` | 881875 | `a5364bbde3e3905544813ae388cf180ba185b1ce9fb8b8d721db7682030e0c3a` | 12081760 | `dd805504c4d075a8db1ea47ba21460ec9d86bb85e0dc3b01cd71db0488d1cafb` | 142164 |
 | `004c1dx-success2-inventory.jsonl.gz` | 6213675 | `85e2011ae04a63cf324fc068bfe5c2f3f94816370e29afd71ac034c53e283844` | 27151651 | `7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5` | 138380 |
-| `004c1dx-success2-summary.json` | 2210 | `ef4426a3433654c8b4aa1da592d63506a22e5d2bfbeb9ea6eedf12b800e98b55` | — | — | — |
+| `004c1dx-success2-summary.json` | 2251 | `921b8067882e6fb27ebf104ffa712b40c93577b00570a16b9299177ee3e5fc15` | — | — | — |
 
 The two compressed success inventories are byte-identical with SHA-256 `85e2011ae04a63cf324fc068bfe5c2f3f94816370e29afd71ac034c53e283844`. Independent decompression of each reproduces raw inventory SHA-256 `7cd54b8a7f0a266bcbea46dde3e5d7b6daa6a8a17df39ff4303eb4aa18d9f7f5` and exactly 138380 lines.
 
