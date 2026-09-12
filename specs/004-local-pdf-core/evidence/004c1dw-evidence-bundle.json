@@ -1,0 +1,1114 @@
+{
+  "attempts": {
+    "failed1": {
+      "docker_diff_lines": 1891,
+      "docker_diff_sha256": "e49ac3d6a8457d9b4c565348a6697695c57ce526db170775e42e31a0e2c4c460",
+      "exit_code": 1,
+      "materializer_content": "#!/usr/bin/env python3\nimport argparse, hashlib, json, os, pathlib, stat, subprocess, sys\n\ndef sha256_file(p):\n    h=hashlib.sha256()\n    with open(p,'rb') as f:\n        for b in iter(lambda:f.read(1024*1024),b''): h.update(b)\n    return h.hexdigest()\n\ndef run(cmd, cwd=None):\n    env=os.environ.copy(); env.update({'GIT_CONFIG_NOSYSTEM':'1','GIT_TERMINAL_PROMPT':'0','HOME':'/tmp/signthos-home','XDG_CONFIG_HOME':'/tmp/signthos-xdg'})\n    cp=subprocess.run(cmd,cwd=cwd,env=env,text=True,capture_output=True)\n    if cp.returncode:\n        raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\n    return cp.stdout.strip(),cp.stderr\n\ndef safe_rel(p):\n    q=pathlib.PurePosixPath(p)\n    if q.is_absolute() or '..' in q.parts or not q.parts: raise RuntimeError(f'unsafe logical path {p!r}')\n\ndef scan_tree(root):\n    root=pathlib.Path(root); recs=[]\n    def walk(d, relbase=''):\n        entries=sorted(os.scandir(d),key=lambda x:x.name)\n        for ent in entries:\n            if ent.name=='.git': continue\n            rel=f'{relbase}/{ent.name}' if relbase else ent.name\n            st=ent.stat(follow_symlinks=False); mode=f'{stat.S_IMODE(st.st_mode):04o}'\n            if stat.S_ISLNK(st.st_mode):\n                recs.append({'path':rel,'type':'symlink','mode':mode,'size':st.st_size,'target':os.readlink(ent.path)})\n            elif stat.S_ISDIR(st.st_mode):\n                recs.append({'path':rel,'type':'dir','mode':mode,'size':0}); walk(ent.path,rel)\n            elif stat.S_ISREG(st.st_mode):\n                recs.append({'path':rel,'type':'file','mode':mode,'size':st.st_size,'sha256':sha256_file(ent.path)})\n            else: raise RuntimeError(f'unsupported materialized type {rel}')\n    walk(root); return recs\n\ndef main():\n    ap=argparse.ArgumentParser(); ap.add_argument('--manifest',required=True); ap.add_argument('--workspace',required=True); ap.add_argument('--evidence',required=True); a=ap.parse_args()\n    mb=pathlib.Path(a.manifest).read_bytes(); manifest=json.loads(mb); workspace=pathlib.Path(a.workspace); ev=pathlib.Path(a.evidence)\n    if workspace.exists() and any(workspace.iterdir()): raise RuntimeError('workspace not empty')\n    workspace.mkdir(parents=True,exist_ok=True); ev.mkdir(parents=True,exist_ok=True); pathlib.Path('/tmp/signthos-home').mkdir(exist_ok=True); pathlib.Path('/tmp/signthos-xdg').mkdir(exist_ok=True)\n    roots=[]\n    for r in manifest:\n        safe_rel(r['logical_path']); src=r['source_git']; target=workspace.joinpath(*pathlib.PurePosixPath(r['logical_path']).parts)\n        if target.exists() or target.is_symlink(): raise RuntimeError(f'path collision before root materialization {r[\"logical_path\"]}')\n        sh,_=run(['git','--git-dir',src,'rev-parse','HEAD']); st,_=run(['git','--git-dir',src,'rev-parse','HEAD^{tree}'])\n        if sh!=r['revision'] or st!=r['tree']: raise RuntimeError(f'source identity mismatch {r[\"logical_path\"]} {sh} {st}')\n        target.parent.mkdir(parents=True,exist_ok=True)\n        run(['git','init','-q',str(target)])\n        for k,v in [('core.hooksPath','/dev/null'),('submodule.recurse','false'),('core.autocrlf','false')]: run(['git','-C',str(target),'config',k,v])\n        out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n        fh,_=run(['git','-C',str(target),'rev-parse','FETCH_HEAD'])\n        if fh!=r['revision']: raise RuntimeError(f'fetch identity mismatch {r[\"logical_path\"]} {fh}')\n        run(['git','-C',str(target),'checkout','-q','--detach','--force',r['revision']])\n        th,_=run(['git','-C',str(target),'rev-parse','HEAD']); tt,_=run(['git','-C',str(target),'rev-parse','HEAD^{tree}']); status,_=run(['git','-C',str(target),'status','--porcelain'])\n        hooks,_=run(['git','-C',str(target),'config','--get','core.hooksPath'])\n        active=[]; hd=target/'.git/hooks'\n        if hd.exists(): active=[x.name for x in hd.iterdir() if x.is_file() and not x.name.endswith('.sample')]\n        if th!=r['revision'] or tt!=r['tree'] or status or hooks!='/dev/null' or active: raise RuntimeError(f'target verification failed {r[\"logical_path\"]}')\n        roots.append({'index':r['index'],'logical_path':r['logical_path'],'revision':th,'tree':tt,'status':'clean','hooks_path':hooks,'active_hooks':active})\n    # Explicit special-entry boundary.\n    dlg=workspace/'third_party/freetype/src/subprojects/dlg'\n    if not dlg.is_dir() or dlg.is_symlink() or any(dlg.iterdir()): raise RuntimeError('FreeType gitlink boundary is not an empty directory')\n    sk=workspace/'third_party/skia/src/ports/fontations/Cargo.toml'\n    if not sk.is_symlink(): raise RuntimeError('canonical Skia symlink not materialized as symlink')\n    recs=scan_tree(workspace)\n    inv=ev/'inventory.jsonl'\n    with inv.open('w',encoding='utf-8',newline='\\n') as f:\n        for r in recs:f.write(json.dumps(r,sort_keys=True,separators=(',',':'))+'\\n')\n    counts={}; total=0\n    for r in recs:\n        counts[r['type']]=counts.get(r['type'],0)+1\n        if r['type']=='file': total+=r['size']\n    summary={'result':'PASS','python':sys.version.split()[0],'git_version':run(['git','--version'])[0],'manifest_sha256':hashlib.sha256(mb).hexdigest(),'materializer_sha256':sha256_file(__file__),'roots':roots,'root_count':len(roots),'inventory_rows':len(recs),'inventory_sha256':sha256_file(inv),'inventory_type_counts':counts,'regular_file_bytes':total,'freetype_gitlink_empty_dir':True,'skia_symlink_target':os.readlink(sk),'network_requests':0,'submodule_operations':0,'hook_executions':0,'payload_executions':0,'gclient_executions':0,'gcs_operations':0,'cipd_operations':0}\n    (ev/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\\n')\n    print(json.dumps({'result':'PASS','roots':len(roots),'inventory_rows':len(recs),'inventory_sha256':summary['inventory_sha256'],'counts':counts},sort_keys=True))\nif __name__=='__main__': main()\n",
+      "materializer_sha256": "94936d22fff9f93601bd92a2da77661a00a9856791ae257b30b2e01df4073ec7",
+      "post": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "e5cd6498fc22f7e8771ce5a5705fa94ca0e7d979d8a3ab5a91c0302e6bba8236",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 1,
+          "FinishedAt": "2026-09-12T15:56:22.141807883Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T15:56:21.498860216Z",
+          "Status": "exited"
+        }
+      },
+      "prestart": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "e5cd6498fc22f7e8771ce5a5705fa94ca0e7d979d8a3ab5a91c0302e6bba8236",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/materialize_git.py\", line 78, in <module>\n    if __name__=='__main__': main()\n  File \"/tmp/materialize_git.py\", line 52, in main\n    out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n  File \"/tmp/materialize_git.py\", line 14, in run\n    raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\nRuntimeError: command failed rc=128: ['git', '-C', '/work/git/base/allocator/partition_allocator', '-c', 'protocol.file.allow=always', 'fetch', '-q', '--no-tags', '--depth=1', '/tmp/repo-01.git', 'HEAD']\nstdout=\nstderr=fatal: detected dubious ownership in repository at '/tmp/repo-01.git'\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe.directory /tmp/repo-01.git\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n\n",
+      "stdout": ""
+    },
+    "failed2": {
+      "docker_diff_lines": 1891,
+      "docker_diff_sha256": "44353dc06057ec17f534ddf7e857eba363da36a9caea44361714cec586ce2c20",
+      "exit_code": 1,
+      "materializer_content": "#!/usr/bin/env python3\nimport argparse, hashlib, json, os, pathlib, stat, subprocess, sys\n\ndef sha256_file(p):\n    h=hashlib.sha256()\n    with open(p,'rb') as f:\n        for b in iter(lambda:f.read(1024*1024),b''): h.update(b)\n    return h.hexdigest()\n\ndef run(cmd, cwd=None):\n    env=os.environ.copy(); env.update({'GIT_CONFIG_NOSYSTEM':'1','GIT_TERMINAL_PROMPT':'0','HOME':'/tmp/signthos-home','XDG_CONFIG_HOME':'/tmp/signthos-xdg'})\n    safe=[f'/tmp/repo-{i:02d}.git' for i in range(1,34)]\n    env['GIT_CONFIG_COUNT']=str(len(safe))\n    for i,d in enumerate(safe):\n        env[f'GIT_CONFIG_KEY_{i}']='safe.directory'; env[f'GIT_CONFIG_VALUE_{i}']=d\n    cp=subprocess.run(cmd,cwd=cwd,env=env,text=True,capture_output=True)\n    if cp.returncode:\n        raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\n    return cp.stdout.strip(),cp.stderr\n\ndef safe_rel(p):\n    q=pathlib.PurePosixPath(p)\n    if q.is_absolute() or '..' in q.parts or not q.parts: raise RuntimeError(f'unsafe logical path {p!r}')\n\ndef scan_tree(root):\n    root=pathlib.Path(root); recs=[]\n    def walk(d, relbase=''):\n        entries=sorted(os.scandir(d),key=lambda x:x.name)\n        for ent in entries:\n            if ent.name=='.git': continue\n            rel=f'{relbase}/{ent.name}' if relbase else ent.name\n            st=ent.stat(follow_symlinks=False); mode=f'{stat.S_IMODE(st.st_mode):04o}'\n            if stat.S_ISLNK(st.st_mode):\n                recs.append({'path':rel,'type':'symlink','mode':mode,'size':st.st_size,'target':os.readlink(ent.path)})\n            elif stat.S_ISDIR(st.st_mode):\n                recs.append({'path':rel,'type':'dir','mode':mode,'size':0}); walk(ent.path,rel)\n            elif stat.S_ISREG(st.st_mode):\n                recs.append({'path':rel,'type':'file','mode':mode,'size':st.st_size,'sha256':sha256_file(ent.path)})\n            else: raise RuntimeError(f'unsupported materialized type {rel}')\n    walk(root); return recs\n\ndef main():\n    ap=argparse.ArgumentParser(); ap.add_argument('--manifest',required=True); ap.add_argument('--workspace',required=True); ap.add_argument('--evidence',required=True); a=ap.parse_args()\n    mb=pathlib.Path(a.manifest).read_bytes(); manifest=json.loads(mb); workspace=pathlib.Path(a.workspace); ev=pathlib.Path(a.evidence)\n    if workspace.exists() and any(workspace.iterdir()): raise RuntimeError('workspace not empty')\n    workspace.mkdir(parents=True,exist_ok=True); ev.mkdir(parents=True,exist_ok=True); pathlib.Path('/tmp/signthos-home').mkdir(exist_ok=True); pathlib.Path('/tmp/signthos-xdg').mkdir(exist_ok=True)\n    roots=[]\n    for r in manifest:\n        safe_rel(r['logical_path']); src=r['source_git']; target=workspace.joinpath(*pathlib.PurePosixPath(r['logical_path']).parts)\n        if target.exists() or target.is_symlink(): raise RuntimeError(f'path collision before root materialization {r[\"logical_path\"]}')\n        sh,_=run(['git','--git-dir',src,'rev-parse','HEAD']); st,_=run(['git','--git-dir',src,'rev-parse','HEAD^{tree}'])\n        if sh!=r['revision'] or st!=r['tree']: raise RuntimeError(f'source identity mismatch {r[\"logical_path\"]} {sh} {st}')\n        target.parent.mkdir(parents=True,exist_ok=True)\n        run(['git','init','-q',str(target)])\n        for k,v in [('core.hooksPath','/dev/null'),('submodule.recurse','false'),('core.autocrlf','false')]: run(['git','-C',str(target),'config',k,v])\n        out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n        fh,_=run(['git','-C',str(target),'rev-parse','FETCH_HEAD'])\n        if fh!=r['revision']: raise RuntimeError(f'fetch identity mismatch {r[\"logical_path\"]} {fh}')\n        run(['git','-C',str(target),'checkout','-q','--detach','--force',r['revision']])\n        th,_=run(['git','-C',str(target),'rev-parse','HEAD']); tt,_=run(['git','-C',str(target),'rev-parse','HEAD^{tree}']); status,_=run(['git','-C',str(target),'status','--porcelain'])\n        hooks,_=run(['git','-C',str(target),'config','--get','core.hooksPath'])\n        active=[]; hd=target/'.git/hooks'\n        if hd.exists(): active=[x.name for x in hd.iterdir() if x.is_file() and not x.name.endswith('.sample')]\n        if th!=r['revision'] or tt!=r['tree'] or status or hooks!='/dev/null' or active: raise RuntimeError(f'target verification failed {r[\"logical_path\"]}')\n        roots.append({'index':r['index'],'logical_path':r['logical_path'],'revision':th,'tree':tt,'status':'clean','hooks_path':hooks,'active_hooks':active})\n    # Explicit special-entry boundary.\n    dlg=workspace/'third_party/freetype/src/subprojects/dlg'\n    if not dlg.is_dir() or dlg.is_symlink() or any(dlg.iterdir()): raise RuntimeError('FreeType gitlink boundary is not an empty directory')\n    sk=workspace/'third_party/skia/src/ports/fontations/Cargo.toml'\n    if not sk.is_symlink(): raise RuntimeError('canonical Skia symlink not materialized as symlink')\n    recs=scan_tree(workspace)\n    inv=ev/'inventory.jsonl'\n    with inv.open('w',encoding='utf-8',newline='\\n') as f:\n        for r in recs:f.write(json.dumps(r,sort_keys=True,separators=(',',':'))+'\\n')\n    counts={}; total=0\n    for r in recs:\n        counts[r['type']]=counts.get(r['type'],0)+1\n        if r['type']=='file': total+=r['size']\n    summary={'result':'PASS','python':sys.version.split()[0],'git_version':run(['git','--version'])[0],'manifest_sha256':hashlib.sha256(mb).hexdigest(),'materializer_sha256':sha256_file(__file__),'roots':roots,'root_count':len(roots),'inventory_rows':len(recs),'inventory_sha256':sha256_file(inv),'inventory_type_counts':counts,'regular_file_bytes':total,'freetype_gitlink_empty_dir':True,'skia_symlink_target':os.readlink(sk),'network_requests':0,'submodule_operations':0,'hook_executions':0,'payload_executions':0,'gclient_executions':0,'gcs_operations':0,'cipd_operations':0}\n    (ev/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\\n')\n    print(json.dumps({'result':'PASS','roots':len(roots),'inventory_rows':len(recs),'inventory_sha256':summary['inventory_sha256'],'counts':counts},sort_keys=True))\nif __name__=='__main__': main()\n",
+      "materializer_sha256": "e859387604ef9173f1ebb42a65434dc0f74f3f0ee693abaa0a29b5d685e02e95",
+      "post": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "a43465150604356cd5543c27711da758dbdbe7e3e7aab08ac73bae4f7b500d27",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 1,
+          "FinishedAt": "2026-09-12T15:59:43.784046337Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T15:59:43.238981962Z",
+          "Status": "exited"
+        }
+      },
+      "prestart": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "a43465150604356cd5543c27711da758dbdbe7e3e7aab08ac73bae4f7b500d27",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "stderr": "Traceback (most recent call last):\n  File \"/tmp/materialize_git_v2.py\", line 82, in <module>\n    if __name__=='__main__': main()\n  File \"/tmp/materialize_git_v2.py\", line 56, in main\n    out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n  File \"/tmp/materialize_git_v2.py\", line 18, in run\n    raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\nRuntimeError: command failed rc=128: ['git', '-C', '/work/git/base/allocator/partition_allocator', '-c', 'protocol.file.allow=always', 'fetch', '-q', '--no-tags', '--depth=1', '/tmp/repo-01.git', 'HEAD']\nstdout=\nstderr=fatal: detected dubious ownership in repository at '/tmp/repo-01.git'\nTo add an exception for this directory, call:\n\n\tgit config --global --add safe.directory /tmp/repo-01.git\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.\n\n",
+      "stdout": ""
+    },
+    "success1": {
+      "docker_diff_lines": 82885,
+      "docker_diff_sha256": "7a9ef3af68d44ce18ef7a0451af9cdcacbcd1560e90c9452319d3adaaf12880c",
+      "exit_code": 0,
+      "materializer_content": "#!/usr/bin/env python3\nimport argparse, hashlib, json, os, pathlib, stat, subprocess, sys\n\ndef sha256_file(p):\n    h=hashlib.sha256()\n    with open(p,'rb') as f:\n        for b in iter(lambda:f.read(1024*1024),b''): h.update(b)\n    return h.hexdigest()\n\ndef run(cmd, cwd=None):\n    env=os.environ.copy(); env.update({'GIT_CONFIG_NOSYSTEM':'1','GIT_TERMINAL_PROMPT':'0','HOME':'/tmp/signthos-home','XDG_CONFIG_HOME':'/tmp/signthos-xdg'})\n    env['GIT_CONFIG_GLOBAL']='/tmp/signthos-safe.gitconfig'\n    cp=subprocess.run(cmd,cwd=cwd,env=env,text=True,capture_output=True)\n    if cp.returncode:\n        raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\n    return cp.stdout.strip(),cp.stderr\n\ndef safe_rel(p):\n    q=pathlib.PurePosixPath(p)\n    if q.is_absolute() or '..' in q.parts or not q.parts: raise RuntimeError(f'unsafe logical path {p!r}')\n\ndef scan_tree(root):\n    root=pathlib.Path(root); recs=[]\n    def walk(d, relbase=''):\n        entries=sorted(os.scandir(d),key=lambda x:x.name)\n        for ent in entries:\n            if ent.name=='.git': continue\n            rel=f'{relbase}/{ent.name}' if relbase else ent.name\n            st=ent.stat(follow_symlinks=False); mode=f'{stat.S_IMODE(st.st_mode):04o}'\n            if stat.S_ISLNK(st.st_mode):\n                recs.append({'path':rel,'type':'symlink','mode':mode,'size':st.st_size,'target':os.readlink(ent.path)})\n            elif stat.S_ISDIR(st.st_mode):\n                recs.append({'path':rel,'type':'dir','mode':mode,'size':0}); walk(ent.path,rel)\n            elif stat.S_ISREG(st.st_mode):\n                recs.append({'path':rel,'type':'file','mode':mode,'size':st.st_size,'sha256':sha256_file(ent.path)})\n            else: raise RuntimeError(f'unsupported materialized type {rel}')\n    walk(root); return recs\n\ndef main():\n    ap=argparse.ArgumentParser(); ap.add_argument('--manifest',required=True); ap.add_argument('--workspace',required=True); ap.add_argument('--evidence',required=True); a=ap.parse_args()\n    mb=pathlib.Path(a.manifest).read_bytes(); manifest=json.loads(mb); workspace=pathlib.Path(a.workspace); ev=pathlib.Path(a.evidence)\n    if workspace.exists() and any(workspace.iterdir()): raise RuntimeError('workspace not empty')\n    safe_cfg=pathlib.Path('/tmp/signthos-safe.gitconfig')\n    safe_cfg.write_text('[safe]\\n'+''.join(f'\\tdirectory = /tmp/repo-{i:02d}.git\\n' for i in range(1,34)),encoding='utf-8')\n    workspace.mkdir(parents=True,exist_ok=True); ev.mkdir(parents=True,exist_ok=True); pathlib.Path('/tmp/signthos-home').mkdir(exist_ok=True); pathlib.Path('/tmp/signthos-xdg').mkdir(exist_ok=True)\n    roots=[]\n    for r in manifest:\n        safe_rel(r['logical_path']); src=r['source_git']; target=workspace.joinpath(*pathlib.PurePosixPath(r['logical_path']).parts)\n        if target.exists() or target.is_symlink(): raise RuntimeError(f'path collision before root materialization {r[\"logical_path\"]}')\n        sh,_=run(['git','--git-dir',src,'rev-parse','HEAD']); st,_=run(['git','--git-dir',src,'rev-parse','HEAD^{tree}'])\n        if sh!=r['revision'] or st!=r['tree']: raise RuntimeError(f'source identity mismatch {r[\"logical_path\"]} {sh} {st}')\n        target.parent.mkdir(parents=True,exist_ok=True)\n        run(['git','init','-q',str(target)])\n        for k,v in [('core.hooksPath','/dev/null'),('submodule.recurse','false'),('core.autocrlf','false')]: run(['git','-C',str(target),'config',k,v])\n        out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n        fh,_=run(['git','-C',str(target),'rev-parse','FETCH_HEAD'])\n        if fh!=r['revision']: raise RuntimeError(f'fetch identity mismatch {r[\"logical_path\"]} {fh}')\n        run(['git','-C',str(target),'checkout','-q','--detach','--force',r['revision']])\n        th,_=run(['git','-C',str(target),'rev-parse','HEAD']); tt,_=run(['git','-C',str(target),'rev-parse','HEAD^{tree}']); status,_=run(['git','-C',str(target),'status','--porcelain'])\n        hooks,_=run(['git','-C',str(target),'config','--get','core.hooksPath'])\n        active=[]; hd=target/'.git/hooks'\n        if hd.exists(): active=[x.name for x in hd.iterdir() if x.is_file() and not x.name.endswith('.sample')]\n        if th!=r['revision'] or tt!=r['tree'] or status or hooks!='/dev/null' or active: raise RuntimeError(f'target verification failed {r[\"logical_path\"]}')\n        roots.append({'index':r['index'],'logical_path':r['logical_path'],'revision':th,'tree':tt,'status':'clean','hooks_path':hooks,'active_hooks':active})\n    # Explicit special-entry boundary.\n    dlg=workspace/'third_party/freetype/src/subprojects/dlg'\n    if not dlg.is_dir() or dlg.is_symlink() or any(dlg.iterdir()): raise RuntimeError('FreeType gitlink boundary is not an empty directory')\n    sk=workspace/'third_party/skia/src/ports/fontations/Cargo.toml'\n    if not sk.is_symlink(): raise RuntimeError('canonical Skia symlink not materialized as symlink')\n    recs=scan_tree(workspace)\n    inv=ev/'inventory.jsonl'\n    with inv.open('w',encoding='utf-8',newline='\\n') as f:\n        for r in recs:f.write(json.dumps(r,sort_keys=True,separators=(',',':'))+'\\n')\n    counts={}; total=0\n    for r in recs:\n        counts[r['type']]=counts.get(r['type'],0)+1\n        if r['type']=='file': total+=r['size']\n    summary={'result':'PASS','python':sys.version.split()[0],'git_version':run(['git','--version'])[0],'manifest_sha256':hashlib.sha256(mb).hexdigest(),'materializer_sha256':sha256_file(__file__),'roots':roots,'root_count':len(roots),'inventory_rows':len(recs),'inventory_sha256':sha256_file(inv),'inventory_type_counts':counts,'regular_file_bytes':total,'freetype_gitlink_empty_dir':True,'skia_symlink_target':os.readlink(sk),'network_requests':0,'submodule_operations':0,'hook_executions':0,'payload_executions':0,'gclient_executions':0,'gcs_operations':0,'cipd_operations':0}\n    (ev/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\\n')\n    print(json.dumps({'result':'PASS','roots':len(roots),'inventory_rows':len(recs),'inventory_sha256':summary['inventory_sha256'],'counts':counts},sort_keys=True))\nif __name__=='__main__': main()\n",
+      "materializer_sha256": "27d8c87585623e6086a3c37073b023feb7a3c3fb89a4584f74160d59f82b9de5",
+      "post": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "aa3b3d25febba38188bed1b2451eab0db1713b052f088252e8e11888c2b15fef",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "2026-09-12T16:04:00.693731387Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T16:03:06.016340542Z",
+          "Status": "exited"
+        }
+      },
+      "prestart": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "aa3b3d25febba38188bed1b2451eab0db1713b052f088252e8e11888c2b15fef",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "stderr": "",
+      "stdout": "{\"counts\": {\"dir\": 5874, \"file\": 73327, \"symlink\": 6}, \"inventory_rows\": 79207, \"inventory_sha256\": \"6c4aad82de96c38ad14afb6bc8766a8e0f18f8d9f9a0fc1db4f63527cd887989\", \"result\": \"PASS\", \"roots\": 33}\n",
+      "summary": {
+        "cipd_operations": 0,
+        "freetype_gitlink_empty_dir": true,
+        "gclient_executions": 0,
+        "gcs_operations": 0,
+        "git_version": "git version 2.34.1",
+        "hook_executions": 0,
+        "inventory_rows": 79207,
+        "inventory_sha256": "6c4aad82de96c38ad14afb6bc8766a8e0f18f8d9f9a0fc1db4f63527cd887989",
+        "inventory_type_counts": {
+          "dir": 5874,
+          "file": 73327,
+          "symlink": 6
+        },
+        "manifest_sha256": "6daf9fc8c9e7c9fccc6e791c4ce9a31901d7bc3dee63a400e536e7231f9aa816",
+        "materializer_sha256": "27d8c87585623e6086a3c37073b023feb7a3c3fb89a4584f74160d59f82b9de5",
+        "network_requests": 0,
+        "payload_executions": 0,
+        "python": "3.10.12",
+        "regular_file_bytes": 1295110068,
+        "result": "PASS",
+        "root_count": 33,
+        "roots": [
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 1,
+            "logical_path": "base/allocator/partition_allocator",
+            "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+            "status": "clean",
+            "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 2,
+            "logical_path": "build",
+            "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+            "status": "clean",
+            "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 3,
+            "logical_path": "buildtools",
+            "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+            "status": "clean",
+            "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 4,
+            "logical_path": "testing/corpus",
+            "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+            "status": "clean",
+            "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 5,
+            "logical_path": "third_party/abseil-cpp",
+            "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+            "status": "clean",
+            "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 6,
+            "logical_path": "third_party/brotli",
+            "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+            "status": "clean",
+            "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 7,
+            "logical_path": "third_party/clang-format/script",
+            "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+            "status": "clean",
+            "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 8,
+            "logical_path": "third_party/depot_tools",
+            "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+            "status": "clean",
+            "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 9,
+            "logical_path": "third_party/dragonbox/src",
+            "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+            "status": "clean",
+            "tree": "176383f02746d0248e7b04409367f691cc231cef"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 10,
+            "logical_path": "third_party/fast_float/src",
+            "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+            "status": "clean",
+            "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 11,
+            "logical_path": "third_party/fp16/src",
+            "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+            "status": "clean",
+            "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 12,
+            "logical_path": "third_party/freetype/src",
+            "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+            "status": "clean",
+            "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 13,
+            "logical_path": "third_party/googletest/src",
+            "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+            "status": "clean",
+            "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 14,
+            "logical_path": "third_party/harfbuzz-ng/src",
+            "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+            "status": "clean",
+            "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 15,
+            "logical_path": "third_party/highway/src",
+            "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+            "status": "clean",
+            "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 16,
+            "logical_path": "third_party/icu",
+            "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+            "status": "clean",
+            "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 17,
+            "logical_path": "third_party/instrumented_libs",
+            "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+            "status": "clean",
+            "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 18,
+            "logical_path": "third_party/jinja2",
+            "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+            "status": "clean",
+            "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 19,
+            "logical_path": "third_party/libc++/src",
+            "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+            "status": "clean",
+            "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 20,
+            "logical_path": "third_party/libc++abi/src",
+            "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+            "status": "clean",
+            "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 21,
+            "logical_path": "third_party/libjpeg_turbo",
+            "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+            "status": "clean",
+            "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 22,
+            "logical_path": "third_party/libpng",
+            "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+            "status": "clean",
+            "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 23,
+            "logical_path": "third_party/llvm-libc/src",
+            "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+            "status": "clean",
+            "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 24,
+            "logical_path": "third_party/markupsafe",
+            "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+            "status": "clean",
+            "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 25,
+            "logical_path": "third_party/nasm",
+            "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+            "status": "clean",
+            "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 26,
+            "logical_path": "third_party/simdutf",
+            "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+            "status": "clean",
+            "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 27,
+            "logical_path": "third_party/skia",
+            "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+            "status": "clean",
+            "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 28,
+            "logical_path": "third_party/test_fonts",
+            "revision": "7f51783942943e965cd56facf786544ccfc07713",
+            "status": "clean",
+            "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 29,
+            "logical_path": "third_party/zlib",
+            "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+            "status": "clean",
+            "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 30,
+            "logical_path": "tools/clang",
+            "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+            "status": "clean",
+            "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 31,
+            "logical_path": "tools/code_coverage",
+            "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+            "status": "clean",
+            "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 32,
+            "logical_path": "tools/memory",
+            "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+            "status": "clean",
+            "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 33,
+            "logical_path": "v8",
+            "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+            "status": "clean",
+            "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+          }
+        ],
+        "skia_symlink_target": "../../../bazel/external/fontations/Cargo.toml",
+        "submodule_operations": 0
+      }
+    },
+    "success2": {
+      "docker_diff_lines": 82885,
+      "docker_diff_sha256": "e60e1393878f0020446cc8de6034ca7b35fefea79eac93476a280dec29d6d241",
+      "exit_code": 0,
+      "materializer_content": "#!/usr/bin/env python3\nimport argparse, hashlib, json, os, pathlib, stat, subprocess, sys\n\ndef sha256_file(p):\n    h=hashlib.sha256()\n    with open(p,'rb') as f:\n        for b in iter(lambda:f.read(1024*1024),b''): h.update(b)\n    return h.hexdigest()\n\ndef run(cmd, cwd=None):\n    env=os.environ.copy(); env.update({'GIT_CONFIG_NOSYSTEM':'1','GIT_TERMINAL_PROMPT':'0','HOME':'/tmp/signthos-home','XDG_CONFIG_HOME':'/tmp/signthos-xdg'})\n    env['GIT_CONFIG_GLOBAL']='/tmp/signthos-safe.gitconfig'\n    cp=subprocess.run(cmd,cwd=cwd,env=env,text=True,capture_output=True)\n    if cp.returncode:\n        raise RuntimeError(f\"command failed rc={cp.returncode}: {cmd!r}\\nstdout={cp.stdout}\\nstderr={cp.stderr}\")\n    return cp.stdout.strip(),cp.stderr\n\ndef safe_rel(p):\n    q=pathlib.PurePosixPath(p)\n    if q.is_absolute() or '..' in q.parts or not q.parts: raise RuntimeError(f'unsafe logical path {p!r}')\n\ndef scan_tree(root):\n    root=pathlib.Path(root); recs=[]\n    def walk(d, relbase=''):\n        entries=sorted(os.scandir(d),key=lambda x:x.name)\n        for ent in entries:\n            if ent.name=='.git': continue\n            rel=f'{relbase}/{ent.name}' if relbase else ent.name\n            st=ent.stat(follow_symlinks=False); mode=f'{stat.S_IMODE(st.st_mode):04o}'\n            if stat.S_ISLNK(st.st_mode):\n                recs.append({'path':rel,'type':'symlink','mode':mode,'size':st.st_size,'target':os.readlink(ent.path)})\n            elif stat.S_ISDIR(st.st_mode):\n                recs.append({'path':rel,'type':'dir','mode':mode,'size':0}); walk(ent.path,rel)\n            elif stat.S_ISREG(st.st_mode):\n                recs.append({'path':rel,'type':'file','mode':mode,'size':st.st_size,'sha256':sha256_file(ent.path)})\n            else: raise RuntimeError(f'unsupported materialized type {rel}')\n    walk(root); return recs\n\ndef main():\n    ap=argparse.ArgumentParser(); ap.add_argument('--manifest',required=True); ap.add_argument('--workspace',required=True); ap.add_argument('--evidence',required=True); a=ap.parse_args()\n    mb=pathlib.Path(a.manifest).read_bytes(); manifest=json.loads(mb); workspace=pathlib.Path(a.workspace); ev=pathlib.Path(a.evidence)\n    if workspace.exists() and any(workspace.iterdir()): raise RuntimeError('workspace not empty')\n    safe_cfg=pathlib.Path('/tmp/signthos-safe.gitconfig')\n    safe_cfg.write_text('[safe]\\n'+''.join(f'\\tdirectory = /tmp/repo-{i:02d}.git\\n' for i in range(1,34)),encoding='utf-8')\n    workspace.mkdir(parents=True,exist_ok=True); ev.mkdir(parents=True,exist_ok=True); pathlib.Path('/tmp/signthos-home').mkdir(exist_ok=True); pathlib.Path('/tmp/signthos-xdg').mkdir(exist_ok=True)\n    roots=[]\n    for r in manifest:\n        safe_rel(r['logical_path']); src=r['source_git']; target=workspace.joinpath(*pathlib.PurePosixPath(r['logical_path']).parts)\n        if target.exists() or target.is_symlink(): raise RuntimeError(f'path collision before root materialization {r[\"logical_path\"]}')\n        sh,_=run(['git','--git-dir',src,'rev-parse','HEAD']); st,_=run(['git','--git-dir',src,'rev-parse','HEAD^{tree}'])\n        if sh!=r['revision'] or st!=r['tree']: raise RuntimeError(f'source identity mismatch {r[\"logical_path\"]} {sh} {st}')\n        target.parent.mkdir(parents=True,exist_ok=True)\n        run(['git','init','-q',str(target)])\n        for k,v in [('core.hooksPath','/dev/null'),('submodule.recurse','false'),('core.autocrlf','false')]: run(['git','-C',str(target),'config',k,v])\n        out,_=run(['git','-C',str(target),'-c','protocol.file.allow=always','fetch','-q','--no-tags','--depth=1',src,'HEAD'])\n        fh,_=run(['git','-C',str(target),'rev-parse','FETCH_HEAD'])\n        if fh!=r['revision']: raise RuntimeError(f'fetch identity mismatch {r[\"logical_path\"]} {fh}')\n        run(['git','-C',str(target),'checkout','-q','--detach','--force',r['revision']])\n        th,_=run(['git','-C',str(target),'rev-parse','HEAD']); tt,_=run(['git','-C',str(target),'rev-parse','HEAD^{tree}']); status,_=run(['git','-C',str(target),'status','--porcelain'])\n        hooks,_=run(['git','-C',str(target),'config','--get','core.hooksPath'])\n        active=[]; hd=target/'.git/hooks'\n        if hd.exists(): active=[x.name for x in hd.iterdir() if x.is_file() and not x.name.endswith('.sample')]\n        if th!=r['revision'] or tt!=r['tree'] or status or hooks!='/dev/null' or active: raise RuntimeError(f'target verification failed {r[\"logical_path\"]}')\n        roots.append({'index':r['index'],'logical_path':r['logical_path'],'revision':th,'tree':tt,'status':'clean','hooks_path':hooks,'active_hooks':active})\n    # Explicit special-entry boundary.\n    dlg=workspace/'third_party/freetype/src/subprojects/dlg'\n    if not dlg.is_dir() or dlg.is_symlink() or any(dlg.iterdir()): raise RuntimeError('FreeType gitlink boundary is not an empty directory')\n    sk=workspace/'third_party/skia/src/ports/fontations/Cargo.toml'\n    if not sk.is_symlink(): raise RuntimeError('canonical Skia symlink not materialized as symlink')\n    recs=scan_tree(workspace)\n    inv=ev/'inventory.jsonl'\n    with inv.open('w',encoding='utf-8',newline='\\n') as f:\n        for r in recs:f.write(json.dumps(r,sort_keys=True,separators=(',',':'))+'\\n')\n    counts={}; total=0\n    for r in recs:\n        counts[r['type']]=counts.get(r['type'],0)+1\n        if r['type']=='file': total+=r['size']\n    summary={'result':'PASS','python':sys.version.split()[0],'git_version':run(['git','--version'])[0],'manifest_sha256':hashlib.sha256(mb).hexdigest(),'materializer_sha256':sha256_file(__file__),'roots':roots,'root_count':len(roots),'inventory_rows':len(recs),'inventory_sha256':sha256_file(inv),'inventory_type_counts':counts,'regular_file_bytes':total,'freetype_gitlink_empty_dir':True,'skia_symlink_target':os.readlink(sk),'network_requests':0,'submodule_operations':0,'hook_executions':0,'payload_executions':0,'gclient_executions':0,'gcs_operations':0,'cipd_operations':0}\n    (ev/'summary.json').write_text(json.dumps(summary,sort_keys=True,indent=2)+'\\n')\n    print(json.dumps({'result':'PASS','roots':len(roots),'inventory_rows':len(recs),'inventory_sha256':summary['inventory_sha256'],'counts':counts},sort_keys=True))\nif __name__=='__main__': main()\n",
+      "materializer_sha256": "27d8c87585623e6086a3c37073b023feb7a3c3fb89a4584f74160d59f82b9de5",
+      "post": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "5ffae6a0c9ee6ca428983f413d7ad432953c25e79214a623026f44b6bf7490ab",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "2026-09-12T16:07:02.260656012Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "2026-09-12T16:05:51.675434757Z",
+          "Status": "exited"
+        }
+      },
+      "prestart": {
+        "Config": {
+          "Entrypoint": [
+            "/bin/sh"
+          ]
+        },
+        "HostConfig": {
+          "Binds": null,
+          "NetworkMode": "none"
+        },
+        "Id": "5ffae6a0c9ee6ca428983f413d7ad432953c25e79214a623026f44b6bf7490ab",
+        "Image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+        "Mounts": [],
+        "State": {
+          "ExitCode": 0,
+          "FinishedAt": "0001-01-01T00:00:00Z",
+          "OOMKilled": false,
+          "Running": false,
+          "StartedAt": "0001-01-01T00:00:00Z",
+          "Status": "created"
+        }
+      },
+      "stderr": "",
+      "stdout": "{\"counts\": {\"dir\": 5874, \"file\": 73327, \"symlink\": 6}, \"inventory_rows\": 79207, \"inventory_sha256\": \"6c4aad82de96c38ad14afb6bc8766a8e0f18f8d9f9a0fc1db4f63527cd887989\", \"result\": \"PASS\", \"roots\": 33}\n",
+      "summary": {
+        "cipd_operations": 0,
+        "freetype_gitlink_empty_dir": true,
+        "gclient_executions": 0,
+        "gcs_operations": 0,
+        "git_version": "git version 2.34.1",
+        "hook_executions": 0,
+        "inventory_rows": 79207,
+        "inventory_sha256": "6c4aad82de96c38ad14afb6bc8766a8e0f18f8d9f9a0fc1db4f63527cd887989",
+        "inventory_type_counts": {
+          "dir": 5874,
+          "file": 73327,
+          "symlink": 6
+        },
+        "manifest_sha256": "6daf9fc8c9e7c9fccc6e791c4ce9a31901d7bc3dee63a400e536e7231f9aa816",
+        "materializer_sha256": "27d8c87585623e6086a3c37073b023feb7a3c3fb89a4584f74160d59f82b9de5",
+        "network_requests": 0,
+        "payload_executions": 0,
+        "python": "3.10.12",
+        "regular_file_bytes": 1295110068,
+        "result": "PASS",
+        "root_count": 33,
+        "roots": [
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 1,
+            "logical_path": "base/allocator/partition_allocator",
+            "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+            "status": "clean",
+            "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 2,
+            "logical_path": "build",
+            "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+            "status": "clean",
+            "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 3,
+            "logical_path": "buildtools",
+            "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+            "status": "clean",
+            "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 4,
+            "logical_path": "testing/corpus",
+            "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+            "status": "clean",
+            "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 5,
+            "logical_path": "third_party/abseil-cpp",
+            "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+            "status": "clean",
+            "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 6,
+            "logical_path": "third_party/brotli",
+            "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+            "status": "clean",
+            "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 7,
+            "logical_path": "third_party/clang-format/script",
+            "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+            "status": "clean",
+            "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 8,
+            "logical_path": "third_party/depot_tools",
+            "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+            "status": "clean",
+            "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 9,
+            "logical_path": "third_party/dragonbox/src",
+            "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+            "status": "clean",
+            "tree": "176383f02746d0248e7b04409367f691cc231cef"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 10,
+            "logical_path": "third_party/fast_float/src",
+            "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+            "status": "clean",
+            "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 11,
+            "logical_path": "third_party/fp16/src",
+            "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+            "status": "clean",
+            "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 12,
+            "logical_path": "third_party/freetype/src",
+            "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+            "status": "clean",
+            "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 13,
+            "logical_path": "third_party/googletest/src",
+            "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+            "status": "clean",
+            "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 14,
+            "logical_path": "third_party/harfbuzz-ng/src",
+            "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+            "status": "clean",
+            "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 15,
+            "logical_path": "third_party/highway/src",
+            "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+            "status": "clean",
+            "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 16,
+            "logical_path": "third_party/icu",
+            "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+            "status": "clean",
+            "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 17,
+            "logical_path": "third_party/instrumented_libs",
+            "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+            "status": "clean",
+            "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 18,
+            "logical_path": "third_party/jinja2",
+            "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+            "status": "clean",
+            "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 19,
+            "logical_path": "third_party/libc++/src",
+            "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+            "status": "clean",
+            "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 20,
+            "logical_path": "third_party/libc++abi/src",
+            "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+            "status": "clean",
+            "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 21,
+            "logical_path": "third_party/libjpeg_turbo",
+            "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+            "status": "clean",
+            "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 22,
+            "logical_path": "third_party/libpng",
+            "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+            "status": "clean",
+            "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 23,
+            "logical_path": "third_party/llvm-libc/src",
+            "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+            "status": "clean",
+            "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 24,
+            "logical_path": "third_party/markupsafe",
+            "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+            "status": "clean",
+            "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 25,
+            "logical_path": "third_party/nasm",
+            "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+            "status": "clean",
+            "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 26,
+            "logical_path": "third_party/simdutf",
+            "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+            "status": "clean",
+            "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 27,
+            "logical_path": "third_party/skia",
+            "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+            "status": "clean",
+            "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 28,
+            "logical_path": "third_party/test_fonts",
+            "revision": "7f51783942943e965cd56facf786544ccfc07713",
+            "status": "clean",
+            "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 29,
+            "logical_path": "third_party/zlib",
+            "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+            "status": "clean",
+            "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 30,
+            "logical_path": "tools/clang",
+            "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+            "status": "clean",
+            "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 31,
+            "logical_path": "tools/code_coverage",
+            "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+            "status": "clean",
+            "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 32,
+            "logical_path": "tools/memory",
+            "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+            "status": "clean",
+            "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+          },
+          {
+            "active_hooks": [],
+            "hooks_path": "/dev/null",
+            "index": 33,
+            "logical_path": "v8",
+            "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+            "status": "clean",
+            "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+          }
+        ],
+        "skia_symlink_target": "../../../bazel/external/fontations/Cargo.toml",
+        "submodule_operations": 0
+      }
+    }
+  },
+  "canonical_base": "e32aff043bc28668897d9f50033b7fc817bf34d5",
+  "guest_manifest": [
+    {
+      "index": 1,
+      "logical_path": "base/allocator/partition_allocator",
+      "revision": "baaa6670c23c19485d0a5a538bc43d3332def328",
+      "source_git": "/tmp/repo-01.git",
+      "tree": "acd2c22d095e6674927b11a6b6d3437d67adf62a"
+    },
+    {
+      "index": 2,
+      "logical_path": "build",
+      "revision": "06d247cb917bb5fac3103b1b7dccb75368a553ce",
+      "source_git": "/tmp/repo-02.git",
+      "tree": "e01b69d7c03521219d8b95e0e5b49af18be45c5d"
+    },
+    {
+      "index": 3,
+      "logical_path": "buildtools",
+      "revision": "6a18683f555b4ac8b05ac8395c29c84483ac9588",
+      "source_git": "/tmp/repo-03.git",
+      "tree": "8a36f872e24a56fe517682e14bc897ceb28f8058"
+    },
+    {
+      "index": 4,
+      "logical_path": "testing/corpus",
+      "revision": "e64acd24f00d365c3f7c60e9c4eff16ce2d71f5d",
+      "source_git": "/tmp/repo-04.git",
+      "tree": "2d942d7a1a6819c2365bd28c3293b996191f8699"
+    },
+    {
+      "index": 5,
+      "logical_path": "third_party/abseil-cpp",
+      "revision": "675d3d37ecbec78fd51378c6774c45715b1e4382",
+      "source_git": "/tmp/repo-05.git",
+      "tree": "ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "index": 6,
+      "logical_path": "third_party/brotli",
+      "revision": "ac16a36bc55c4c896135084e878f0d6a2f9b347e",
+      "source_git": "/tmp/repo-06.git",
+      "tree": "0c85090ba747c2548f3ac785db123bd795abdeb7"
+    },
+    {
+      "index": 7,
+      "logical_path": "third_party/clang-format/script",
+      "revision": "c2725e0622e1a86d55f14514f2177a39efea4a0e",
+      "source_git": "/tmp/repo-07.git",
+      "tree": "5117026e03ac0ec21b1c163738d26a7c9443f611"
+    },
+    {
+      "index": 8,
+      "logical_path": "third_party/depot_tools",
+      "revision": "6235028c6b18b73e68f5414f935ec537a25ea51a",
+      "source_git": "/tmp/repo-08.git",
+      "tree": "0b08d0dbc2f75f2b44fb0b46ae7133e9bceb9e44"
+    },
+    {
+      "index": 9,
+      "logical_path": "third_party/dragonbox/src",
+      "revision": "beeeef91cf6fef89a4d4ba5e95d47ca64ccb3a44",
+      "source_git": "/tmp/repo-09.git",
+      "tree": "176383f02746d0248e7b04409367f691cc231cef"
+    },
+    {
+      "index": 10,
+      "logical_path": "third_party/fast_float/src",
+      "revision": "cb1d42aaa1e14b09e1452cfdef373d051b8c02a4",
+      "source_git": "/tmp/repo-10.git",
+      "tree": "7138c095baadd3caa9f4cbae2b6effb643f22454"
+    },
+    {
+      "index": 11,
+      "logical_path": "third_party/fp16/src",
+      "revision": "3d2de1816307bac63c16a297e8c4dc501b4076df",
+      "source_git": "/tmp/repo-11.git",
+      "tree": "052b1ec2fb66e4f709ecbdc11dd43c2bfb979f32"
+    },
+    {
+      "index": 12,
+      "logical_path": "third_party/freetype/src",
+      "revision": "b91f75bd02db43b06d634591eb286d3eb0ce3b65",
+      "source_git": "/tmp/repo-12.git",
+      "tree": "84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "index": 13,
+      "logical_path": "third_party/googletest/src",
+      "revision": "4fe3307fb2d9f86d19777c7eb0e4809e9694dde7",
+      "source_git": "/tmp/repo-13.git",
+      "tree": "feafbf9cf5deeb64dbe983f5574cb50f96fc330b"
+    },
+    {
+      "index": 14,
+      "logical_path": "third_party/harfbuzz-ng/src",
+      "revision": "fa2908bf16d2ccd6623f4d575455fea72a1a722b",
+      "source_git": "/tmp/repo-14.git",
+      "tree": "c2cd3655b841dfcf6ca2806dacc1217298bada3b"
+    },
+    {
+      "index": 15,
+      "logical_path": "third_party/highway/src",
+      "revision": "84379d1c73de9681b54fbe1c035a23c7bd5d272d",
+      "source_git": "/tmp/repo-15.git",
+      "tree": "afb7cf05e253a76cfc1e9bd8975a979fa865d113"
+    },
+    {
+      "index": 16,
+      "logical_path": "third_party/icu",
+      "revision": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd",
+      "source_git": "/tmp/repo-16.git",
+      "tree": "73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "index": 17,
+      "logical_path": "third_party/instrumented_libs",
+      "revision": "e8cb570a9a2ee9128e2214c73417ad2a3c47780b",
+      "source_git": "/tmp/repo-17.git",
+      "tree": "651502f72d94a6c75baf64edb2090a894af13d63"
+    },
+    {
+      "index": 18,
+      "logical_path": "third_party/jinja2",
+      "revision": "c3027d884967773057bf74b957e3fea87e5df4d7",
+      "source_git": "/tmp/repo-18.git",
+      "tree": "b1ced381d7e8c813f62afc3be3026da78800409c"
+    },
+    {
+      "index": 19,
+      "logical_path": "third_party/libc++/src",
+      "revision": "7ab65651aed6802d2599dcb7a73b1f82d5179d05",
+      "source_git": "/tmp/repo-19.git",
+      "tree": "2d0b4c55fd2fd81d53a11a54f10424e60b4e954e"
+    },
+    {
+      "index": 20,
+      "logical_path": "third_party/libc++abi/src",
+      "revision": "8f11bb1d4438d0239d0dfc1bd9456a9f31629dda",
+      "source_git": "/tmp/repo-20.git",
+      "tree": "63eed58f0937ba832a2195cd848f9f53ef8ecea9"
+    },
+    {
+      "index": 21,
+      "logical_path": "third_party/libjpeg_turbo",
+      "revision": "6bb85251a8382b5e07f635a981ac685cc5ab5053",
+      "source_git": "/tmp/repo-21.git",
+      "tree": "402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "index": 22,
+      "logical_path": "third_party/libpng",
+      "revision": "172f83835c98264e6eefdbe8ae82dc08be337ad0",
+      "source_git": "/tmp/repo-22.git",
+      "tree": "615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "index": 23,
+      "logical_path": "third_party/llvm-libc/src",
+      "revision": "603c242115079d3a208638a6e56f842c0801d0bd",
+      "source_git": "/tmp/repo-23.git",
+      "tree": "b4f9a04628d3fe9de5ca34e2684e7f54701ad7cc"
+    },
+    {
+      "index": 24,
+      "logical_path": "third_party/markupsafe",
+      "revision": "4256084ae14175d38a3ff7d739dca83ae49ccec6",
+      "source_git": "/tmp/repo-24.git",
+      "tree": "8c1f275c5022de6417bf43377c671b44d7a474d6"
+    },
+    {
+      "index": 25,
+      "logical_path": "third_party/nasm",
+      "revision": "af5eeeb054bebadfbb79c7bcd100a95e2ad4525f",
+      "source_git": "/tmp/repo-25.git",
+      "tree": "1c758a0853e56e755cc16fa081314c24888435e1"
+    },
+    {
+      "index": 26,
+      "logical_path": "third_party/simdutf",
+      "revision": "f7356eed293f8208c40b3c1b344a50bd70971983",
+      "source_git": "/tmp/repo-26.git",
+      "tree": "6123564324038cf176c37fbd3dfac2bbee1deb32"
+    },
+    {
+      "index": 27,
+      "logical_path": "third_party/skia",
+      "revision": "c497e689bf3db5c8efe853dae45dd61867d3363a",
+      "source_git": "/tmp/repo-27.git",
+      "tree": "1767c5d85a6b00262b76864728f4cefaa65be928"
+    },
+    {
+      "index": 28,
+      "logical_path": "third_party/test_fonts",
+      "revision": "7f51783942943e965cd56facf786544ccfc07713",
+      "source_git": "/tmp/repo-28.git",
+      "tree": "7d8a8ab400ae28ff251c0feaf7116693b7e5ae5d"
+    },
+    {
+      "index": 29,
+      "logical_path": "third_party/zlib",
+      "revision": "980253c1cc835c893c57b5cfc10c5b942e10bc46",
+      "source_git": "/tmp/repo-29.git",
+      "tree": "610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "index": 30,
+      "logical_path": "tools/clang",
+      "revision": "a1542f2952bcc47640d5cfbc39bb8f6926a1bf6a",
+      "source_git": "/tmp/repo-30.git",
+      "tree": "5f6eb766609b9c3e2062e28ff581e53800c5b4db"
+    },
+    {
+      "index": 31,
+      "logical_path": "tools/code_coverage",
+      "revision": "fc75c61d3a98a78ff83940366aeba83ddeb28179",
+      "source_git": "/tmp/repo-31.git",
+      "tree": "39d72b61c7db2b6a4a4965645bf33fa1238aaf04"
+    },
+    {
+      "index": 32,
+      "logical_path": "tools/memory",
+      "revision": "16429092be4bb5160bed0ad763bd4c13f1f52990",
+      "source_git": "/tmp/repo-32.git",
+      "tree": "3335d7f6fceaee7584cc674fd7efcc9c9c1bc512"
+    },
+    {
+      "index": 33,
+      "logical_path": "v8",
+      "revision": "b3995dff9fc0df19d00743da41a567da5eb8318c",
+      "source_git": "/tmp/repo-33.git",
+      "tree": "6fab8283d790ea54c5c34479458cd33cd7eaad7d"
+    }
+  ],
+  "guest_manifest_sha256": "6daf9fc8c9e7c9fccc6e791c4ce9a31901d7bc3dee63a400e536e7231f9aa816",
+  "identity_manifest_sha256": "93f4a24dba8cd5cb1dd33685bc47b738059a85f8f65fde6e8ce683bb6405fe89",
+  "repair_authority_1": "github:issue-comment:5646994091",
+  "repair_authority_2": "github:issue-comment:5647011961",
+  "runtime_authority": "github:issue-comment:5646964817",
+  "successful_replay_equivalence": {
+    "docker_diff_roots": [
+      "/tmp",
+      "/work"
+    ],
+    "inventories_byte_identical": true,
+    "inventory_rows": 79207,
+    "inventory_sha256": "6c4aad82de96c38ad14afb6bc8766a8e0f18f8d9f9a0fc1db4f63527cd887989",
+    "summaries_byte_identical": true
+  },
+  "unit": "004C1DW_EXACT_OFFLINE_GIT_ROOT_MATERIALIZATION_QUALIFICATION"
+}
