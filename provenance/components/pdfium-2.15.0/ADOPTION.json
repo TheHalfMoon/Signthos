@@ -142,7 +142,6 @@
   "frozen_004c1er_evidence": {
     "closure_rows": 24,
     "evidence_manifest_sha256": "11f6f106712d0119967933e8049e81963e16c36915e975ce9147ed72da3000a0",
-    "external_root": "/Users/abdulazizalsh/Signthos-evidence/004c1er-notice-inventory-20260913T064740Z",
     "input_map_sha256": "0f642122adb49fcd88ada7dba04eb2cdc9ed2d5cc92a562a0807180d4f824835",
     "inventory_byte_deterministic": true,
     "inventory_sha256": "2b564bb641ff544e25ecf12eb8e860d4537d5c8ea2faac301e517207bd9b37af",
