@@ -45,14 +45,14 @@ The sequence retained curl verbose transcripts and independently scanned every e
 
 Exactly four HTTPS requests executed. Each completed with HTTP 200, verified TLS, no redirect, and a final effective URL identical to the requested URL.
 
-| Request | Requested and final effective URL | HTTP | Redirects | TLS verify | Credential headers | Metrics SHA-256 | Verbose SHA-256 |
-| --- | --- | ---: | ---: | ---: | --- | --- | --- |
-| Node checksum list | `https://nodejs.org/dist/v24.20.0/SHASUMS256.txt` | `200` | `0` | `0` | ABSENT | `9e53a64aa74c022ad997bfaf27781b1151c3c5975b3011624527fe89a2d8885a` | `a57c041e7f07e2483bc4068cde36e6b26464f332d36e928a0b37c5413d2f8576` |
-| Node archive | `https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz` | `200` | `0` | `0` | ABSENT | `fdfd8d7d727ca5074ddfcdea359fade6ad7fad42bcac2749c89bd7ea203a8173` | `2038ce32ca896a7eab8502088b2be54d166e44452e3cee262ab0122adf32825f` |
-| pnpm exact-version packument | `https://registry.npmjs.org/pnpm/10.34.5` | `200` | `0` | `0` | ABSENT | `2f53adbf2d1d5cbfccd5f02d3f7a378d23ccc845b47da3c945124ad3b39adcd0` | `feb13aac862a5fa48b8ba3ac026175afe265ec8a14e373aaa797a3ec335c9889` |
-| pnpm tarball | `https://registry.npmjs.org/pnpm/-/pnpm-10.34.5.tgz` | `200` | `0` | `0` | ABSENT | `200c4b87d428a2b0a6729b21c074cdff61ca39ae1eba8033e6fd709f4a79c3c5` | `7300d87ffde17740cf5c43ca6775e938e58881f1032d12bc09bdb504c26b1e61` |
+| Request | Requested and final effective URL | Remote endpoint | HTTP | Redirects | TLS verify | Credential headers | Metrics SHA-256 | Verbose SHA-256 |
+| --- | --- | --- | ---: | ---: | ---: | --- | --- | --- |
+| Node checksum list | `https://nodejs.org/dist/v24.20.0/SHASUMS256.txt` | `[2606:4700::6810:d483]:443` | `200` | `0` | `0` | ABSENT | `9e53a64aa74c022ad997bfaf27781b1151c3c5975b3011624527fe89a2d8885a` | `a57c041e7f07e2483bc4068cde36e6b26464f332d36e928a0b37c5413d2f8576` |
+| Node archive | `https://nodejs.org/dist/v24.20.0/node-v24.20.0-linux-x64.tar.xz` | `[2606:4700::6810:d583]:443` | `200` | `0` | `0` | ABSENT | `fdfd8d7d727ca5074ddfcdea359fade6ad7fad42bcac2749c89bd7ea203a8173` | `2038ce32ca896a7eab8502088b2be54d166e44452e3cee262ab0122adf32825f` |
+| pnpm exact-version packument | `https://registry.npmjs.org/pnpm/10.34.5` | `104.16.7.34:443` | `200` | `0` | `0` | ABSENT | `2f53adbf2d1d5cbfccd5f02d3f7a378d23ccc845b47da3c945124ad3b39adcd0` | `feb13aac862a5fa48b8ba3ac026175afe265ec8a14e373aaa797a3ec335c9889` |
+| pnpm tarball | `https://registry.npmjs.org/pnpm/-/pnpm-10.34.5.tgz` | `[2606:4700::6810:722]:443` | `200` | `0` | `0` | ABSENT | `200c4b87d428a2b0a6729b21c074cdff61ca39ae1eba8033e6fd709f4a79c3c5` | `7300d87ffde17740cf5c43ca6775e938e58881f1032d12bc09bdb504c26b1e61` |
 
-`ssl_verify_result=0` is recorded for all four requests. `num_redirects=0` is recorded for all four requests. Because redirect following was disabled and each response was the expected HTTP 200 at the requested URL, no redirect was accepted or followed. This satisfies the canonical redirect boundary without inferring from current host state.
+Each remote endpoint above is the contemporaneous `remote_ip` plus `remote_port` captured in the corresponding metrics record whose SHA-256 is bound in the same row. `ssl_verify_result=0` is recorded for all four requests. `num_redirects=0` is recorded for all four requests. Because redirect following was disabled and each response was the expected HTTP 200 at the requested URL, no redirect was accepted or followed. This satisfies the canonical redirect boundary without inferring from current host state.
 
 ## Exact Node identity
 
