@@ -27,7 +27,11 @@ The qualifying repair evidence is isolated from both earlier nonqualifying evide
 EVIDENCE_ROOT_LABEL = 004c1fa-repair-20260913T202512Z
 AUTHORITY_COMMENT = 5655884091
 EXCLUSIVE_LOCK_PATH = Signthos-evidence/.004c1fa-repair.lock
-EVIDENCE_DATA_FILES = 9EVIDENCE_MANIFEST_TSV_SHA256 = cfa840ff78174d9bb5b453ebc9464ecb538ba2a276bfb2aeb33b04a084adacdf
+EVIDENCE_DATA_FILES = 9
+EVIDENCE_MANIFEST_TSV_SHA256 = cfa840ff78174d9bb5b453ebc9464ecb538ba2a276bfb2aeb33b04a084adacdf
+SUPPLEMENTAL_PRECONDITION_EVIDENCE_ROOT_LABEL = 004c1fa-precondition-reconstruction-20260913T210115Z
+SUPPLEMENTAL_EVIDENCE_MANIFEST_TSV_SHA256 = 93b06c47ada63695e6aaa8f4672bef9db17f18357853efbb84688ab066974bbc
+SUPPLEMENTAL_SUMMARY_JSON_SHA256 = 0154fd67504a88fa3c37fed1d3fd81b6bc19158907c60a0d96fa018df58aefc9
 REPLAY_A_STDOUT_SHA256 = 0360104108e6ff8d51dd70074f7cc8b14a9c22d88fd27c59a1a31c6903e6bad9
 REPLAY_B_STDOUT_SHA256 = 0360104108e6ff8d51dd70074f7cc8b14a9c22d88fd27c59a1a31c6903e6bad9
 REPLAY_A_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
@@ -35,6 +39,21 @@ REPLAY_B_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991
 ```
 
 The lock remained outside the repository and existed before Replay A began. No stale hash from either prior 004C1FA attempt is used as qualifying evidence.
+
+A supplemental read-only reconstruction binds the authority preconditions to immutable GitHub and Git timing evidence:
+
+```text
+EXCLUSIVE_LOCK_ACQUIRED_UTC = 2026-09-13T20:25:12Z
+OPEN_PULL_REQUESTS_AT_LOCK = 0
+REPLAY_B_COMPLETE_UTC = 2026-09-13T20:26:50Z
+CANDIDATE_COMMITTER_DATE_UTC = 2026-09-13T20:49:52Z
+PR_233_CREATED_AT_UTC = 2026-09-13T20:50:15Z
+REPOSITORY_COMMIT_OR_PUSH_BEFORE_QUALIFYING_EVIDENCE = 0
+TRACKED_CANDIDATE_COMMIT_AFTER_REPLAY_EVIDENCE = PASS
+PR_CREATION_AFTER_REPLAY_EVIDENCE = PASS
+```
+
+The authority explicitly treated the prior untracked draft as nonqualifying and required regeneration after the fresh repair pair. Consistent with that boundary, the no-mutation proof here is about tracked candidate commit/push and PR mutation: none occurred before qualifying replay evidence completed. The prior untracked draft was not used as qualifying evidence.
 
 ## 3. Replay results
 
@@ -84,7 +103,8 @@ DISTRIBUTION_AUTHORITY = ABSENT
 004D_AUTHORITY = ABSENT
 SPECIFICATION_005_AUTHORITY = ABSENT
 RELEASE_AUTHORITY = ABSENT
-DEPLOYMENT_AUTHORITY = ABSENTPROJECT_COMPLETE = false
+DEPLOYMENT_AUTHORITY = ABSENT
+PROJECT_COMPLETE = false
 ```
 
 This candidate records only the repaired 004C1FA qualification. Any successor authority requires exact-head independent substantive review, guarded merge, post-merge verification, and a fresh canonical Issue #7 reconciliation.
