@@ -1,0 +1,61 @@
+{
+  "authority": "github:issue-comment:5650000303",
+  "canonical_base": "d3ce21ef6e55d89aca1d6676a923e6f33bdc735b",
+  "canonical_base_tree": "8c6d026ca7c8c15c3781e1fbfea8de90263a5cc5",
+  "comparison": {
+    "published_equals_build_1": true,
+    "published_equals_build_2": true,
+    "scope": "pdfium.wasm only"
+  },
+  "non_grants": [
+    "other_published_file_equality",
+    "component_inventory",
+    "complete_notice_or_sbom",
+    "artifact_adoption",
+    "provider_runtime",
+    "004C2",
+    "004D",
+    "Specification 005",
+    "release",
+    "deployment",
+    "project completion"
+  ],
+  "notice_gap_disposition": {
+    "distribution_adoption_gate": "FAIL_CLOSED",
+    "item_1_exact_final_component_link_closure": "OPEN",
+    "item_2_component_license_mapping": "OPEN",
+    "item_3_external_deps_actual_incorporation_mapping": "OPEN",
+    "item_4_notice_inventory_completeness": "OPEN",
+    "item_5_reproducible_build_source_to_published_wasm_binding": "CLOSED_PASS",
+    "pdfium_component_notice_completeness": "PARTIAL"
+  },
+  "published_artifact": {
+    "bytes": 4633788,
+    "package": "@embedpdf/pdfium@2.15.0",
+    "path": "package/dist/pdfium.wasm",
+    "sha256": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8",
+    "source_units": [
+      "004C1AC",
+      "004C1AD"
+    ],
+    "tarball_bytes": 2665003,
+    "tarball_sha256": "fe0cb4677782a58b67f555df9a1257742bcfbf390b9a3e08bd8ad976eea436bb"
+  },
+  "repository_payload": {
+    "documentation_files": 2,
+    "generated_vendor_binary_bytes": 0,
+    "package_or_lockfile_mutation": false,
+    "upstream_source_bytes": 0
+  },
+  "reproducible_build": {
+    "bytes": 4633788,
+    "sha256": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8",
+    "source_units": [
+      "004C1EF",
+      "004C1EG"
+    ],
+    "successful_builds": 2
+  },
+  "result": "PASS_EXACT_REPRODUCIBLE_BUILD_TO_PUBLISHED_NPM_WASM_IDENTITY",
+  "unit": "004C1EH_EXACT_REPRODUCIBLE_BUILD_TO_PUBLISHED_NPM_PDFIUM_WASM_IDENTITY_QUALIFICATION"
+}
