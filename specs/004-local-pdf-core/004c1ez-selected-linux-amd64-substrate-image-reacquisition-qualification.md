@@ -59,7 +59,7 @@ No retry or alternate reference was used.
 Post-pull read-only inspection established:
 
 ```text
-LOCAL_IMAGE_ID = sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3
+LOCAL_DOCKER_INSPECT_ID = sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3
 LOCAL_DESCRIPTOR_DIGEST = sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3
 LOCAL_REPOSITORY_DIGEST = emscripten/emsdk@sha256:c64f3cadcdff49ae65eadd815a425680a3f4c038b8fd49fe639c12e651d9c0a3
 LOCAL_IMAGE_OS = linux
@@ -68,7 +68,7 @@ LOCAL_IMAGE_SIZE_BYTES = 720592460
 LOCAL_LAYER_COUNT = 5
 ```
 
-The local descriptor and repository digest therefore match the exact canonical immutable manifest identity, and the selected platform is exactly linux/amd64.
+The current containerd-backed Docker inspection surface reports `.Id` equal to the selected manifest digest. This value is retained only as `LOCAL_DOCKER_INSPECT_ID`; it is not treated as the image config identity. The local descriptor and repository digest match the exact canonical immutable manifest identity, and the selected platform is exactly linux/amd64. The config identity is established separately from the local save manifest below.
 
 ## 5. Local config binding
 
