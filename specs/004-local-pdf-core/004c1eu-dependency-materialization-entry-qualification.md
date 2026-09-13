@@ -111,7 +111,7 @@ No developer-local evidence path is present in the adopted metadata.
 
 ## 4. Fresh exact-version registry revalidation
 
-Fresh read-only npm-registry metadata revalidation was performed for all eight direct roots. Every exact version remains published, undepr ecated, and reports license `MIT`. The observed exact-version SHA-1 values match the canonical 004C1I registry identities:
+Fresh read-only npm-registry metadata revalidation was performed for all eight direct roots. Every exact version remains published, non-deprecated, and reports license `MIT`. The observed exact-version SHA-1 values match the canonical 004C1I registry identities:
 
 | Exact identity | Fresh registry SHA-1 | Canonical parity |
 | --- | --- | --- |
