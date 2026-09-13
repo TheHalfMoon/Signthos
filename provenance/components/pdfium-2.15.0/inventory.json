@@ -1,0 +1,476 @@
+{
+  "closure_rows": 24,
+  "rows": [
+    {
+      "classification": "MAPPED",
+      "closure_id": "core",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/03-1fe9dea718fbd75c.txt",
+          "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+          "source_evidence_path": "pdfium-licenses/pdfium_root.txt"
+        }
+      ],
+      "license_or_attribution_basis": "PDFium BSD-style redistribution terms",
+      "observed_identity": "objects=336",
+      "row": 1,
+      "source_binding": "PDFIUM cb29e78f2ba00c9298714d5f4a8bf7765f1e802f tree 5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "fpdfsdk",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/03-1fe9dea718fbd75c.txt",
+          "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+          "source_evidence_path": "pdfium-licenses/pdfium_root.txt"
+        }
+      ],
+      "license_or_attribution_basis": "PDFium BSD-style redistribution terms",
+      "observed_identity": "objects=66",
+      "row": 2,
+      "source_binding": "PDFIUM cb29e78f2ba00c9298714d5f4a8bf7765f1e802f tree 5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "fxjs",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/03-1fe9dea718fbd75c.txt",
+          "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9",
+          "source_evidence_path": "pdfium-licenses/pdfium_root.txt"
+        }
+      ],
+      "license_or_attribution_basis": "PDFium BSD-style redistribution terms",
+      "observed_identity": "objects=3",
+      "row": 3,
+      "source_binding": "PDFIUM cb29e78f2ba00c9298714d5f4a8bf7765f1e802f tree 5b402772057e8c3a676c95882a4825350bdf6988"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/abseil-cpp",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/18-c79a7fea0e3cac04.txt",
+          "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747",
+          "source_evidence_path": "pdfium-licenses/abseil.txt"
+        }
+      ],
+      "license_or_attribution_basis": "Apache-2.0 exact LICENSE",
+      "observed_identity": "objects=135",
+      "row": 4,
+      "source_binding": "675d3d37ecbec78fd51378c6774c45715b1e4382 tree ca62252c27724e8ad8fe91d70807c700c6069f86"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/fx_agg",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/01-0e16f9c228558326.txt",
+          "sha256": "0e16f9c2285583269242e94c6f502de0c9910dfcbbc7b386e236cdf29ecd4333",
+          "source_evidence_path": "pdfium-licenses/agg23.txt"
+        }
+      ],
+      "license_or_attribution_basis": "Anti-Grain Geometry 2.3 permissive redistribution/copyright text",
+      "observed_identity": "objects=5",
+      "row": 5,
+      "source_binding": "PDFIUM vendored at cb29e78f2ba00c9298714d5f4a8bf7765f1e802f"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "third_party/fx_freetype",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/15-bd36c8b474855fa2.txt",
+          "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b",
+          "source_evidence_path": "pdfium-licenses/freetype.txt"
+        },
+        {
+          "bundle_path": "licenses/07-5a5ee54c5001bbad.txt",
+          "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f",
+          "source_evidence_path": "pdfium-licenses/freetype_ftl.txt"
+        },
+        {
+          "bundle_path": "licenses/17-c4120c6752c910c2.txt",
+          "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18",
+          "source_evidence_path": "pdfium-licenses/freetype_gpl2.txt"
+        }
+      ],
+      "license_or_attribution_basis": "FreeType dual-license declaration; canonical redistribution basis FTL with exact FTL text preserved",
+      "observed_identity": "objects=18",
+      "row": 6,
+      "source_binding": "b91f75bd02db43b06d634591eb286d3eb0ce3b65 tree 84a6fa6276a41ebff796b2b16fd217e867b0c8bd"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/fx_lcms2",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/09-6dbd60437f8ef91d.txt",
+          "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31",
+          "source_evidence_path": "pdfium-licenses/lcms2.txt"
+        }
+      ],
+      "license_or_attribution_basis": "MIT exact LICENSE",
+      "observed_identity": "objects=26",
+      "row": 7,
+      "source_binding": "PDFIUM vendored at cb29e78f2ba00c9298714d5f4a8bf7765f1e802f"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/fx_libopenjpeg",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/12-a6af136f3e15038a.txt",
+          "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6",
+          "source_evidence_path": "pdfium-licenses/openjpeg.txt"
+        }
+      ],
+      "license_or_attribution_basis": "BSD-2-Clause exact LICENSE with copyright notices",
+      "observed_identity": "objects=21",
+      "row": 8,
+      "source_binding": "PDFIUM vendored at cb29e78f2ba00c9298714d5f4a8bf7765f1e802f"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "third_party/icu",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/04-451167c55c0fa447.txt",
+          "sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca",
+          "source_evidence_path": "pdfium-licenses/icu.txt"
+        }
+      ],
+      "license_or_attribution_basis": "Exact ICU LICENSE including Unicode License V3 and bundled attribution/notices",
+      "observed_identity": "objects=202",
+      "row": 9,
+      "source_binding": "a86a32e67b8d1384b33f8fa48c83a6079b86f8cd tree 73b9cb2be837165ec31f9512bec2577255b825eb"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "third_party/libjpeg_turbo",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/11-96f5b328adbb78ee.txt",
+          "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430",
+          "source_evidence_path": "pdfium-licenses/libjpeg_turbo.txt"
+        },
+        {
+          "bundle_path": "licenses/10-75815e3bf6484201.txt",
+          "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6",
+          "source_evidence_path": "pdfium-licenses/libjpeg_ijg.txt"
+        }
+      ],
+      "license_or_attribution_basis": "IJG + BSD-3-Clause; exact libjpeg-turbo license roll-up and IJG text preserved",
+      "observed_identity": "objects=98",
+      "row": 10,
+      "source_binding": "6bb85251a8382b5e07f635a981ac685cc5ab5053 tree 402c2a97c8296e75ab702aa137b7b5d5d4faafb6"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/libpng",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/16-bf5e22b9dce84640.txt",
+          "sha256": "bf5e22b9dce8464064ae17a48ea1133c3369ac9e1d80ef9e320e5219aa14ea9b",
+          "source_evidence_path": "pdfium-licenses/libpng.txt"
+        }
+      ],
+      "license_or_attribution_basis": "PNG Reference Library License v2 exact LICENSE",
+      "observed_identity": "objects=15",
+      "row": 11,
+      "source_binding": "172f83835c98264e6eefdbe8ae82dc08be337ad0 tree 615deb4d13aa95080f11030afcf2eebf17dd43b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "third_party/zlib",
+      "closure_kind": "pdfium_component",
+      "evidence": [
+        {
+          "bundle_path": "licenses/19-e1cfcc55c325b3f7.txt",
+          "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c",
+          "source_evidence_path": "pdfium-licenses/zlib.txt"
+        }
+      ],
+      "license_or_attribution_basis": "zlib license exact revision LICENSE",
+      "observed_identity": "objects=16",
+      "row": 12,
+      "source_binding": "980253c1cc835c893c57b5cfc10c5b942e10bc46 tree 610b2b5c40379696b6920fa8573d0652b1a6e830"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libGL-getprocaddr.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "Emscripten dual MIT/NCSA; archive sources identified by exact system_libs.py",
+      "observed_identity": "sha256=b61c519837e61762bcf84c40584fadd8c0e1ac68c2031c69bf2a2dfeac4b32b7",
+      "row": 13,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libal.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "Emscripten dual MIT/NCSA; system/lib/al.c via exact system_libs.py",
+      "observed_identity": "sha256=ee50ab9897cd6026a6914bdfcaa23d6ba05d256adacdb74be99e6eb7701413ec",
+      "row": 14,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libhtml5.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "Emscripten dual MIT/NCSA; system/lib/html5/*.c via exact system_libs.py",
+      "observed_identity": "sha256=c88c94f5e4ba9852ba007d75739a9205e94621a229f93dcc5b50a792d8adab94",
+      "row": 15,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libstubs-debug.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "Emscripten dual MIT/NCSA; libc stub sources via exact system_libs.py",
+      "observed_identity": "sha256=b897f4424d685651f47cb9d0152f585af39559c73ba687d15c05448ba2481d28",
+      "row": 16,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libnoexit.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "Emscripten dual MIT/NCSA; system/lib/libc/atexit_dummy.c via exact system_libs.py",
+      "observed_identity": "sha256=09946cc98653c43648b317b55a61354bff94a9897120c179aca38b386473970e",
+      "row": 17,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "libc-debug.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/21-f9bc4423732350eb.txt",
+          "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+          "source_evidence_path": "emscripten/musl_copyright"
+        },
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "musl MIT plus Emscripten dual MIT/NCSA for Emscripten libc additions",
+      "observed_identity": "sha256=200a852a57eac29dc6db0ce75b9392bb4a4606d3b131394a8b5c9907c3c46355",
+      "row": 18,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "libdlmalloc.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/14-bc66b32f9a9562b6.txt",
+          "sha256": "bc66b32f9a9562b6546cce3c9b1e5d04d91b177ef4682fabc7fe3230efd70150",
+          "source_evidence_path": "emscripten/dlmalloc_source"
+        },
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "dlmalloc public-domain/CC0 statement plus Emscripten modifications under Emscripten dual license",
+      "observed_identity": "sha256=b77181acc3d4adfc5b20ba8cc69ba3b204177bef5ff45f501435a85ab8f42272",
+      "row": 19,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "COMPOSITE_MAPPED",
+      "closure_id": "libcompiler_rt.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/02-1a8f1058753f1ba8.txt",
+          "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d",
+          "source_evidence_path": "emscripten/compiler_rt_license"
+        },
+        {
+          "bundle_path": "licenses/08-620a78084fc7ca97.txt",
+          "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86",
+          "source_evidence_path": "emscripten/emscripten_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "LLVM Apache-2.0 WITH LLVM-exception plus Emscripten-specific compiler-rt additions",
+      "observed_identity": "sha256=e042f32ae45b5a65d53e625c8db58ce867e186e1c600f316f2c8e815b7df1590",
+      "row": 20,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libc++-noexcept.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/06-539dd7aed86e8a4f.txt",
+          "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b",
+          "source_evidence_path": "emscripten/libcxx_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "LLVM Apache-2.0 WITH LLVM-exception exact libc++ license",
+      "observed_identity": "sha256=b4842d12fb4c1f81086a2ca297437df75b8aee4dab1a67346dc5965efc643153",
+      "row": 21,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libc++abi-debug-noexcept.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/20-e2b35be49f7284a4.txt",
+          "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c",
+          "source_evidence_path": "emscripten/libcxxabi_license"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "LLVM Apache-2.0 WITH LLVM-exception exact libc++abi license",
+      "observed_identity": "sha256=3a7f1d35bc7b81e39b245b02efcd55b98e9de58790bd586a0cb203fb479cbd7f",
+      "row": 22,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libsockets.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/21-f9bc4423732350eb.txt",
+          "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af",
+          "source_evidence_path": "emscripten/musl_copyright"
+        },
+        {
+          "bundle_path": "licenses/13-aa75ac798c2d4cd2.txt",
+          "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab",
+          "source_evidence_path": "emscripten/system_libs"
+        }
+      ],
+      "license_or_attribution_basis": "musl MIT exact COPYRIGHT; network sources identified by exact system_libs.py",
+      "observed_identity": "sha256=1c67c98978130134cab6a820dea2da1592aa58f5ba403b264931c92a3b7341d5",
+      "row": 23,
+      "source_binding": "builder image sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4"
+    },
+    {
+      "classification": "MAPPED",
+      "closure_id": "libz.a",
+      "closure_kind": "emscripten_archive",
+      "evidence": [
+        {
+          "bundle_path": "licenses/05-4bb4d5664fb9d06e.txt",
+          "sha256": "4bb4d5664fb9d06ef0d47e8ef73104bd545a5a57eb7241be4f2e0be904966322",
+          "source_evidence_path": "zlib/zlib-1.2.13-README"
+        }
+      ],
+      "license_or_attribution_basis": "zlib 1.2.13 exact copyright/license notice",
+      "observed_identity": "sha256=b16764a437491089095f9c00ca95b9630315dd999e1cbde523f27045a0656a6a",
+      "row": 24,
+      "source_binding": "zlib 1.2.13 archive SHA512 44b834fbfb50cca229209b8dbe1f96b258f19a49f5df23b80970b716371d856a4adf525edb4c6e0e645b180ea949cb90f5365a1d896160f297f56794dd888659"
+    }
+  ],
+  "schema": "signthos.004c1er.notice-inventory.v1",
+  "unresolved_rows": 0
+}
