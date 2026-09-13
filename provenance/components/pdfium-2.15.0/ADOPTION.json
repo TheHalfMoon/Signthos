@@ -1,0 +1,180 @@
+{
+  "adopted_evidence_files": [
+    {
+      "bytes": 498069,
+      "path": "provenance/components/pdfium-2.15.0/NOTICE.generated.txt",
+      "sha256": "9ce821c509d524f0744daa516cb4eb75683db10909b4e7535264a7a030cef5e3"
+    },
+    {
+      "bytes": 20794,
+      "path": "provenance/components/pdfium-2.15.0/inventory.json",
+      "sha256": "2b564bb641ff544e25ecf12eb8e860d4537d5c8ea2faac301e517207bd9b37af"
+    },
+    {
+      "bytes": 443,
+      "path": "provenance/components/pdfium-2.15.0/licenses/01-0e16f9c228558326.txt",
+      "sha256": "0e16f9c2285583269242e94c6f502de0c9910dfcbbc7b386e236cdf29ecd4333"
+    },
+    {
+      "bytes": 16708,
+      "path": "provenance/components/pdfium-2.15.0/licenses/02-1a8f1058753f1ba8.txt",
+      "sha256": "1a8f1058753f1ba890de984e48f0242a3a5c29a6a8f2ed9fd813f36985387e8d"
+    },
+    {
+      "bytes": 12896,
+      "path": "provenance/components/pdfium-2.15.0/licenses/03-1fe9dea718fbd75c.txt",
+      "sha256": "1fe9dea718fbd75cf149adaf4d8a22a4335604d964ddb76d1b45383dec8668c9"
+    },
+    {
+      "bytes": 26487,
+      "path": "provenance/components/pdfium-2.15.0/licenses/04-451167c55c0fa447.txt",
+      "sha256": "451167c55c0fa447cc2d5632714f5e3c567fe4f1e1badefab2c1333852198aca"
+    },
+    {
+      "bytes": 5368,
+      "path": "provenance/components/pdfium-2.15.0/licenses/05-4bb4d5664fb9d06e.txt",
+      "sha256": "4bb4d5664fb9d06ef0d47e8ef73104bd545a5a57eb7241be4f2e0be904966322"
+    },
+    {
+      "bytes": 16703,
+      "path": "provenance/components/pdfium-2.15.0/licenses/06-539dd7aed86e8a4f.txt",
+      "sha256": "539dd7aed86e8a4f12cbdd0e6c50c189c7d74847e4fecc64ce2c6ee3a01da38b"
+    },
+    {
+      "bytes": 6743,
+      "path": "provenance/components/pdfium-2.15.0/licenses/07-5a5ee54c5001bbad.txt",
+      "sha256": "5a5ee54c5001bbad1cdc1a57cc3dd4c42199b2da09d39c7ee41fab002d02967f"
+    },
+    {
+      "bytes": 5093,
+      "path": "provenance/components/pdfium-2.15.0/licenses/08-620a78084fc7ca97.txt",
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    {
+      "bytes": 1080,
+      "path": "provenance/components/pdfium-2.15.0/licenses/09-6dbd60437f8ef91d.txt",
+      "sha256": "6dbd60437f8ef91d8de1f08ad75882547fd4931bfcc3566a0735f28db1484d31"
+    },
+    {
+      "bytes": 12799,
+      "path": "provenance/components/pdfium-2.15.0/licenses/10-75815e3bf6484201.txt",
+      "sha256": "75815e3bf6484201a3c3d17a1bbf10f2e8e3237f84df10a2357ea896db2a81d6"
+    },
+    {
+      "bytes": 5620,
+      "path": "provenance/components/pdfium-2.15.0/licenses/11-96f5b328adbb78ee.txt",
+      "sha256": "96f5b328adbb78eeaaec6980d73fd558cb1e4d62560ed615646bc3cf5e532430"
+    },
+    {
+      "bytes": 2112,
+      "path": "provenance/components/pdfium-2.15.0/licenses/12-a6af136f3e15038a.txt",
+      "sha256": "a6af136f3e15038a666b61f376612a07d9a4e48cb7c01adbf3e33b3f14ab49b6"
+    },
+    {
+      "bytes": 83014,
+      "path": "provenance/components/pdfium-2.15.0/licenses/13-aa75ac798c2d4cd2.txt",
+      "sha256": "aa75ac798c2d4cd24687655f9a6e598b42ef046f2bb0da337950819d22350cab"
+    },
+    {
+      "bytes": 236511,
+      "path": "provenance/components/pdfium-2.15.0/licenses/14-bc66b32f9a9562b6.txt",
+      "sha256": "bc66b32f9a9562b6546cce3c9b1e5d04d91b177ef4682fabc7fe3230efd70150"
+    },
+    {
+      "bytes": 2149,
+      "path": "provenance/components/pdfium-2.15.0/licenses/15-bd36c8b474855fa2.txt",
+      "sha256": "bd36c8b474855fa294c2ec5c184544478ef3720aad37d65a6296a4f264fd2d3b"
+    },
+    {
+      "bytes": 5345,
+      "path": "provenance/components/pdfium-2.15.0/licenses/16-bf5e22b9dce84640.txt",
+      "sha256": "bf5e22b9dce8464064ae17a48ea1133c3369ac9e1d80ef9e320e5219aa14ea9b"
+    },
+    {
+      "bytes": 17994,
+      "path": "provenance/components/pdfium-2.15.0/licenses/17-c4120c6752c910c2.txt",
+      "sha256": "c4120c6752c910c299e3bd9cb3a46ff262c268303ca2069b61f92f10a5656c18"
+    },
+    {
+      "bytes": 11361,
+      "path": "provenance/components/pdfium-2.15.0/licenses/18-c79a7fea0e3cac04.txt",
+      "sha256": "c79a7fea0e3cac04cd43f20e7b648e5a0ff8fa5344e644b0ee09ca1162b62747"
+    },
+    {
+      "bytes": 910,
+      "path": "provenance/components/pdfium-2.15.0/licenses/19-e1cfcc55c325b3f7.txt",
+      "sha256": "e1cfcc55c325b3f78cf55df9664abaa066e2271dffe8213347d9fccdfbac8f2c"
+    },
+    {
+      "bytes": 16706,
+      "path": "provenance/components/pdfium-2.15.0/licenses/20-e2b35be49f7284a4.txt",
+      "sha256": "e2b35be49f7284a45b7baca8fc7b3ab7440e7902392b2528a457816b5bb2a15c"
+    },
+    {
+      "bytes": 6204,
+      "path": "provenance/components/pdfium-2.15.0/licenses/21-f9bc4423732350eb.txt",
+      "sha256": "f9bc4423732350eb0b3f7ed7e91d530298476f8fec0c6c427a1c04ade22655af"
+    }
+  ],
+  "adoption_metadata": {
+    "path": "provenance/components/pdfium-2.15.0/ADOPTION.json",
+    "self_hash": "OMITTED_TO_AVOID_RECURSIVE_SELF_HASH"
+  },
+  "canonical_base": {
+    "commit": "911946405e1e2c6678fcd4f30201fe0cf176c610",
+    "tree": "68919c45e6237b3ed8af8ab577ec62196599c084"
+  },
+  "closure": {
+    "adopted_paths_total": 24,
+    "closure_rows": 24,
+    "evidence_files": 23,
+    "license_files": 21,
+    "unresolved_rows": 0
+  },
+  "component": {
+    "npm_identity": "@embedpdf/pdfium@2.15.0",
+    "published_wasm": {
+      "bytes": 4633788,
+      "path": "package/dist/pdfium.wasm",
+      "sha256": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8"
+    }
+  },
+  "frozen_004c1er_evidence": {
+    "closure_rows": 24,
+    "evidence_manifest_sha256": "11f6f106712d0119967933e8049e81963e16c36915e975ce9147ed72da3000a0",
+    "external_root": "/Users/abdulazizalsh/Signthos-evidence/004c1er-notice-inventory-20260913T064740Z",
+    "input_map_sha256": "0f642122adb49fcd88ada7dba04eb2cdc9ed2d5cc92a562a0807180d4f824835",
+    "inventory_byte_deterministic": true,
+    "inventory_sha256": "2b564bb641ff544e25ecf12eb8e860d4537d5c8ea2faac301e517207bd9b37af",
+    "notice_byte_deterministic": true,
+    "notice_sha256": "9ce821c509d524f0744daa516cb4eb75683db10909b4e7535264a7a030cef5e3",
+    "unique_exact_evidence_files": 21,
+    "unresolved_rows": 0
+  },
+  "immutable_004c1eh_evidence": {
+    "bytes": 2004,
+    "path": "specs/004-local-pdf-core/evidence/004c1eh-published-wasm-identity-evidence-bundle.json",
+    "sha256": "9f8ebcefb7b9a1d8bda205bf0171f124d66b4437239fe9eeb31249e05edc9f34"
+  },
+  "predecessor_authorities": [
+    {
+      "closeout": "github:issue-comment:5651630709",
+      "unit": "004C1EP"
+    },
+    {
+      "closeout": "github:issue-comment:5651697051",
+      "unit": "004C1EQ"
+    },
+    {
+      "closeout": "github:issue-comment:5651750353",
+      "unit": "004C1ER"
+    },
+    {
+      "closeout": "github:issue-comment:5652106544",
+      "merge": "911946405e1e2c6678fcd4f30201fe0cf176c610",
+      "unit": "004C1ES"
+    }
+  ],
+  "schema": "signthos.pdfium-component-adoption.v1",
+  "unit": "004C1ET_NOTICE_LICENSE_COMPONENT_SUBTREE_ADOPTION"
+}
