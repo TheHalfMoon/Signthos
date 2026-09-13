@@ -46,22 +46,46 @@ A later adoption unit must fail closed if any of these identities differ. Regene
 
 ## 3. Minimal future repository surface
 
-The later mutation should introduce one dedicated immutable-at-adoption subtree:
+The later adoption mutation **must** introduce exactly one dedicated immutable-at-adoption subtree, and every changed path in that mutation must be one of the following exact paths:
 
 ```text
-provenance/components/pdfium-2.15.0/
-  NOTICE.generated.txt
-  inventory.json
-  licenses/<stable-byte-derived-name>.txt
-  ADOPTION.json
+provenance/components/pdfium-2.15.0/NOTICE.generated.txt
+provenance/components/pdfium-2.15.0/inventory.json
+provenance/components/pdfium-2.15.0/licenses/01-0e16f9c228558326.txt
+provenance/components/pdfium-2.15.0/licenses/02-1a8f1058753f1ba8.txt
+provenance/components/pdfium-2.15.0/licenses/03-1fe9dea718fbd75c.txt
+provenance/components/pdfium-2.15.0/licenses/04-451167c55c0fa447.txt
+provenance/components/pdfium-2.15.0/licenses/05-4bb4d5664fb9d06e.txt
+provenance/components/pdfium-2.15.0/licenses/06-539dd7aed86e8a4f.txt
+provenance/components/pdfium-2.15.0/licenses/07-5a5ee54c5001bbad.txt
+provenance/components/pdfium-2.15.0/licenses/08-620a78084fc7ca97.txt
+provenance/components/pdfium-2.15.0/licenses/09-6dbd60437f8ef91d.txt
+provenance/components/pdfium-2.15.0/licenses/10-75815e3bf6484201.txt
+provenance/components/pdfium-2.15.0/licenses/11-96f5b328adbb78ee.txt
+provenance/components/pdfium-2.15.0/licenses/12-a6af136f3e15038a.txt
+provenance/components/pdfium-2.15.0/licenses/13-aa75ac798c2d4cd2.txt
+provenance/components/pdfium-2.15.0/licenses/14-bc66b32f9a9562b6.txt
+provenance/components/pdfium-2.15.0/licenses/15-bd36c8b474855fa2.txt
+provenance/components/pdfium-2.15.0/licenses/16-bf5e22b9dce84640.txt
+provenance/components/pdfium-2.15.0/licenses/17-c4120c6752c910c2.txt
+provenance/components/pdfium-2.15.0/licenses/18-c79a7fea0e3cac04.txt
+provenance/components/pdfium-2.15.0/licenses/19-e1cfcc55c325b3f7.txt
+provenance/components/pdfium-2.15.0/licenses/20-e2b35be49f7284a4.txt
+provenance/components/pdfium-2.15.0/licenses/21-f9bc4423732350eb.txt
+provenance/components/pdfium-2.15.0/ADOPTION.json
 ```
-The subtree is component-scoped rather than root-license-scoped. It must not replace `NOTICE`, `LICENSES/AGPL-3.0-only.txt`, or Signthos' own licensing statements.
 
-Stable license filenames must be derived from the frozen 004C1ER bundle mapping and byte identity, not human-renamed by license family. Byte-identical evidence may remain deduplicated exactly as 004C1ER proved; byte-different evidence must remain separate.
+This is the complete permitted changed-path set for the future adoption mutation: 24 files total. No path outside `provenance/components/pdfium-2.15.0/**` may change in that mutation. Any root `NOTICE`, `LICENSES/**`, package, lockfile, workflow, source/runtime, database, fixture, or deployment change requires separate later authority.
 
-`ADOPTION.json` is the repository provenance bridge. It must bind:
+The 21 license filenames above are the exact frozen 004C1ER byte-derived names. Byte-identical evidence remains deduplicated exactly as 004C1ER proved; byte-different evidence remains separate. Human renaming or license-family normalization is prohibited.
 
-- `@embedpdf/pdfium@2.15.0` and the exact published WASM SHA-256;
+`ADOPTION.json` is the repository provenance bridge. It must bind and exact-match:
+
+- npm identity `@embedpdf/pdfium@2.15.0`;
+- published WASM path `package/dist/pdfium.wasm`;
+- published WASM byte size `4633788`;
+- published WASM SHA-256 `c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8`;
+- immutable 004C1EH evidence path `specs/004-local-pdf-core/evidence/004c1eh-published-wasm-identity-evidence-bundle.json`, byte size `2004`, and SHA-256 `9f8ebcefb7b9a1d8bda205bf0171f124d66b4437239fe9eeb31249e05edc9f34`;
 - the canonical 004C1ER NOTICE, inventory, and evidence-manifest SHA-256 values;
 - all adopted file paths, sizes, and SHA-256 values;
 - the 24/24 closure coverage and zero-unresolved result;
