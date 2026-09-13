@@ -1,0 +1,120 @@
+{
+  "authority": {
+    "prelaunch_freeze": "github:issue-comment:5649802458",
+    "repository": "github:issue-comment:5649938113",
+    "runtime": "github:issue-comment:5649749560"
+  },
+  "canonical_base": "aff931412338a6ee9b6e3bf0e6cde3969555633b",
+  "canonical_base_tree": "f963de9b21fbd5e5f9aa4532495744ef63940067",
+  "canonical_reference": {
+    "merge": "aff931412338a6ee9b6e3bf0e6cde3969555633b",
+    "outputs": {
+      "functions.ts": {
+        "bytes": 50754,
+        "sha256": "a099440e877ad8ab21fccc914f2d9cdc6e029451e1201b64ec58e631d48d8f50"
+      },
+      "pdfium.cjs": {
+        "bytes": 279438,
+        "sha256": "3764d21da0fb2cd0b10f595c5bb68b77b8502fd6d0200ed6637da40ec8cfe861"
+      },
+      "pdfium.js": {
+        "bytes": 279742,
+        "sha256": "ac8f3b5f46b182c67807100632687fd592375f286d90fec41849df8926170d92"
+      },
+      "pdfium.wasm": {
+        "bytes": 4633788,
+        "sha256": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8"
+      },
+      "runtime-methods.ts": {
+        "bytes": 948,
+        "sha256": "95265b81272a7227add74105c1083a6b08ccc0d31bd207df3508a0130251087b"
+      }
+    },
+    "pr": 222,
+    "reviewed_head": "15333735281c31ec5208507a8c25bd12b7198b27",
+    "unit": "004C1EF"
+  },
+  "comparison": {
+    "all_five_sha256_match": true,
+    "all_five_size_match": true,
+    "build_success_count": 2,
+    "comparison_json_sha256": "2059492129897bff413ac45a674c4d3e64766de8029f9f4207df34b95f0bab91"
+  },
+  "external_evidence": {
+    "host_root": "/private/tmp/signthos-004c1eg-rebuild-5phCPVDF/postexit",
+    "manifest_rows": 71,
+    "manifest_sha256": "d7c344dd3b5da0c67f71466d2c99a61eab91f18251547ccb24b802a1832b344f"
+  },
+  "non_grants": [
+    "published_artifact_equality",
+    "artifact_import_or_adoption",
+    "package_control_mutation",
+    "browser_or_provider_runtime",
+    "pdf_functional_correctness",
+    "untrusted_pdf_security",
+    "performance_or_resource_limits",
+    "004C2",
+    "004D",
+    "Specification 005",
+    "release",
+    "deployment",
+    "project completion"
+  ],
+  "outputs": {
+    "functions.ts": {
+      "bytes": 50754,
+      "sha256": "a099440e877ad8ab21fccc914f2d9cdc6e029451e1201b64ec58e631d48d8f50"
+    },
+    "pdfium.cjs": {
+      "bytes": 279438,
+      "sha256": "3764d21da0fb2cd0b10f595c5bb68b77b8502fd6d0200ed6637da40ec8cfe861"
+    },
+    "pdfium.js": {
+      "bytes": 279742,
+      "sha256": "ac8f3b5f46b182c67807100632687fd592375f286d90fec41849df8926170d92"
+    },
+    "pdfium.wasm": {
+      "bytes": 4633788,
+      "sha256": "c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8"
+    },
+    "runtime-methods.ts": {
+      "bytes": 948,
+      "sha256": "95265b81272a7227add74105c1083a6b08ccc0d31bd207df3508a0130251087b"
+    }
+  },
+  "replay": {
+    "build_control_sha256": "954c0197dfcdc392ac5db59898af1dcf6c60c4efe99059e9de4497e0d9cff1da",
+    "build_finished_at": "2026-09-13T01:16:52Z",
+    "build_started_at": "2026-09-13T01:02:46Z",
+    "builder_image": "sha256:ebc4a9202a97820ac8f8780c8e7b89d51952f5ed512a898c52a8576cd38924b4",
+    "container": "c84d7613f6167357a7e4f69533b695185741c5ebd0e8bf66cec3d45f36d51619",
+    "container_execs": 0,
+    "copy_log_rows": 58,
+    "copy_log_sha256": "a38534f14a2b3eeb619f13dfd8aeea801fe0e25e5ec5414c4c12dc335e847d31",
+    "copy_plan_rows": 58,
+    "copy_plan_sha256": "a38534f14a2b3eeb619f13dfd8aeea801fe0e25e5ec5414c4c12dc335e847d31",
+    "exit_code": 0,
+    "finished_at": "2026-09-13T01:16:52.565772754Z",
+    "host_mounts": 0,
+    "network_mode": "none",
+    "oom_killed": false,
+    "previous_build_output_reuse": false,
+    "previous_generated_emscripten_cache_reuse": false,
+    "qualified_input_byte_reuse": true,
+    "retrieving_port_lines": 0,
+    "started_at": "2026-09-13T00:56:26.433285423Z",
+    "temporary_failure_lines": 0
+  },
+  "repository_payload": {
+    "documentation_files": 2,
+    "generated_vendor_binary_bytes": 0,
+    "package_or_lockfile_mutation": false,
+    "upstream_source_bytes": 0
+  },
+  "result": "PASS_TWO_EXACT_OFFLINE_REBUILDS_AND_FIVE_OUTPUT_REPRODUCIBILITY",
+  "unit": "004C1EG_EXACT_OFFLINE_RELEASE_INDEPENDENT_REBUILD_REPRODUCIBILITY_QUALIFICATION",
+  "zlib_cache": {
+    "bytes": 285614,
+    "sha256": "b16764a437491089095f9c00ca95b9630315dd999e1cbde523f27045a0656a6a"
+  }
+}
