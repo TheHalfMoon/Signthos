@@ -155,6 +155,33 @@ test('contradictory or incomplete raw observations fail closed', () => {
   }
 });
 
+test('inherited raw-observation fields cannot bypass qualified shape checks', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+
+  const inheritedError = Object.create({ pdfiumLastError: 3 });
+  inheritedError.openSucceeded = true;
+  inheritedError.pageCount = 1;
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, inheritedError), /plain object/);
+
+  const inheritedPageCount = Object.create({ pageCount: 0 });
+  inheritedPageCount.openSucceeded = false;
+  inheritedPageCount.pdfiumLastError = 3;
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, inheritedPageCount), /plain object/);
+
+  const inheritedRequired = Object.create({ openSucceeded: true, pageCount: 1 });
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, inheritedRequired), /plain object/);
+});
+
+test('null-prototype observations are accepted only with required own fields', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  const observation = Object.assign(Object.create(null), { openSucceeded: true, pageCount: 1 });
+  const evidence = mapPdfiumStructuralObservation(bytes, observation);
+  assert.equal(evidence.state, 'STRUCTURAL_INSPECTION_COMPLETE');
+  assert.equal(evidence.structuralIdentityResult, 'PDF_STRUCTURE_ACCEPTED');
+});
+
 test('mapped accepted evidence composes with provider-neutral admission', () => {
   const item = record('admission-seed-ordinary-minimal-v1');
   const evidence = mapPdfiumStructuralObservation(bytesFor(item), { openSucceeded: true, pageCount: 1 });

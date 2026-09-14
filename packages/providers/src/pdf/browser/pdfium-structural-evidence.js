@@ -19,7 +19,9 @@ const PDFIUM_FORMAT_ERROR = Object.freeze({
 });
 
 function isPlainObject(value) {
-  return Boolean(value) && typeof value === 'object' && !Array.isArray(value) && !Buffer.isBuffer(value);
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Buffer.isBuffer(value)) return false;
+  const prototype = Object.getPrototypeOf(value);
+  return prototype === Object.prototype || prototype === null;
 }
 
 function hasOwn(value, key) {
@@ -50,17 +52,19 @@ function baseEvidence(bytes) {
 function mapPdfiumStructuralObservation(bytes, rawObservation) {
   if (!Buffer.isBuffer(bytes)) throw new TypeError('bytes must be a Buffer');
   if (!isPlainObject(rawObservation)) throw new TypeError('rawObservation must be a plain object');
-  if (typeof rawObservation.openSucceeded !== 'boolean') {
-    throw new TypeError('rawObservation.openSucceeded must be boolean');
+  if (!hasOwn(rawObservation, 'openSucceeded') || typeof rawObservation.openSucceeded !== 'boolean') {
+    throw new TypeError('rawObservation.openSucceeded must be an own boolean field');
   }
 
   const base = baseEvidence(bytes);
 
   if (rawObservation.openSucceeded) {
-    if (!Number.isSafeInteger(rawObservation.pageCount) || rawObservation.pageCount < 0) {
+    if (!hasOwn(rawObservation, 'pageCount')
+        || !Number.isSafeInteger(rawObservation.pageCount)
+        || rawObservation.pageCount < 0) {
       throw new TypeError('successful PDFium open requires a nonnegative integer pageCount');
     }
-    if (hasOwn(rawObservation, 'pdfiumLastError')) {
+    if ('pdfiumLastError' in rawObservation) {
       throw new TypeError('successful PDFium open must not carry pdfiumLastError');
     }
     return Object.freeze({
@@ -74,10 +78,11 @@ function mapPdfiumStructuralObservation(bytes, rawObservation) {
     });
   }
 
-  if (hasOwn(rawObservation, 'pageCount')) {
+  if ('pageCount' in rawObservation) {
     throw new TypeError('failed PDFium open must not carry pageCount');
   }
-  if (rawObservation.pdfiumLastError !== PDFIUM_FORMAT_ERROR.code) {
+  if (!hasOwn(rawObservation, 'pdfiumLastError')
+      || rawObservation.pdfiumLastError !== PDFIUM_FORMAT_ERROR.code) {
     throw new TypeError('PDFium observation is not qualified for structural mapping');
   }
 
