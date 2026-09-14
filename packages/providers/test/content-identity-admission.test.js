@@ -172,7 +172,7 @@ test('classifier pdf result cannot confirm PDF without structural evidence', () 
   assertNoDisposition(result);
 });
 
-test('classifier non-pdf label cannot override structural acceptance without explicit conflict', () => {
+test('classifier non-pdf disagreement requires explicit reconciliation before structural acceptance can publish', () => {
   const item = record('admission-seed-ordinary-minimal-v1');
   const binding = bindingFor(item);
   const result = evaluateFixture(item, {
@@ -184,7 +184,139 @@ test('classifier non-pdf label cannot override structural acceptance without exp
     }),
     structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
   });
+  assert.equal(result.operationStatus, OPERATION_STATUS.FAILED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.CONFLICTING);
+  assert.equal(result.failureClass, 'PDF_ADMISSION_EVIDENCE_CONFLICT');
+  assertNoDisposition(result);
+});
+
+test('explicit advisory classifier disagreement preserves structural acceptance', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const binding = bindingFor(item);
+  const conflict = bound(binding, {
+    conflictClass: 'CLASSIFIER_VS_STRUCTURAL_MISMATCH',
+    evidenceRefs: ['classifier-evidence', 'structural-evidence'],
+    dispositionImpact: CONFLICT_IMPACTS.NONE,
+  });
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierLabel: 'zip',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
+    conflicts: [conflict],
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.SUCCEEDED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.COMPLETE);
   assert.equal(result.admissionDisposition, DISPOSITIONS.CONFIRMED_PDF);
+  assert.equal(result.conflicts.length, 1);
+});
+
+test('classifier disagreement can remain explicit admission ambiguity', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const binding = bindingFor(item);
+  const conflict = bound(binding, {
+    conflictClass: 'CLASSIFIER_VS_STRUCTURAL_MISMATCH',
+    evidenceRefs: ['classifier-evidence', 'structural-evidence'],
+    dispositionImpact: CONFLICT_IMPACTS.AMBIGUOUS,
+  });
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierLabel: 'zip',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
+    conflicts: [conflict],
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.SUCCEEDED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.CONFLICTING);
+  assert.equal(result.admissionDisposition, DISPOSITIONS.AMBIGUOUS_CONTENT_IDENTITY);
+});
+
+test('classifier pdf disagreement requires explicit reconciliation before structural rejection can publish', () => {
+  const item = record('admission-seed-declared-pdf-nonpdf-v1');
+  const binding = bindingFor(item);
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierLabel: 'pdf',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_REJECTED'),
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.FAILED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.CONFLICTING);
+  assert.equal(result.failureClass, 'PDF_ADMISSION_EVIDENCE_CONFLICT');
+  assertNoDisposition(result);
+});
+
+test('explicit classifier pdf disagreement cannot erase structural rejection', () => {
+  const item = record('admission-seed-declared-pdf-nonpdf-v1');
+  const binding = bindingFor(item);
+  const conflict = bound(binding, {
+    conflictClass: 'CLASSIFIER_VS_STRUCTURAL_MISMATCH',
+    evidenceRefs: ['classifier-evidence', 'structural-evidence'],
+    dispositionImpact: CONFLICT_IMPACTS.NONE,
+  });
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierLabel: 'pdf',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_REJECTED'),
+    conflicts: [conflict],
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.SUCCEEDED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.COMPLETE);
+  assert.equal(result.admissionDisposition, DISPOSITIONS.NOT_PDF);
+});
+
+test('classifier mismatch record is invalid when classifier and structural evidence agree', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const binding = bindingFor(item);
+  const conflict = bound(binding, {
+    conflictClass: 'CLASSIFIER_VS_STRUCTURAL_MISMATCH',
+    evidenceRefs: ['classifier-evidence', 'structural-evidence'],
+    dispositionImpact: CONFLICT_IMPACTS.NONE,
+  });
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierLabel: 'pdf',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
+    conflicts: [conflict],
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.FAILED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.INCOMPLETE);
+  assert.equal(result.failureClass, 'PDF_ADMISSION_INVALID_EVIDENCE');
+  assertNoDisposition(result);
+});
+
+test('available classifier result requires an explicit label', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const binding = bindingFor(item);
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    classifierEvidence: bound(binding, {
+      state: 'CLASSIFIER_RESULT_AVAILABLE',
+      classifierConfidence: 0.99,
+    }),
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.FAILED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.INCOMPLETE);
+  assert.equal(result.failureClass, 'PDF_ADMISSION_INVALID_EVIDENCE');
+  assertNoDisposition(result);
 });
 
 test('non-material declared metadata conflict is preserved without forcing ambiguity', () => {

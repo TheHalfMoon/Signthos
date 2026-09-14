@@ -189,7 +189,9 @@ function validateDeterministicObservation(item) {
 }
 
 function validateClassifierEvidence(item) {
-  return isPlainObject(item) && CLASSIFIER_STATES.has(item.state);
+  if (!isPlainObject(item) || !CLASSIFIER_STATES.has(item.state)) return false;
+  if (item.state === 'CLASSIFIER_RESULT_AVAILABLE') return nonEmptyString(item.classifierLabel);
+  return true;
 }
 
 function validateStructuralEvidence(item) {
@@ -215,6 +217,25 @@ function validateConflict(item) {
   if (item.conflictClass === 'POLYGLOT_OR_MIXED_CONTENT_INDICATOR'
       && item.dispositionImpact !== CONFLICT_IMPACTS.AMBIGUOUS) return false;
   return true;
+}
+
+function classifierStructuralReconciliationState(classifierEvidence, structuralEvidence, conflicts) {
+  const mismatchConflicts = conflicts.filter(
+    (item) => item.conflictClass === 'CLASSIFIER_VS_STRUCTURAL_MISMATCH',
+  );
+  if (mismatchConflicts.length > 1) return 'INVALID';
+
+  const canCompare = classifierEvidence?.state === 'CLASSIFIER_RESULT_AVAILABLE'
+    && structuralEvidence?.state === 'STRUCTURAL_INSPECTION_COMPLETE'
+    && structuralEvidence.structuralIdentityResult !== 'PDF_STRUCTURE_UNSUPPORTED_OR_UNCERTAIN';
+  if (!canCompare) return mismatchConflicts.length === 0 ? 'OK' : 'INVALID';
+
+  const classifierSaysPdf = classifierEvidence.classifierLabel === 'pdf';
+  const structuralSaysPdf = structuralEvidence.structuralIdentityResult === 'PDF_STRUCTURE_ACCEPTED';
+  const disagreement = classifierSaysPdf !== structuralSaysPdf;
+  if (disagreement && mismatchConflicts.length === 0) return 'MISSING';
+  if (!disagreement && mismatchConflicts.length !== 0) return 'INVALID';
+  return 'OK';
 }
 
 function failureResult(base, operationStatus, evidenceCompleteness, failureClass) {
@@ -328,6 +349,18 @@ function evaluateAdmission(input) {
 
   if (conflicts.some((item) => item.dispositionImpact === CONFLICT_IMPACTS.INVALIDATED)) {
     return failureResult(base, OPERATION_STATUS.FAILED, COMPLETENESS.INVALIDATED, 'PDF_INPUT_IDENTITY_CHANGED_DURING_ADMISSION');
+  }
+
+  const reconciliationState = classifierStructuralReconciliationState(
+    classifierEvidence,
+    structuralEvidence,
+    conflicts,
+  );
+  if (reconciliationState === 'MISSING') {
+    return failureResult(base, OPERATION_STATUS.FAILED, COMPLETENESS.CONFLICTING, 'PDF_ADMISSION_EVIDENCE_CONFLICT');
+  }
+  if (reconciliationState === 'INVALID') {
+    return failureResult(base, OPERATION_STATUS.FAILED, COMPLETENESS.INCOMPLETE, 'PDF_ADMISSION_INVALID_EVIDENCE');
   }
 
   if (!structuralEvidence || structuralEvidence.state !== 'STRUCTURAL_INSPECTION_COMPLETE') {

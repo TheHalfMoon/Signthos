@@ -212,10 +212,10 @@ packages/providers/package.json
 SHA256 = d0d54a230580a44b84163c31aa0c3199b899c74035242180bd97fcfc92dea85f
 
 packages/providers/src/content-identity-admission.js
-SHA256 = 1ebe9cecdbed6fc0f145d20f42cb6ba0c0f93f57286967edfd4d398e701fe4e1
+SHA256 = af9cefdfdc4e81aa0619101d938cfd9fa237e5364b67ab821632b26506f0c965
 
 packages/providers/test/content-identity-admission.test.js
-SHA256 = e8a1033a93245d382b9b0226a95d8aa8eba899048f624ce0aa6334883ffaac24
+SHA256 = 04cc60f1abac62b6aae41dd9a1675897e56d8d478af2d0362eb49525178b27cc
 ```
 
 Canonical fixture manifest remains unchanged:
@@ -255,9 +255,9 @@ Both fresh syntax checks passed.
 Fresh test result:
 
 ```text
-TOP_LEVEL_SUBTESTS = 25
-NODE_TEST_COUNT = 38
-PASS = 38
+TOP_LEVEL_SUBTESTS = 31
+NODE_TEST_COUNT = 44
+PASS = 44
 FAIL = 0
 CANCELLED = 0
 SKIPPED = 0
@@ -277,7 +277,11 @@ The test suite covers at least:
 - explicit policy control over structural rejection disposition;
 - input-rejected outcome with no disposition;
 - classifier `pdf` label unable to bypass missing structural evidence;
-- classifier non-PDF label unable to override structural evidence silently;
+- classifier/structural disagreement in either direction requiring explicit `CLASSIFIER_VS_STRUCTURAL_MISMATCH` reconciliation before any disposition publishes;
+- advisory classifier disagreement with `dispositionImpact = NONE` preserving the structural result without granting classifier authority;
+- classifier disagreement with `dispositionImpact = AMBIGUOUS_CONTENT_IDENTITY` remaining explicit ambiguity;
+- false classifier/structural mismatch records rejected when the signals agree;
+- `CLASSIFIER_RESULT_AVAILABLE` rejected when no explicit classifier label is present;
 - non-material declared-metadata conflict preservation;
 - material mixed-content ambiguity;
 - explicit rejection of `POLYGLOT_OR_MIXED_CONTENT_INDICATOR` when its disposition impact is `NONE`;
@@ -295,6 +299,8 @@ The test suite covers at least:
 - malformed top-level evidence-container rejection.
 
 CodeRabbit review thread `PRRT_kwDOUMBFqc6iBCXC` / comment `4002877313` identified that `POLYGLOT_OR_MIXED_CONTENT_INDICATOR` could previously declare `dispositionImpact = NONE` and therefore evade the ambiguity gate. The candidate was repaired forward-only: that conflict class now requires `AMBIGUOUS_CONTENT_IDENTITY`, and a dedicated regression test proves `NONE` fails evidence validation and publishes no admission disposition.
+
+A later fresh CodeRabbit review of exact head `9ab3a13b6289055be9eb80ea799b32fe746f8c7d` identified that completed classifier/structural disagreement could still be silently discarded. The forward-only repair authorized by Issue #7 comment `5660671269` now requires exactly one explicit `CLASSIFIER_VS_STRUCTURAL_MISMATCH` record whenever an available classifier label disagrees with a determinate completed structural result. Missing reconciliation fails closed with `PDF_ADMISSION_EVIDENCE_CONFLICT`; a mismatch record with no actual disagreement is invalid evidence. The classifier remains advisory: a valid mismatch record with `dispositionImpact = NONE` preserves the structural disposition, while `AMBIGUOUS_CONTENT_IDENTITY` preserves the disagreement as admission ambiguity.
 
 ## 14. Non-grants
 
