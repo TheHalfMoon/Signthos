@@ -135,14 +135,17 @@ All other PDFium error codes are unqualified by this unit and fail closed rather
 
 The mapper throws before publishing evidence for raw shapes including:
 
-- missing or non-boolean `openSucceeded`;
-- successful open without a valid nonnegative integer `pageCount`;
-- successful open carrying `pdfiumLastError`;
-- failed open carrying any `pageCount`;
-- failed open missing `pdfiumLastError`;
+- any raw observation whose prototype is neither `Object.prototype` nor `null`;
+- missing, inherited, or non-boolean `openSucceeded`;
+- successful open without an own valid nonnegative integer `pageCount`;
+- successful open carrying an own or inherited `pdfiumLastError`;
+- failed open carrying an own or inherited `pageCount`;
+- failed open missing an own `pdfiumLastError`;
 - failed open with any PDFium error code other than `3`;
 - non-Buffer input bytes;
 - non-object raw observation input.
+
+The standard-prototype restriction plus own-field requirements prevent custom prototype chains from supplying required fields or hiding contradictory forbidden fields. A null-prototype record remains valid only when every required field is present as an own property.
 
 This fail-closed behavior prevents an unqualified raw provider state from being normalized into authoritative provider-neutral structural evidence.
 
@@ -235,7 +238,7 @@ The failure is preserved by `github:issue-comment:5670834631`. The authoring art
 
 The failed sequence is not qualification evidence.
 
-## 14. Fresh exact-Node qualification result
+## 14. Initial exact-Node qualification result before independent review
 
 After the forward-only source repair, the exact authorized validation commands were executed fresh using only the verified Node `v24.20.0` executable:
 
@@ -276,17 +279,70 @@ EVIDENCE_MANIFEST_SHA256 = 236cb6b568be01725853aaf56a70b112598cb2c9ec482394927d1
 
 The wrapper defect and post-validation result are preserved by `github:issue-comment:5670856131`.
 
-## 15. Candidate file identities before commit
+## 15. Independent review finding, concurrent repair, and fresh validation
+
+Fresh CodeRabbit review `github:issue-comment:5670906469` was bound to exact candidate head `8d1f597aef0055fdf24242a1fd8ae22fbbbe5bcb` and tree `6eb120de30041620a53a4700607c470e24810f74`. It reported one material fail-closed defect: custom-prototype raw observation objects could supply required fields through inheritance or hide contradictory inherited fields from own-property checks.
+
+The finding was accepted under `github:issue-comment:5670916641`. During the forward-only repair, a same-unit writer advanced the shared PR branch independently. The shared repair was preserved and adopted rather than overwritten:
+
+```text
+SHARED_REPAIR_HEAD = 8d99a540d23fb7ca96175880771e905ead8db51e
+SHARED_REPAIR_TREE = ddb1c8243355783eade3eb35585edc3fa52c8f3b
+SHARED_REPAIR_PARENT = 8d1f597aef0055fdf24242a1fd8ae22fbbbe5bcb
+SHARED_REPAIR_RECORD = github:issue-comment:5670941351
+CONCURRENCY_RECONCILIATION = github:issue-comment:5671041039
+FORCE_PUSH = NOT_USED
+REBASE = NOT_USED
+HISTORY_REWRITE = NOT_USED
+```
+
+The shared repair:
+
+- restricts accepted raw observations to objects whose prototype is exactly `Object.prototype` or `null`;
+- requires `openSucceeded` to be an own boolean field;
+- requires successful `pageCount` to be an own nonnegative safe integer;
+- rejects successful observations carrying an inherited or own `pdfiumLastError`;
+- rejects failed observations carrying an inherited or own `pageCount`;
+- requires failed `pdfiumLastError` to be an own field equal to `3`;
+- adds regressions for inherited forbidden/required fields and valid null-prototype observations.
+
+A fresh complete exact-Node validation sequence was executed independently on the exact shared repair bytes at `8d99a540...`:
+
+```text
+VALIDATION_NODE_VERSION = v24.20.0
+VALIDATION_NODE_SHA256 = 9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a
+CHECK_ADMISSION_RC = 0
+CHECK_ADAPTER_RC = 0
+CHECK_ADMISSION_TEST_RC = 0
+CHECK_ADAPTER_TEST_RC = 0
+TEST_ALL_RC = 0
+TESTS = 60
+PASS = 60
+FAIL = 0
+CANCELLED = 0
+SKIPPED = 0
+TODO = 0
+PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
+TEST_STDOUT_SHA256 = e1fbf9810e8be783770c5ddabb0a8623fb3b5b9f78504968e042e64150e6f64a
+TEST_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+VALIDATION_SUMMARY_SHA256 = 3b9805d64b879cee3b191e2b1265d007403597cadca13d29226f9e63e9ffb13e
+EVIDENCE_MANIFEST_ENTRIES = 18
+EVIDENCE_MANIFEST_SHA256 = 8370c69e403bcabca9307d77f415d152bb53fa13bff6be7eaa6fb216d50fe4d6
+```
+
+No PDFium/WASM, Docker, package-manager, dependency-installation, or additional network execution occurred during the review repair or reconciliation validation. The review of `8d1f597...` is stale for merge qualification; the final documentation-synchronized head requires a fresh independent substantive exact-head review.
+
+## 16. Final candidate file identities after inherited-field repair
 
 ```text
 packages/providers/package.json
 SHA256 = 42e34bd4f7b4aa0a045a49c4538ffec79eaff28bc136e42adddc486ee2e47b80
 
 packages/providers/src/pdf/browser/pdfium-structural-evidence.js
-SHA256 = 1a97ecc47fc48ddfac0ec5d458d2fd78fd9a0c9c5e39a5e0771ad8cf47425286
+SHA256 = 64c377b979c9887bdaf85731196f9703a9cbbe51aeec6c2442e149c5e345824f
 
 packages/providers/test/pdfium-structural-evidence.test.js
-SHA256 = 8388bde04a3c76e874f6c28c6aa458d17df10fd74826195ed6364f967b5712d7
+SHA256 = a2d293493609dbb9b2e67e7e6e4503260c35b931be1682a248a9e14f7f6d1a73
 ```
 
 The canonical provider-neutral implementation remains unchanged:
@@ -296,7 +352,7 @@ packages/providers/src/content-identity-admission.js
 SHA256 = af9cefdfdc4e81aa0619101d938cfd9fa237e5364b67ab821632b26506f0c965
 ```
 
-## 16. Regression coverage
+## 17. Regression coverage
 
 The fresh combined suite proves at minimum:
 
@@ -305,6 +361,8 @@ The fresh combined suite proves at minimum:
 - exact provider/version/source/submodule/WASM/capability evidence is published;
 - unknown PDFium error codes fail closed;
 - contradictory and incomplete raw observation shapes fail closed;
+- custom-prototype observations with inherited required or forbidden fields fail closed;
+- null-prototype observations are accepted only when required fields are valid own properties;
 - emitted digest and length equal exact fixture bytes;
 - mapped accepted evidence composes with canonical provider-neutral admission;
 - mapped input rejection publishes no admission disposition;
@@ -313,7 +371,7 @@ The fresh combined suite proves at minimum:
 - non-Buffer and non-object inputs fail closed;
 - all four fixture mappings independently match canonical exact-byte identity computation.
 
-## 17. Explicit non-grants
+## 18. Explicit non-grants
 
 ```text
 PDFIUM_IMPORT_OR_INITIALIZATION = NOT_AUTHORIZED
@@ -340,7 +398,7 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 
 No statement in this unit grants provider execution merely because provider observations can now be mapped.
 
-## 18. Canonicalization gate
+## 19. Canonicalization gate
 
 This candidate may become canonical only if all of the following remain true:
 
