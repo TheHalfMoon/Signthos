@@ -182,6 +182,44 @@ test('null-prototype observations are accepted only with required own fields', (
   assert.equal(evidence.structuralIdentityResult, 'PDF_STRUCTURE_ACCEPTED');
 });
 
+test('own accessors are rejected without invoking getter code', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  let getterCalls = 0;
+
+  const pageCountAccessor = { openSucceeded: true };
+  Object.defineProperty(pageCountAccessor, 'pageCount', {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return getterCalls === 1 ? 1 : -1;
+    },
+  });
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, pageCountAccessor), /data property/);
+
+  const openSucceededAccessor = { pageCount: 1 };
+  Object.defineProperty(openSucceededAccessor, 'openSucceeded', {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return true;
+    },
+  });
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, openSucceededAccessor), /data property/);
+
+  const lastErrorAccessor = { openSucceeded: false };
+  Object.defineProperty(lastErrorAccessor, 'pdfiumLastError', {
+    enumerable: true,
+    get() {
+      getterCalls += 1;
+      return 3;
+    },
+  });
+  assert.throws(() => mapPdfiumStructuralObservation(bytes, lastErrorAccessor), /not qualified/);
+
+  assert.equal(getterCalls, 0);
+});
+
 test('mapped accepted evidence composes with provider-neutral admission', () => {
   const item = record('admission-seed-ordinary-minimal-v1');
   const evidence = mapPdfiumStructuralObservation(bytesFor(item), { openSucceeded: true, pageCount: 1 });

@@ -28,6 +28,12 @@ function hasOwn(value, key) {
   return Object.prototype.hasOwnProperty.call(value, key);
 }
 
+function ownDataProperty(value, key) {
+  const descriptor = Object.getOwnPropertyDescriptor(value, key);
+  if (!descriptor || !hasOwn(descriptor, 'value')) return null;
+  return descriptor;
+}
+
 function frozenProviderVersionEvidence() {
   return Object.freeze({
     packageIdentity: PDFIUM_PROVIDER.packageIdentity,
@@ -52,17 +58,19 @@ function baseEvidence(bytes) {
 function mapPdfiumStructuralObservation(bytes, rawObservation) {
   if (!Buffer.isBuffer(bytes)) throw new TypeError('bytes must be a Buffer');
   if (!isPlainObject(rawObservation)) throw new TypeError('rawObservation must be a plain object');
-  if (!hasOwn(rawObservation, 'openSucceeded') || typeof rawObservation.openSucceeded !== 'boolean') {
-    throw new TypeError('rawObservation.openSucceeded must be an own boolean field');
+  const openSucceededDescriptor = ownDataProperty(rawObservation, 'openSucceeded');
+  if (!openSucceededDescriptor || typeof openSucceededDescriptor.value !== 'boolean') {
+    throw new TypeError('rawObservation.openSucceeded must be an own boolean data property');
   }
+  const openSucceeded = openSucceededDescriptor.value;
 
   const base = baseEvidence(bytes);
 
-  if (rawObservation.openSucceeded) {
-    if (!hasOwn(rawObservation, 'pageCount')
-        || !Number.isSafeInteger(rawObservation.pageCount)
-        || rawObservation.pageCount < 0) {
-      throw new TypeError('successful PDFium open requires a nonnegative integer pageCount');
+  if (openSucceeded) {
+    const pageCountDescriptor = ownDataProperty(rawObservation, 'pageCount');
+    const pageCount = pageCountDescriptor?.value;
+    if (!pageCountDescriptor || !Number.isSafeInteger(pageCount) || pageCount < 0) {
+      throw new TypeError('successful PDFium open requires an own nonnegative safe-integer pageCount data property');
     }
     if ('pdfiumLastError' in rawObservation) {
       throw new TypeError('successful PDFium open must not carry pdfiumLastError');
@@ -73,7 +81,7 @@ function mapPdfiumStructuralObservation(bytes, rawObservation) {
       structuralIdentityResult: 'PDF_STRUCTURE_ACCEPTED',
       providerObservation: Object.freeze({
         openSucceeded: true,
-        pageCount: rawObservation.pageCount,
+        pageCount,
       }),
     });
   }
@@ -81,8 +89,8 @@ function mapPdfiumStructuralObservation(bytes, rawObservation) {
   if ('pageCount' in rawObservation) {
     throw new TypeError('failed PDFium open must not carry pageCount');
   }
-  if (!hasOwn(rawObservation, 'pdfiumLastError')
-      || rawObservation.pdfiumLastError !== PDFIUM_FORMAT_ERROR.code) {
+  const pdfiumLastErrorDescriptor = ownDataProperty(rawObservation, 'pdfiumLastError');
+  if (!pdfiumLastErrorDescriptor || pdfiumLastErrorDescriptor.value !== PDFIUM_FORMAT_ERROR.code) {
     throw new TypeError('PDFium observation is not qualified for structural mapping');
   }
 

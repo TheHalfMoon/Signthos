@@ -332,17 +332,56 @@ EVIDENCE_MANIFEST_SHA256 = 8370c69e403bcabca9307d77f415d152bb53fa13bff6be7eaa6fb
 
 No PDFium/WASM, Docker, package-manager, dependency-installation, or additional network execution occurred during the review repair or reconciliation validation. The review of `8d1f597...` is stale for merge qualification; the final documentation-synchronized head requires a fresh independent substantive exact-head review.
 
-## 16. Final candidate file identities after inherited-field repair
+## 16. Second exact-head review finding and own-data-property repair
+
+Fresh CodeRabbit review `github:issue-comment:5671163016` was bound to exact documentation-synchronized head `f9046b9bbe60e41ac5fde44a4a71620105131b1b` and tree `5090de26563496acfcd78605bcd3eab1c66103c9`. It reported one additional material fail-closed defect: qualified own fields could still be accessor properties, so `pageCount` could return one value during validation and a different value during evidence construction.
+
+The finding was accepted under `github:issue-comment:5671181277`. The forward-only repair:
+
+- requires every qualified required raw field to be an own **data property** rather than an accessor;
+- reads `openSucceeded`, `pageCount`, and `pdfiumLastError` once from validated property-descriptor values;
+- rejects accessor forms without invoking getter code;
+- retains inherited/own forbidden-field contradiction checks;
+- adds regression coverage proving changing accessors for `pageCount`, `openSucceeded`, and `pdfiumLastError` cannot execute or influence emitted evidence.
+
+Fresh exact-Node validation of the accessor-repaired source/test bytes produced:
+
+```text
+VALIDATION_RECORD = github:issue-comment:5671206979
+VALIDATION_NODE_VERSION = v24.20.0
+VALIDATION_NODE_SHA256 = 9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a
+CHECK_ADMISSION_RC = 0
+CHECK_ADAPTER_RC = 0
+CHECK_ADMISSION_TEST_RC = 0
+CHECK_ADAPTER_TEST_RC = 0
+TEST_ALL_RC = 0
+TESTS = 61
+PASS = 61
+FAIL = 0
+CANCELLED = 0
+SKIPPED = 0
+TODO = 0
+PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
+TEST_STDOUT_SHA256 = b73ff8b1bf9c1596216277fb906b88abd39385cb473d2ec3be3039d1455b3f29
+TEST_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+VALIDATION_SUMMARY_SHA256 = 6b122a33746925800d1de23bad7dd7fa80179e648055c70517884584117bf616
+EVIDENCE_MANIFEST_ENTRIES = 20
+EVIDENCE_MANIFEST_SHA256 = 64580f3b3a5f69b717a99b9aaba3d9942ddcc15b11b6483dd0455cdd08b6e80c
+```
+
+No PDFium/WASM runtime, Docker, package-manager, dependency-installation, fixture mutation, or network execution occurred during this second repair. The review of `f9046b9...` is stale for merge qualification once these source/test bytes change.
+
+## 17. Final candidate file identities after own-data-property repair
 
 ```text
 packages/providers/package.json
 SHA256 = 42e34bd4f7b4aa0a045a49c4538ffec79eaff28bc136e42adddc486ee2e47b80
 
 packages/providers/src/pdf/browser/pdfium-structural-evidence.js
-SHA256 = 64c377b979c9887bdaf85731196f9703a9cbbe51aeec6c2442e149c5e345824f
+SHA256 = 61e93de6cf0458f3e6c903a142bfac953ae21b9fbf857cde131a08e0669b0eee
 
 packages/providers/test/pdfium-structural-evidence.test.js
-SHA256 = a2d293493609dbb9b2e67e7e6e4503260c35b931be1682a248a9e14f7f6d1a73
+SHA256 = 800728fe8984af1b1ca72f6a9b8d9ccbdccaf03bafe59970a3594a3f2cfde30f
 ```
 
 The canonical provider-neutral implementation remains unchanged:
@@ -352,7 +391,7 @@ packages/providers/src/content-identity-admission.js
 SHA256 = af9cefdfdc4e81aa0619101d938cfd9fa237e5364b67ab821632b26506f0c965
 ```
 
-## 17. Regression coverage
+## 18. Regression coverage
 
 The fresh combined suite proves at minimum:
 
@@ -362,6 +401,7 @@ The fresh combined suite proves at minimum:
 - unknown PDFium error codes fail closed;
 - contradictory and incomplete raw observation shapes fail closed;
 - custom-prototype observations with inherited required or forbidden fields fail closed;
+- own accessor properties for qualified fields fail closed without invoking getter code;
 - null-prototype observations are accepted only when required fields are valid own properties;
 - emitted digest and length equal exact fixture bytes;
 - mapped accepted evidence composes with canonical provider-neutral admission;
@@ -371,7 +411,7 @@ The fresh combined suite proves at minimum:
 - non-Buffer and non-object inputs fail closed;
 - all four fixture mappings independently match canonical exact-byte identity computation.
 
-## 18. Explicit non-grants
+## 19. Explicit non-grants
 
 ```text
 PDFIUM_IMPORT_OR_INITIALIZATION = NOT_AUTHORIZED
@@ -398,7 +438,7 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 
 No statement in this unit grants provider execution merely because provider observations can now be mapped.
 
-## 19. Canonicalization gate
+## 20. Canonicalization gate
 
 This candidate may become canonical only if all of the following remain true:
 
@@ -416,6 +456,6 @@ This candidate may become canonical only if all of the following remain true:
 12. Issue #7 performs a fresh successor reconciliation before any broader provider/runtime/004D authority is inferred.
 
 ```text
-IMPLEMENTATION_RESULT = CANDIDATE_PASS_AWAITING_INDEPENDENT_EXACT_HEAD_REVIEW
+IMPLEMENTATION_RESULT = ACCESSOR_REPAIR_CANDIDATE_PASS_AWAITING_INDEPENDENT_EXACT_HEAD_REVIEW
 PROJECT_COMPLETION = NOT_ESTABLISHED
 ```
