@@ -212,10 +212,10 @@ packages/providers/package.json
 SHA256 = d0d54a230580a44b84163c31aa0c3199b899c74035242180bd97fcfc92dea85f
 
 packages/providers/src/content-identity-admission.js
-SHA256 = 6595e3248b607a94be492c25b632e699b33c7b4852d096f589ac17d59ca6303b
+SHA256 = 1ebe9cecdbed6fc0f145d20f42cb6ba0c0f93f57286967edfd4d398e701fe4e1
 
 packages/providers/test/content-identity-admission.test.js
-SHA256 = 931aaea3f63d5c6517ea6748d641deebed89b0cb326b7f29a0d443270fce92d6
+SHA256 = e8a1033a93245d382b9b0226a95d8aa8eba899048f624ce0aa6334883ffaac24
 ```
 
 Canonical fixture manifest remains unchanged:
@@ -255,9 +255,9 @@ Both fresh syntax checks passed.
 Fresh test result:
 
 ```text
-TOP_LEVEL_SUBTESTS = 24
-NODE_TEST_COUNT = 37
-PASS = 37
+TOP_LEVEL_SUBTESTS = 25
+NODE_TEST_COUNT = 38
+PASS = 38
 FAIL = 0
 CANCELLED = 0
 SKIPPED = 0
@@ -280,6 +280,7 @@ The test suite covers at least:
 - classifier non-PDF label unable to override structural evidence silently;
 - non-material declared-metadata conflict preservation;
 - material mixed-content ambiguity;
+- explicit rejection of `POLYGLOT_OR_MIXED_CONTENT_INDICATOR` when its disposition impact is `NONE`;
 - explicit input-identity-change invalidation;
 - stale input binding against replacement bytes;
 - evidence bound to different bytes;
@@ -292,6 +293,8 @@ The test suite covers at least:
 - unsupported policy requirement rejection;
 - read-only input-byte preservation;
 - malformed top-level evidence-container rejection.
+
+CodeRabbit review thread `PRRT_kwDOUMBFqc6iBCXC` / comment `4002877313` identified that `POLYGLOT_OR_MIXED_CONTENT_INDICATOR` could previously declare `dispositionImpact = NONE` and therefore evade the ambiguity gate. The candidate was repaired forward-only: that conflict class now requires `AMBIGUOUS_CONTENT_IDENTITY`, and a dedicated regression test proves `NONE` fails evidence validation and publishes no admission disposition.
 
 ## 14. Non-grants
 
