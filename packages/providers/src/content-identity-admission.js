@@ -212,6 +212,8 @@ function validateConflict(item) {
   const identityConflict = IDENTITY_CONFLICT_CLASSES.has(item.conflictClass);
   if (identityConflict && item.dispositionImpact !== CONFLICT_IMPACTS.INVALIDATED) return false;
   if (!identityConflict && item.dispositionImpact === CONFLICT_IMPACTS.INVALIDATED) return false;
+  if (item.conflictClass === 'POLYGLOT_OR_MIXED_CONTENT_INDICATOR'
+      && item.dispositionImpact !== CONFLICT_IMPACTS.AMBIGUOUS) return false;
   return true;
 }
 

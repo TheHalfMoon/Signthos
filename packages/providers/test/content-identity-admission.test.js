@@ -223,6 +223,25 @@ test('material same-byte polyglot conflict remains explicit ambiguity', () => {
   assert.equal(result.admissionDisposition, DISPOSITIONS.AMBIGUOUS_CONTENT_IDENTITY);
 });
 
+test('polyglot conflict cannot declare NONE and reach confirmed admission', () => {
+  const item = record('admission-seed-trailing-inert-bytes-v1');
+  const binding = bindingFor(item);
+  const conflict = bound(binding, {
+    conflictClass: 'POLYGLOT_OR_MIXED_CONTENT_INDICATOR',
+    evidenceRefs: ['structural-evidence', 'mixed-content-observation'],
+    dispositionImpact: CONFLICT_IMPACTS.NONE,
+  });
+  const result = evaluateFixture(item, {
+    inputBinding: binding,
+    structuralEvidence: structural(binding, 'STRUCTURAL_INSPECTION_COMPLETE', 'PDF_STRUCTURE_ACCEPTED'),
+    conflicts: [conflict],
+  });
+  assert.equal(result.operationStatus, OPERATION_STATUS.FAILED);
+  assert.equal(result.evidenceCompleteness, COMPLETENESS.INCOMPLETE);
+  assert.equal(result.failureClass, 'PDF_ADMISSION_INVALID_EVIDENCE');
+  assertNoDisposition(result);
+});
+
 test('explicit input-identity-change conflict invalidates the evaluation', () => {
   const item = record('admission-seed-ordinary-minimal-v1');
   const binding = bindingFor(item);
