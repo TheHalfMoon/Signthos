@@ -7,6 +7,8 @@ const test = require('node:test');
 
 const { inspectPdfWithLocalWasm } = require('../src/pdf/browser/pdf-inspect-runtime');
 
+const FETCH_SOURCE_PATTERN = /\bfetch\s*\(/;
+
 function fakeRuntime(options = {}) {
   const events = [];
   const heap = new Uint8Array(4096);
@@ -264,13 +266,20 @@ test('each operation obtains fresh allocation and document handles from the runt
   assert.equal(runtime.events.filter((entry) => entry === 'destroy').length, 2);
 });
 
+test('fetch regression pattern detects normal network-loader syntax', () => {
+  const directFetchCall = ['fetch', '("runtime.wasm")'].join('');
+  const spacedFetchCall = ['fetch', ' (runtimeUrl)'].join('');
+  assert.equal(FETCH_SOURCE_PATTERN.test(directFetchCall), true);
+  assert.equal(FETCH_SOURCE_PATTERN.test(spacedFetchCall), true);
+});
+
 test('runtime module contains no real PDFium import or network/CDN loader surface', () => {
   const source = fs.readFileSync(path.join(__dirname, '../src/pdf/browser/pdf-inspect-runtime.js'), 'utf8');
   for (const forbidden of [
     /@embedpdf\/pdfium/,
     /DEFAULT_PDFIUM_WASM_URL/,
     /cdn\.jsdelivr\.net/,
-    /fetch\s*\(/,
+    FETCH_SOURCE_PATTERN,
     /XMLHttpRequest/,
     /https?:\/\//,
   ]) {

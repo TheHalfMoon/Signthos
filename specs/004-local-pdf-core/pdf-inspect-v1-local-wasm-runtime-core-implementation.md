@@ -292,7 +292,7 @@ Node version = v24.20.0
 Node executable SHA256 = 9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a
 ```
 
-The exact authorized commands on the final pre-document candidate all passed:
+The exact authorized commands on the pre-review candidate all passed:
 
 ```text
 node --check packages/providers/src/pdf/browser/pdf-inspect-runtime.js
@@ -333,20 +333,54 @@ The final validation is preserved by:
 github:issue-comment:5672340654
 ```
 
-## 17. Final pre-document implementation identities
+### Independent exact-head review finding and forward-only repair
+
+Fresh CodeRabbit review of exact head `f09498ae1ca8ea54c30afce2836cc8a7f0afe01b` / tree `89085e736deafbc0976955d8504646223183915d` identified one material test defect: the static no-network regression contained literal byte `0x08` before `fetch` instead of the intended JavaScript regex word-boundary escape `\b`. The malformed assertion therefore did not reliably reject a normal `fetch(` source reference.
+
+The finding is preserved by `github:issue-comment:5672388271` and the governance record `github:issue-comment:5672511858`. The repair was limited to the authorized runtime test path: the control byte was replaced by the shared `\bfetch\s*\(` pattern and a direct regression now proves that the same pattern detects both `fetch(...)` and `fetch (...)` syntax. The runtime implementation itself did not change.
+
+The complete authorized exact-Node sequence was then executed fresh on the repaired bytes:
+
+```text
+node --check packages/providers/src/pdf/browser/pdf-inspect-runtime.js
+  => PASS / RC 0
+
+node --check packages/providers/test/pdf-inspect-runtime.test.js
+  => PASS / RC 0
+
+node --test packages/providers/test/content-identity-admission.test.js packages/providers/test/pdfium-structural-evidence.test.js packages/providers/test/pdf-inspect-provider.test.js packages/providers/test/pdf-inspect-runtime.test.js
+  => PASS / RC 0
+
+TESTS = 105
+PASS = 105
+FAIL = 0
+CANCELLED = 0
+SKIPPED = 0
+TODO = 0
+PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
+TEST_STDOUT_SHA256 = 1581c234f5ef39ad51495f117c0cb2e20168c5d0692e840e6b6fa6cbfd834939
+TEST_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+VALIDATION_SUMMARY_SHA256 = 43eb0a4c1fc54a7d85837bfd6f191ffa97561d119d6cc17e3376fc8aa344e3e3
+EVIDENCE_MANIFEST_ENTRIES = 14
+EVIDENCE_MANIFEST_SHA256 = fb9f6a3e06173ffb0fedab033cdb332acba39e4f29ba01affc546481aef8be84
+```
+
+The repaired validation is preserved by `github:issue-comment:5672526986`. No real PDFium/WASM, browser, network, dependency-manager, or dependency-installation execution occurred. The old review is stale for merge qualification because the test bytes changed.
+
+## 17. Final review-repair implementation identities
 
 ```text
 packages/providers/src/pdf/browser/pdf-inspect-runtime.js
 SHA256 = 5edc4120358c636c517c60175299e90d49c3b01eae625a6cc86ae337860bb8db
 
 packages/providers/test/pdf-inspect-runtime.test.js
-SHA256 = e51e1a12ab78ea87b60d5fb6c64e0ee37bb07b9de812bcf7533a5fe6866f6eaf
+SHA256 = 517168c351611d16b3fea020364bf88fe46a5108e43fa56406dd1ca4c0621ac6
 
 packages/providers/package.json
 SHA256 = 658c5d27d56985fd66c52a3d177f8a078a84c31f2b9bcf438e98ee293f6a9a88
 ```
 
-The qualification document is added only after these implementation/test/package bytes were validated. It does not alter those bytes.
+The qualification document is synchronized only after these implementation/test/package bytes were validated. It does not alter those bytes.
 
 ## 18. Explicit non-grants and non-claims
 
