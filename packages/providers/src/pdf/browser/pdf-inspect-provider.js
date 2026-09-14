@@ -42,6 +42,9 @@ const AVAILABILITY = Object.freeze({
 const OUTCOME = Object.freeze({
   SUCCEEDED: 'SUCCEEDED',
   FAILED: 'FAILED',
+  CANCELLED: 'CANCELLED',
+  TIMED_OUT: 'TIMED_OUT',
+  RESOURCE_LIMIT_EXCEEDED: 'RESOURCE_LIMIT_EXCEEDED',
 });
 
 const STABLE_ERROR = Object.freeze({
@@ -49,7 +52,30 @@ const STABLE_ERROR = Object.freeze({
   UNSUPPORTED_CAPABILITY: 'UNSUPPORTED_CAPABILITY',
   UNAVAILABLE: 'UNAVAILABLE',
   MALFORMED_UNTRUSTED_DOCUMENT: 'MALFORMED_UNTRUSTED_DOCUMENT',
+  CANCELLED: 'CANCELLED',
+  TIMEOUT: 'TIMEOUT',
+  RESOURCE_LIMIT_EXCEEDED: 'RESOURCE_LIMIT_EXCEEDED',
 });
+
+const TERMINAL_EVIDENCE_SCHEMA = 'signthos.pdf.inspect.runtime-terminal.v1';
+
+const TERMINAL_OUTCOME = Object.freeze({
+  CANCELLED: 'CANCELLED',
+  TIMED_OUT: 'TIMED_OUT',
+  RESOURCE_LIMIT_EXCEEDED: 'RESOURCE_LIMIT_EXCEEDED',
+});
+
+const TERMINAL_EVIDENCE_KEYS = Object.freeze([
+  'schema',
+  'terminalOutcome',
+  'providerId',
+  'providerCapabilityVersion',
+  'inputExactBytesDigest',
+  'byteLength',
+  'resourceBudgetRef',
+  'runtimeEvidenceRef',
+  'partialOutputDiscarded',
+]);
 
 const RETRY_CATEGORY = Object.freeze({
   DO_NOT_RETRY_UNCHANGED: 'DO_NOT_RETRY_UNCHANGED',
@@ -273,6 +299,65 @@ function structuralBindingMatches(base, evidence) {
     && validateVersionEvidence(version);
 }
 
+function classifyTerminalOutcomeEvidence(base, evidence) {
+  if (!exactOwnKeys(evidence, TERMINAL_EVIDENCE_KEYS)) return { kind: 'INVALID' };
+
+  const schema = ownString(evidence, 'schema');
+  const terminalOutcome = ownString(evidence, 'terminalOutcome');
+  const providerId = ownString(evidence, 'providerId');
+  const providerCapabilityVersion = ownString(evidence, 'providerCapabilityVersion');
+  const inputExactBytesDigest = ownData(evidence, 'inputExactBytesDigest');
+  const byteLength = ownData(evidence, 'byteLength');
+  const resourceBudgetRef = ownString(evidence, 'resourceBudgetRef');
+  const runtimeEvidenceRef = ownString(evidence, 'runtimeEvidenceRef');
+  const partialOutputDiscarded = ownData(evidence, 'partialOutputDiscarded');
+
+  if (schema !== TERMINAL_EVIDENCE_SCHEMA
+      || !Object.values(TERMINAL_OUTCOME).includes(terminalOutcome)
+      || providerId !== PROVIDER_DESCRIPTOR.providerId
+      || providerCapabilityVersion !== PROVIDER_CAPABILITY_VERSION
+      || !exactDigest(inputExactBytesDigest, base.identity.inputExactBytesDigest)
+      || byteLength !== base.identity.byteLength
+      || resourceBudgetRef !== base.resourceBudgetRef
+      || !runtimeEvidenceRef
+      || partialOutputDiscarded !== true) {
+    return { kind: 'INVALID' };
+  }
+
+  return { kind: 'VALID', terminalOutcome, runtimeEvidenceRef };
+}
+
+function terminalResult(base, terminal) {
+  const semantics = {
+    [TERMINAL_OUTCOME.CANCELLED]: {
+      errorClass: STABLE_ERROR.CANCELLED,
+      errorCode: 'cancelled.pdf_inspect_runtime',
+      retryCategory: RETRY_CATEGORY.RETRY_MAY_SUCCEED,
+    },
+    [TERMINAL_OUTCOME.TIMED_OUT]: {
+      errorClass: STABLE_ERROR.TIMEOUT,
+      errorCode: 'timeout.pdf_inspect_runtime',
+      retryCategory: RETRY_CATEGORY.RETRY_REQUIRES_CHANGED_INPUT_OR_STATE,
+    },
+    [TERMINAL_OUTCOME.RESOURCE_LIMIT_EXCEEDED]: {
+      errorClass: STABLE_ERROR.RESOURCE_LIMIT_EXCEEDED,
+      errorCode: 'resource_limit_exceeded.pdf_inspect_runtime',
+      retryCategory: RETRY_CATEGORY.RETRY_REQUIRES_CHANGED_INPUT_OR_STATE,
+    },
+  }[terminal.terminalOutcome];
+
+  return deepFreeze({
+    ...baseResult(base),
+    outcome: terminal.terminalOutcome,
+    stableError: stableError(semantics.errorClass, semantics.errorCode, semantics.retryCategory),
+    runtimeTerminalEvidence: {
+      schema: TERMINAL_EVIDENCE_SCHEMA,
+      runtimeEvidenceRef: terminal.runtimeEvidenceRef,
+      partialOutputDiscarded: true,
+    },
+  });
+}
+
 function classifyStructuralEvidence(base, evidence) {
   if (!structuralBindingMatches(base, evidence)) return { kind: 'BINDING_INVALID' };
 
@@ -349,6 +434,29 @@ function composePdfInspectResult({
     return failed(base, stableError(STABLE_ERROR.INVALID_INPUT, 'invalid_input.provider_mismatch'));
   }
 
+  if (terminalOutcomeEvidence !== null && terminalOutcomeEvidence !== undefined) {
+    if (availability !== AVAILABILITY.AVAILABLE) {
+      return failed(base, stableError(
+        STABLE_ERROR.INVALID_INPUT,
+        'invalid_input.runtime_terminal_availability_conflict',
+      ));
+    }
+    if (structuralEvidence !== null && structuralEvidence !== undefined) {
+      return failed(base, stableError(
+        STABLE_ERROR.INVALID_INPUT,
+        'invalid_input.runtime_terminal_evidence_conflict',
+      ));
+    }
+    const terminal = classifyTerminalOutcomeEvidence(base, terminalOutcomeEvidence);
+    if (terminal.kind !== 'VALID') {
+      return failed(base, stableError(
+        STABLE_ERROR.INVALID_INPUT,
+        'invalid_input.runtime_terminal_evidence',
+      ));
+    }
+    return terminalResult(base, terminal);
+  }
+
   if (availability !== AVAILABILITY.AVAILABLE) {
     if (availability !== AVAILABILITY.UNAVAILABLE && availability !== AVAILABILITY.UNKNOWN) {
       return failed(base, stableError(STABLE_ERROR.INVALID_INPUT, 'invalid_input.availability_state'));
@@ -357,15 +465,6 @@ function composePdfInspectResult({
       STABLE_ERROR.UNAVAILABLE,
       'unavailable.pdf_inspect_provider',
       RETRY_CATEGORY.RETRY_MAY_SUCCEED,
-    ));
-  }
-
-  // This pure semantic unit owns no runtime terminal-evidence schema. It must never
-  // ignore cancellation/timeout/resource-limit evidence and then publish success.
-  if (terminalOutcomeEvidence !== null && terminalOutcomeEvidence !== undefined) {
-    return failed(base, stableError(
-      STABLE_ERROR.INVALID_INPUT,
-      'invalid_input.runtime_terminal_evidence_not_qualified',
     ));
   }
 
@@ -412,6 +511,8 @@ module.exports = Object.freeze({
   PROVIDER_DESCRIPTOR,
   RETRY_CATEGORY,
   STABLE_ERROR,
+  TERMINAL_EVIDENCE_SCHEMA,
+  TERMINAL_OUTCOME,
   UNSUPPORTED_INSPECT_OBSERVATIONS,
   composePdfInspectResult,
 });

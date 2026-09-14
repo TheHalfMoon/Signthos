@@ -17,6 +17,8 @@ const {
   PROVIDER_CAPABILITY_VERSION,
   PROVIDER_DESCRIPTOR,
   STABLE_ERROR,
+  TERMINAL_EVIDENCE_SCHEMA,
+  TERMINAL_OUTCOME,
   UNSUPPORTED_INSPECT_OBSERVATIONS,
   composePdfInspectResult,
 } = require('../src/pdf/browser/pdf-inspect-provider');
@@ -70,6 +72,22 @@ function inspect(item, raw, overrides = {}) {
 function assertExactBinding(item, result) {
   assert.deepEqual(result.inputExactBytesDigest, item.exactBytesDigest);
   assert.equal(result.inputByteLength, item.byteLength);
+}
+
+function terminalEvidenceFor(item, bytes = bytesFor(item), request = requestFor(item, bytes), overrides = {}) {
+  const identity = exactByteIdentity(bytes);
+  return {
+    schema: TERMINAL_EVIDENCE_SCHEMA,
+    terminalOutcome: TERMINAL_OUTCOME.CANCELLED,
+    providerId: PROVIDER_DESCRIPTOR.providerId,
+    providerCapabilityVersion: PROVIDER_CAPABILITY_VERSION,
+    inputExactBytesDigest: { ...identity.inputExactBytesDigest },
+    byteLength: identity.byteLength,
+    resourceBudgetRef: request.resourceBudgetRef,
+    runtimeEvidenceRef: `runtime-evidence:${item.fixtureId}`,
+    partialOutputDiscarded: true,
+    ...overrides,
+  };
 }
 
 test('provider descriptor freezes the exact browser-local inspect capability', () => {
@@ -463,27 +481,165 @@ test('unknown top-level request fields fail closed instead of becoming hidden pr
   assert.equal(result.locality, 'LOCAL_ONLY');
 });
 
-test('runtime terminal outcome evidence is never ignored and converted into semantic success', () => {
+test('qualified runtime terminal evidence maps to distinct fail-closed terminal outcomes', () => {
   const item = record('admission-seed-ordinary-minimal-v1');
   const bytes = bytesFor(item);
-  const evidence = structuralFor(item, { openSucceeded: true, pageCount: 1 }, bytes);
-  for (const terminalOutcomeEvidence of [
-    { outcome: 'CANCELLED', confirmed: true },
-    { outcome: 'TIMED_OUT', confirmed: true },
-    { outcome: 'RESOURCE_LIMIT_EXCEEDED', confirmed: true },
-  ]) {
+  const request = requestFor(item, bytes);
+  const cases = [
+    [TERMINAL_OUTCOME.CANCELLED, OUTCOME.CANCELLED, STABLE_ERROR.CANCELLED, 'cancelled.pdf_inspect_runtime', 'RETRY_MAY_SUCCEED'],
+    [TERMINAL_OUTCOME.TIMED_OUT, OUTCOME.TIMED_OUT, STABLE_ERROR.TIMEOUT, 'timeout.pdf_inspect_runtime', 'RETRY_REQUIRES_CHANGED_INPUT_OR_STATE'],
+    [TERMINAL_OUTCOME.RESOURCE_LIMIT_EXCEEDED, OUTCOME.RESOURCE_LIMIT_EXCEEDED, STABLE_ERROR.RESOURCE_LIMIT_EXCEEDED, 'resource_limit_exceeded.pdf_inspect_runtime', 'RETRY_REQUIRES_CHANGED_INPUT_OR_STATE'],
+  ];
+
+  for (const [terminalOutcome, outcome, errorClass, errorCode, retryCategory] of cases) {
+    const terminalOutcomeEvidence = terminalEvidenceFor(item, bytes, request, { terminalOutcome });
     const result = composePdfInspectResult({
       bytes,
-      request: requestFor(item, bytes),
+      request,
       availability: AVAILABILITY.AVAILABLE,
-      structuralEvidence: evidence,
+      structuralEvidence: null,
+      terminalOutcomeEvidence,
+    });
+    assert.equal(result.outcome, outcome);
+    assert.equal(result.stableError.errorClass, errorClass);
+    assert.equal(result.stableError.errorCode, errorCode);
+    assert.equal(result.stableError.retryCategory, retryCategory);
+    assert.equal(result.runtimeTerminalEvidence.schema, TERMINAL_EVIDENCE_SCHEMA);
+    assert.equal(result.runtimeTerminalEvidence.runtimeEvidenceRef, terminalOutcomeEvidence.runtimeEvidenceRef);
+    assert.equal(result.runtimeTerminalEvidence.partialOutputDiscarded, true);
+    assert.equal(Object.prototype.hasOwnProperty.call(result, 'observations'), false);
+    assert.equal(result.newCanonicalRevisionCreated, false);
+    assert.ok(Object.isFrozen(result));
+    assert.ok(Object.isFrozen(result.runtimeTerminalEvidence));
+    assertExactBinding(item, result);
+  }
+});
+
+test('runtime terminal evidence requires exact byte, provider, capability, and resource-budget binding', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  const request = requestFor(item, bytes);
+  const base = terminalEvidenceFor(item, bytes, request);
+  const invalidEvidence = [
+    { ...base, schema: 'signthos.pdf.inspect.runtime-terminal.v2' },
+    { ...base, terminalOutcome: 'FAILED' },
+    { ...base, providerId: 'provider:other' },
+    { ...base, providerCapabilityVersion: 'signthos.pdf.inspect.v2' },
+    { ...base, inputExactBytesDigest: { algorithm: 'sha256', value: '0'.repeat(64) } },
+    { ...base, byteLength: base.byteLength + 1 },
+    { ...base, resourceBudgetRef: 'budget:other' },
+    { ...base, runtimeEvidenceRef: '   ' },
+    { ...base, partialOutputDiscarded: false },
+    { ...base, extraField: true },
+  ];
+  const { runtimeEvidenceRef, ...missingRef } = base;
+  invalidEvidence.push(missingRef);
+
+  for (const terminalOutcomeEvidence of invalidEvidence) {
+    const result = composePdfInspectResult({
+      bytes,
+      request,
+      availability: AVAILABILITY.AVAILABLE,
+      structuralEvidence: null,
       terminalOutcomeEvidence,
     });
     assert.equal(result.outcome, OUTCOME.FAILED);
     assert.equal(result.stableError.errorClass, STABLE_ERROR.INVALID_INPUT);
-    assert.equal(result.stableError.errorCode, 'invalid_input.runtime_terminal_evidence_not_qualified');
+    assert.equal(result.stableError.errorCode, 'invalid_input.runtime_terminal_evidence');
     assert.equal(Object.prototype.hasOwnProperty.call(result, 'observations'), false);
   }
+});
+
+test('runtime terminal evidence cannot coexist with structural success or unavailable provider state', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  const request = requestFor(item, bytes);
+  const terminalOutcomeEvidence = terminalEvidenceFor(item, bytes, request);
+  const structuralEvidence = structuralFor(item, { openSucceeded: true, pageCount: 1 }, bytes);
+
+  const conflicting = composePdfInspectResult({
+    bytes,
+    request,
+    availability: AVAILABILITY.AVAILABLE,
+    structuralEvidence,
+    terminalOutcomeEvidence,
+  });
+  assert.equal(conflicting.outcome, OUTCOME.FAILED);
+  assert.equal(conflicting.stableError.errorCode, 'invalid_input.runtime_terminal_evidence_conflict');
+
+  for (const availability of [AVAILABILITY.UNAVAILABLE, AVAILABILITY.UNKNOWN]) {
+    const result = composePdfInspectResult({
+      bytes,
+      request,
+      availability,
+      structuralEvidence: null,
+      terminalOutcomeEvidence,
+    });
+    assert.equal(result.outcome, OUTCOME.FAILED);
+    assert.equal(result.stableError.errorCode, 'invalid_input.runtime_terminal_availability_conflict');
+  }
+});
+
+test('runtime terminal evidence rejects custom prototypes, inherited fields, symbols, accessors, and proxies without trap execution', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  const request = requestFor(item, bytes);
+  const base = terminalEvidenceFor(item, bytes, request);
+
+  const custom = Object.create({ terminalOutcome: TERMINAL_OUTCOME.CANCELLED });
+  Object.assign(custom, base);
+  delete custom.terminalOutcome;
+
+  const symbolExtra = { ...base };
+  symbolExtra[Symbol('hidden')] = true;
+
+  let getterCalls = 0;
+  const accessor = { ...base };
+  Object.defineProperty(accessor, 'runtimeEvidenceRef', {
+    enumerable: true,
+    get() { getterCalls += 1; return 'runtime-evidence:getter'; },
+  });
+
+  let proxyTrapCalls = 0;
+  const proxy = new Proxy({ ...base }, {
+    getPrototypeOf(target) { proxyTrapCalls += 1; return Reflect.getPrototypeOf(target); },
+    ownKeys(target) { proxyTrapCalls += 1; return Reflect.ownKeys(target); },
+    getOwnPropertyDescriptor(target, key) { proxyTrapCalls += 1; return Reflect.getOwnPropertyDescriptor(target, key); },
+  });
+
+  for (const terminalOutcomeEvidence of [custom, symbolExtra, accessor, proxy]) {
+    const result = composePdfInspectResult({
+      bytes,
+      request,
+      availability: AVAILABILITY.AVAILABLE,
+      structuralEvidence: null,
+      terminalOutcomeEvidence,
+    });
+    assert.equal(result.outcome, OUTCOME.FAILED);
+    assert.equal(result.stableError.errorClass, STABLE_ERROR.INVALID_INPUT);
+    assert.equal(result.stableError.errorCode, 'invalid_input.runtime_terminal_evidence');
+  }
+  assert.equal(getterCalls, 0);
+  assert.equal(proxyTrapCalls, 0);
+});
+
+test('runtime terminal composition does not mutate bytes, request, or evidence', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  const beforeBytes = Buffer.from(bytes);
+  const request = Object.freeze(requestFor(item, bytes));
+  const terminalOutcomeEvidence = Object.freeze(terminalEvidenceFor(item, bytes, request));
+  const beforeEvidence = JSON.stringify(terminalOutcomeEvidence);
+  const result = composePdfInspectResult({
+    bytes,
+    request,
+    availability: AVAILABILITY.AVAILABLE,
+    structuralEvidence: null,
+    terminalOutcomeEvidence,
+  });
+  assert.equal(result.outcome, OUTCOME.CANCELLED);
+  assert.deepEqual(bytes, beforeBytes);
+  assert.equal(JSON.stringify(terminalOutcomeEvidence), beforeEvidence);
 });
 
 test('structural evidence must match the exact canonical adapter shape and error meaning', () => {
