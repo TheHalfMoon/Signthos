@@ -535,7 +535,7 @@ The affected historical claim is therefore narrowed as follows:
 POSTRUN_VALIDATION_V2_EXPECTED_PACKAGE_PRESENCE = PASS
 POSTRUN_VALIDATION_V2_ADMITTED_PACKAGE_PAYLOAD_EQUALITY = PASS_18_OF_18
 POSTRUN_VALIDATION_V2_NO_EXTRA_PACKAGE_IDENTITY_PROOF = SUPERSEDED
-NO_EXTRA_PACKAGE_IDENTITY_PROOF = IMMUTABLE_INVENTORY_RECONSTRUCTION_V1
+NO_EXTRA_PACKAGE_IDENTITY_PROOF = IMMUTABLE_INVENTORY_RECONSTRUCTION_V2
 ```
 
 The underlying materialization bytes are not re-executed. Absence of extra package identities is re-established read-only from the already-frozen complete `materialized-inventory-v2.tsv`. That inventory was produced by traversing all files and symlinks under `MATERIALIZED_NODE_MODULES_ROOT` and is independently bound by both immutable manifests:
@@ -727,6 +727,128 @@ MISSING_PACKAGE_IDENTITIES = []
 EXTRA_PACKAGE_IDENTITIES = []
 PNPM_INFRASTRUCTURE_COMPONENTS = ["node_modules"]
 READ_ONLY_RECONSTRUCTION_RESULT = PASS_EXACT_IDENTITY_SET
+```
+
+### 12.1 Pre-review reconstruction verifier tightening
+
+An author-side audit before any qualifying review found that reconstruction V1 correctly enumerated the full frozen inventory, but its own control script did not independently bind `archive-admission-summary.json` or require a clean exact-revision review-pack checkout. V1 remains preserved above as the first read-only reconstruction. It is superseded for qualification by reconstruction V2 below; no materialization or dependency/runtime execution was repeated.
+
+V2 adds fail-closed controls for the exact single Gist commit, clean pack worktree, archive-admission summary SHA-256, and both manifest bindings for the archive summary as well as the materialized inventory. The complete package-store and package-manifest derivation remains independent of the expected identity set.
+
+```text
+RECONSTRUCTION_V1_STATUS = SUPERSEDED_PREQUALIFICATION
+RECONSTRUCTION_V2_AUTHORITY = github:issue-comment:5659570287
+RECONSTRUCTION_V2_SCRIPT_SHA256 = 37cd7113207b4c44f39222d933a48f071d3514b49722babb7c70443161b270f0
+RECONSTRUCTION_V2_RESULT_SHA256 = 653c2f5f04c89ba234c9c81f17f68eea07b568077471d4ba74a1df5bcca9185c
+RECONSTRUCTION_V2_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+ARCHIVE_ADMISSION_SUMMARY_SHA256 = 01088326d31aa638ba3e69e1f1a62daaac34b1eba8c57b799653dc4bc6c75244
+REVIEW_PACK_COMMIT_COUNT = 1
+REVIEW_PACK_CLEAN = true
+RECONSTRUCTION_V2_EXIT = 0
+RECONSTRUCTION_V2_RESULT = PASS_EXACT_IDENTITY_SET
+```
+
+Exact V2 source:
+
+```python
+#!/usr/bin/env python3
+import argparse, hashlib, json, re, subprocess
+from pathlib import Path
+EXPECTED_REVISION='a7c3549202c18ed077c8fc9f303250670f3907a0'
+EXPECTED_PACK_MANIFEST_SHA256='5b2800c8015b015022caa9dcab367ddaf7539a06d599c28764005e80dcb84d0b'
+EXPECTED_PRIMARY_MANIFEST_SHA256='abe74dfab2d99d5e9f100277d2b805c534cfd1db675e4405b7d5f7d99b46b2df'
+EXPECTED_INVENTORY_SHA256='6490e2adc663d3970ddd1cfacd37f139ebf303a9e5a40daf2665b46f9f66c585'
+EXPECTED_ARCHIVE_SHA256='01088326d31aa638ba3e69e1f1a62daaac34b1eba8c57b799653dc4bc6c75244'
+
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def store_to_key(store):
+    base=store.split('_',1)[0]
+    if base.startswith('@'):
+        m=re.fullmatch(r'@([^+@]+)\+(.+)@([^@]+)',base)
+        if not m: raise ValueError(f'malformed scoped pnpm store component: {store}')
+        s,n,v=m.groups(); return f'@{s}/{n}@{v}'
+    m=re.fullmatch(r'(.+)@([^@]+)',base)
+    if not m: raise ValueError(f'malformed pnpm store component: {store}')
+    n,v=m.groups(); return f'{n}@{v}'
+def key_name(key): return key.rsplit('@',1)[0]
+def main():
+    ap=argparse.ArgumentParser(); ap.add_argument('--pack',required=True); ns=ap.parse_args()
+    root=Path(ns.pack).resolve()
+    rev=subprocess.check_output(['git','-C',str(root),'rev-parse','HEAD'],text=True).strip()
+    if rev!=EXPECTED_REVISION: raise RuntimeError(f'pack revision mismatch: {rev}')
+    if subprocess.check_output(['git','-C',str(root),'rev-list','--all','--count'],text=True).strip()!='1': raise RuntimeError('review pack commit count is not one')
+    if subprocess.check_output(['git','-C',str(root),'status','--porcelain=v1','--untracked-files=all'],text=True): raise RuntimeError('review pack worktree is not clean')
+    pm=root/'review-pack-file-manifest.tsv'; prim=root/'primary-evidence-manifest.tsv'; inv=root/'materialized-inventory-v2.tsv'; arc=root/'archive-admission-summary.json'
+    if sha(pm)!=EXPECTED_PACK_MANIFEST_SHA256: raise RuntimeError('review pack manifest hash mismatch')
+    if sha(prim)!=EXPECTED_PRIMARY_MANIFEST_SHA256: raise RuntimeError('primary evidence manifest hash mismatch')
+    if sha(inv)!=EXPECTED_INVENTORY_SHA256: raise RuntimeError('materialized inventory hash mismatch')
+    if sha(arc)!=EXPECTED_ARCHIVE_SHA256: raise RuntimeError('archive admission summary hash mismatch')
+    pack_lines=set(pm.read_text().splitlines()); primary_lines=set(prim.read_text().splitlines())
+    for name,path,expected_sha,primary_name in [
+        ('inventory',inv,EXPECTED_INVENTORY_SHA256,'POSTRUN/materialized-inventory-v2.tsv'),
+        ('archive',arc,EXPECTED_ARCHIVE_SHA256,'ARCHIVE_EVIDENCE/archive-admission-summary.json')]:
+        size=path.stat().st_size
+        if f'{path.name}\t{size}\t{expected_sha}' not in pack_lines: raise RuntimeError(f'{name} not bound by review-pack manifest')
+        if f'{primary_name}\tfile\t{size}\t{expected_sha}' not in primary_lines: raise RuntimeError(f'{name} not bound by primary evidence manifest')
+    lines=inv.read_text().splitlines()
+    if not lines or lines[0] != 'path\ttype\tbytes\tsha256': raise RuntimeError('inventory header mismatch')
+    rows=[]
+    for number,line in enumerate(lines[1:],2):
+        fields=line.split('\t')
+        if len(fields)!=4: raise RuntimeError(f'malformed inventory row {number}')
+        path,kind,size,digest=fields
+        if kind not in {'file','symlink'} or not size.isdigit() or not re.fullmatch(r'[0-9a-f]{64}',digest): raise RuntimeError(f'invalid inventory row {number}')
+        rows.append((path,kind,int(size),digest))
+    prefix='MATERIALIZED_NODE_MODULES_ROOT/.pnpm/'
+    components={}
+    for path,kind,size,digest in rows:
+        if path.startswith(prefix):
+            component=path[len(prefix):].split('/',1)[0]
+            components.setdefault(component,[]).append((path,kind,size,digest))
+    if set(components)=={'node_modules'}: raise RuntimeError('no package store components found')
+    if 'node_modules' not in components: raise RuntimeError('pnpm infrastructure node_modules component missing')
+    infra=components['node_modules']
+    if any(k!='symlink' for _,k,_,_ in infra): raise RuntimeError('pnpm infrastructure contains non-symlink rows')
+    if any(p.endswith('/package.json') for p,*_ in infra): raise RuntimeError('pnpm infrastructure unexpectedly contains package.json')
+    stores=sorted(c for c in components if c!='node_modules'); derived={}
+    for component in stores:
+        key=store_to_key(component)
+        if key in derived: raise RuntimeError(f'duplicate derived identity: {key}')
+        derived[key]=component
+    admitted=json.loads(arc.read_text())
+    results=admitted.get('results')
+    if not isinstance(results,list) or len(results)!=18: raise RuntimeError('archive admission result cardinality mismatch')
+    expected=[]
+    for i,row in enumerate(results):
+        key=row.get('key')
+        if not isinstance(key,str): raise RuntimeError(f'archive identity missing at row {i}')
+        expected.append(key)
+    if len(expected)!=len(set(expected)): raise RuntimeError('duplicate expected archive identity')
+    pattern=re.compile(r'^MATERIALIZED_NODE_MODULES_ROOT/\.pnpm/([^/]+)/node_modules/(?:@([^/]+)/([^/]+)|([^/]+))/package\.json$')
+    pjs=[]; errors=[]
+    for path,kind,size,digest in rows:
+        if not (path.startswith(prefix) and path.endswith('/package.json')): continue
+        m=pattern.fullmatch(path)
+        if not m:
+            errors.append({'path':path,'reason':'unparseable-package-json-path'}); continue
+        store,scope,scoped,plain=m.groups()
+        if store=='node_modules': errors.append({'path':path,'reason':'package-json-in-infrastructure'}); continue
+        dk=store_to_key(store); pn=f'@{scope}/{scoped}' if scope is not None else plain
+        if key_name(dk)!=pn: errors.append({'path':path,'reason':f'path-name-mismatch:{dk}'})
+        pjs.append({'path':path,'derived_identity':dk})
+    ds=set(derived); es=set(expected); missing=sorted(es-ds); extra=sorted(ds-es); pjids=[x['derived_identity'] for x in pjs]
+    result='PASS_EXACT_IDENTITY_SET'
+    if missing or extra or errors or set(pjids)!=es or len(pjs)!=len(expected): result='FAIL'
+    out={'schema':'signthos.004c1fc.postmerge-extra-identity-reconstruction.v2','authority':'github:issue-comment:5659570287','review_pack_revision':rev,'review_pack_commit_count':1,'review_pack_clean':True,'review_pack_manifest_sha256':sha(pm),'primary_evidence_manifest_sha256':sha(prim),'materialized_inventory_sha256':sha(inv),'archive_admission_summary_sha256':sha(arc),'materialized_inventory_rows':len(rows),'pnpm_infrastructure_components':['node_modules'],'pnpm_infrastructure_rows':len(infra),'package_store_directory_count':len(stores),'derived_package_identity_count':len(ds),'expected_package_identity_count':len(es),'package_json_row_count':len(pjs),'package_json_identity_errors':errors,'missing_package_identities':missing,'extra_package_identities':extra,'derived_package_identities':sorted(ds),'result':result}
+    print(json.dumps(out,sort_keys=True,separators=(',',':')))
+    if result!='PASS_EXACT_IDENTITY_SET': raise SystemExit(1)
+if __name__=='__main__': main()
+```
+
+Exact V2 result:
+
+```json
+{"archive_admission_summary_sha256":"01088326d31aa638ba3e69e1f1a62daaac34b1eba8c57b799653dc4bc6c75244","authority":"github:issue-comment:5659570287","derived_package_identities":["@embedpdf/core@2.15.0","@embedpdf/engines@2.15.0","@embedpdf/fonts-arabic@1.0.0","@embedpdf/fonts-hebrew@1.0.0","@embedpdf/fonts-jp@1.0.0","@embedpdf/fonts-kr@1.0.0","@embedpdf/fonts-latin@1.0.0","@embedpdf/fonts-sc@1.0.0","@embedpdf/fonts-tc@1.0.0","@embedpdf/models@2.15.0","@embedpdf/pdfium@2.15.0","@embedpdf/plugin-document-manager@2.15.0","@embedpdf/plugin-interaction-manager@2.15.0","@embedpdf/plugin-render@2.15.0","@embedpdf/plugin-search@2.15.0","@embedpdf/plugin-selection@2.15.0","@embedpdf/plugin-thumbnail@2.15.0","@embedpdf/utils@2.15.0"],"derived_package_identity_count":18,"expected_package_identity_count":18,"extra_package_identities":[],"materialized_inventory_rows":934,"materialized_inventory_sha256":"6490e2adc663d3970ddd1cfacd37f139ebf303a9e5a40daf2665b46f9f66c585","missing_package_identities":[],"package_json_identity_errors":[],"package_json_row_count":18,"package_store_directory_count":18,"pnpm_infrastructure_components":["node_modules"],"pnpm_infrastructure_rows":10,"primary_evidence_manifest_sha256":"abe74dfab2d99d5e9f100277d2b805c534cfd1db675e4405b7d5f7d99b46b2df","result":"PASS_EXACT_IDENTITY_SET","review_pack_clean":true,"review_pack_commit_count":1,"review_pack_manifest_sha256":"5b2800c8015b015022caa9dcab367ddaf7539a06d599c28764005e80dcb84d0b","review_pack_revision":"a7c3549202c18ed077c8fc9f303250670f3907a0","schema":"signthos.004c1fc.postmerge-extra-identity-reconstruction.v2"}
 ```
 
 This repair does not broaden the original qualification. It does not authorize or perform another archive admission, materialization, Node invocation, pnpm invocation, Docker start, registry request, source import, classifier execution, PDF provider execution, general 004C runtime, 004C2, 004D, Specification 005, release, or deployment.
