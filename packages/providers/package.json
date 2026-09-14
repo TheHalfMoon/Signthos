@@ -1,0 +1,9 @@
+{
+  "name": "@signthos/providers",
+  "private": true,
+  "version": "0.0.0",
+  "type": "commonjs",
+  "scripts": {
+    "test": "node --test test/content-identity-admission.test.js"
+  }
+}
