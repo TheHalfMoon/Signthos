@@ -1,7 +1,8 @@
 # 004C1FA Selected linux/amd64 Guest Substrate Recheck Qualification
-Status: `QUALIFICATION_CANDIDATE / EVIDENCE_COMPLETE_REPLACEMENT_REPAIR_PAIR_PASS / FROZEN`
+Status: `QUALIFICATION_CANDIDATE / EVIDENCE_COMPLETE_REPLACEMENT_REPAIR_PAIR_PASS / LOCK_LIFETIME_REVIEW_REPAIR_PASS / FROZEN`
 Issue: #7
-Authority: `github:issue-comment:5657663210`
+Execution authority: `github:issue-comment:5657663210`
+Review-repair authority: `github:issue-comment:5658071216`
 
 ## Authority boundary
 
@@ -40,9 +41,24 @@ A_FINISHED_AT = 2026-09-14T01:12:32.664643Z
 B_CREATED_AT = 2026-09-14T01:12:32.773862584Z
 A_FINISHED_BEFORE_B_CREATED = PASS
 EVIDENCE_MANIFEST_TSV_SHA256 = 9e59b0624511c13c2f219d2e3ac4d058ab7b70e557902f579acd2702d8c434eb
+LOCK_LIFETIME_LATER_OBSERVATION = PASS
+LOCK_LIFETIME_OBSERVED_UTC = 2026-09-14T02:16:36.194179Z
+LOCK_DIRECTORY_CURRENT_INODE = 61550516
+LOCK_DIRECTORY_BIRTH_UTC = 2026-09-14T01:12:26.471238Z
+LOCK_ACQUISITION_FILE_CURRENT_INODE = 61550517
+LOCK_ACQUISITION_FILE_BIRTH_UTC = 2026-09-14T01:12:26.477711Z
+LOCK_ACQUISITION_FILE_SHA256 = 1db7489acfb743b451f60af9a20f0de1e5a65c9e74acf627d3373c2cb30a9cb1
+LOCK_ACQUISITION_DIGEST_MATCH = PASS
+OBSERVATION_AFTER_CANDIDATE_COMMIT = PASS
+OBSERVATION_AFTER_PR_236_CREATION = PASS
+LOCK_LIFETIME_OBSERVATION_SHA256 = 378b0a60030dc95587e4671e862e0f99ce007f12ac74be2f07be531421ce1412
+LOCK_LIFETIME_REPAIR_MANIFEST_SHA256 = 4373a8908076db57f141047dbbc032872558517b9bb40e63af51c3e42fb53067
+DOCKER_REPLAYS_EXECUTED_FOR_LOCK_LIFETIME_REPAIR = 0
 ```
 
 The exclusive lock was acquired atomically by creating a previously absent lock directory. Its identity, owner, host, result, and nanosecond acquisition timestamp are frozen below. The GitHub open-PR query was captured while that lock directory remained present and before Replay A. The raw HTTP response terminates in `[]`.
+
+The lock-lifetime repair does not infer continuity from path presence alone. A later read-only APFS observation at `2026-09-14T02:16:36.194179Z`, after the candidate commit and PR #236 creation, observed the lock directory at inode `61550516` with birth time `2026-09-14T01:12:26.471238Z` and the acquisition file at inode `61550517` with birth time `2026-09-14T01:12:26.477711Z`. The acquisition file's exact current bytes hash to `1db7489acfb743b451f60af9a20f0de1e5a65c9e74acf627d3373c2cb30a9cb1`, identical to the acquisition object already frozen in this candidate. This later observation is tied to the original acquisition identity by the matching digest plus filesystem identity/birth metadata and supplies the missing lifetime evidence through replay/evidence finalization. The original owner PID is no longer live at the later observation and is not used as lifetime proof. No Docker replay or guest probe was executed for this review repair.
 
 Every evidence object below is represented as `base64(RAW_BYTES)` with exact byte length and SHA-256. An empty base64 payload therefore reconstructs exactly zero bytes; no Markdown fence newline is evidence content.
 
@@ -94,6 +110,19 @@ ENCODING = base64(RAW_BYTES)
 
 ```base64
 TE9DS19QQVRIPS90bXAvc2lnbnRob3MtMDA0YzFmYS1leGNsdXNpdmUubG9jawpMT0NLX0FDUVVJUkVEX1VUQz0yMDI2LTA5LTE0VDAxOjEyOjI2LjQ3MzkxOTAwMFoKTE9DS19PV05FUl9QSUQ9NDgzODYKTE9DS19PV05FUl9IT1NUPW1hY2Jvb2sKTE9DS19BQ1FVSVJFX1JFU1VMVD1TVUNDRVNTCg==
+```
+
+### Supplemental review repair: `lock-lifetime-observation.txt`
+
+```text
+BYTE_LENGTH = 1527
+SHA256 = 378b0a60030dc95587e4671e862e0f99ce007f12ac74be2f07be531421ce1412
+ENCODING = base64(RAW_BYTES)
+REPAIR_MANIFEST_SHA256 = 4373a8908076db57f141047dbbc032872558517b9bb40e63af51c3e42fb53067
+```
+
+```base64
+U0NIRU1BPXNpZ250aG9zLjAwNGMxZmEubG9jay1saWZldGltZS1vYnNlcnZhdGlvbi52MQpBVVRIT1JJVFlfQ09NTUVOVD01NjU4MDcxMjE2Ck9CU0VSVkVEX1VUQz0yMDI2LTA5LTE0VDAyOjE2OjM2LjE5NDE3OVoKQ0FORElEQVRFX0hFQUQ9N2QyYmYzNmNkODI2M2U1MGYxY2FjN2I4MjI1NDE1ZDI2MDhlOTkwYgpDQU5ESURBVEVfVFJFRT0yNTU0NzFiYjI4MzVhY2FjYmE0MzgwMTNhODg4MWQ1MzYwNmIxMTE5CkNBTkRJREFURV9DT01NSVRURVJfVVRDPTIwMjYtMDktMTRUMDE6MTM6MjBaClBSXzIzNl9DUkVBVEVEX1VUQz0yMDI2LTA5LTE0VDAxOjE0OjEyWgpMT0NLX1BBVEg9L3RtcC9zaWdudGhvcy0wMDRjMWZhLWV4Y2x1c2l2ZS5sb2NrCkxPQ0tfRElSRUNUT1JZX1BSRVNFTlQ9UEFTUwpMT0NLX0RJUkVDVE9SWV9JTk9ERT02MTU1MDUxNgpMT0NLX0RJUkVDVE9SWV9CSVJUSF9VVEM9MjAyNi0wOS0xNFQwMToxMjoyNi40NzEyMzhaCkxPQ0tfRElSRUNUT1JZX01USU1FX1VUQz0yMDI2LTA5LTE0VDAxOjEyOjI2LjQ3NzcxNVoKTE9DS19ESVJFQ1RPUllfQ1RJTUVfVVRDPTIwMjYtMDktMTRUMDE6MTI6MjYuNDc3NzE1WgpMT0NLX0FDUVVJU0lUSU9OX0ZJTEVfUEFUSD0vdG1wL3NpZ250aG9zLTAwNGMxZmEtZXhjbHVzaXZlLmxvY2svbG9jay1hY3F1aXNpdGlvbi50eHQKTE9DS19BQ1FVSVNJVElPTl9GSUxFX0lOT0RFPTYxNTUwNTE3CkxPQ0tfQUNRVUlTSVRJT05fRklMRV9CSVJUSF9VVEM9MjAyNi0wOS0xNFQwMToxMjoyNi40Nzc3MTFaCkxPQ0tfQUNRVUlTSVRJT05fRklMRV9NVElNRV9VVEM9MjAyNi0wOS0xNFQwMToxMjoyNi40Nzc4MTJaCkxPQ0tfQUNRVUlTSVRJT05fRklMRV9CWVRFX0xFTkdUSD0xNjkKTE9DS19BQ1FVSVNJVElPTl9GSUxFX1NIQTI1Nj0xZGI3NDg5YWNmYjc0M2I0NTFmNjBhZjlhMjBmMGRlMWU1YTY1YzllNzRhY2Y2MjdkMzM3M2MyY2IzMGE5Y2IxCkVNQkVEREVEX1BSXzIzNl9MT0NLX0FDUVVJU0lUSU9OX1NIQTI1Nj0xZGI3NDg5YWNmYjc0M2I0NTFmNjBhZjlhMjBmMGRlMWU1YTY1YzllNzRhY2Y2MjdkMzM3M2MyY2IzMGE5Y2IxCkxPQ0tfQUNRVUlTSVRJT05fRklMRV9CQVNFNjQ9VEU5RFMxOVFRVlJJUFM5MGJYQXZjMmxuYm5Sb2IzTXRNREEwWXpGbVlTMWxlR05zZFhOcGRtVXViRzlqYXdwTVQwTkxYMEZEVVZWSlVrVkVYMVZVUXoweU1ESTJMVEE1TFRFMFZEQXhPakV5T2pJMkxqUTNNemt4T1RBd01Gb0tURTlEUzE5UFYwNUZVbDlRU1VROU5EZ3pPRFlLVEU5RFMxOVBWMDVGVWw5SVQxTlVQVzFoWTJKdmIyc0tURTlEUzE5QlExRlZTVkpGWDFKRlUxVk1WRDFUVlVORFJWTlRDZz09CkxPQ0tfQUNRVUlTSVRJT05fRElHRVNUX01BVENIPVBBU1MKTE9DS19CSVJUSF9TRUNPTkRfTUFUQ0hFU19BQ1FVSVNJVElPTl9TRUNPTkQ9UEFTUwpPQlNFUlZBVElPTl9BRlRFUl9DQU5ESURBVEVfQ09NTUlUPVBBU1MKT0JTRVJWQVRJT05fQUZURVJfUFJfMjM2X0NSRUFUSU9OPVBBU1MKRE9DS0VSX1JFUExBWVNfRVhFQ1VURURfRk9SX1RISVNfUkVQQUlSPTAK
 ```
 
 ### `open-pr-capture-time.txt`
@@ -326,4 +355,4 @@ ZG9ja2VyLmlvL2Vtc2NyaXB0ZW4vZW1zZGtAc2hhMjU2OmM2NGYzY2FkY2RmZjQ5YWU2NWVhZGQ4MTVh
 
 ## Scope conclusion
 
-This candidate proves only the bounded selected `linux/amd64` guest-substrate recheck qualification authorized by Issue #7. It grants no dependency materialization, package-manager execution, project runtime, source import, distribution, `004C2`, `004D`, Specification 005, release, or deployment authority. Merge qualification requires a fresh independent substantive review of the exact candidate head, zero unresolved material findings/threads, immediate premerge race proof, guarded normal merge with `expected_head_sha`, mechanical postmerge verification, and fresh Issue #7 successor reconciliation.
+This candidate proves only the bounded selected `linux/amd64` guest-substrate recheck qualification authorized by Issue #7, including the read-only lock-lifetime review repair authorized by `github:issue-comment:5658071216`. The repair executed zero additional Docker replays and changed no execution result. It grants no dependency materialization, package-manager execution, project runtime, source import, distribution, `004C2`, `004D`, Specification 005, release, or deployment authority. Merge qualification requires a fresh independent substantive review of the exact candidate head, zero unresolved material findings/threads, immediate premerge race proof, guarded normal merge with `expected_head_sha`, mechanical postmerge verification, and fresh Issue #7 successor reconciliation.
