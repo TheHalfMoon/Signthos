@@ -434,9 +434,74 @@ PRIMARY_EVIDENCE_MANIFEST_SHA256=abe74dfab2d99d5e9f100277d2b805c534cfd1db675e440
 RESULT=PASS
 ```
 
-## 10. Evidence accessibility and review contract
+## 10. Evidence accessibility and independent verification contract
 
-The 133,277,848 bytes of admitted public registry archives and the external materialized dependency tree are deliberately not committed to Git. This candidate carries their exact canonical SRI/SHA-1/SHA-256/byte identities, the exact admission and V2 validation control sources, exact deterministic summaries, and the final evidence-manifest identity. Canonical 004C1AC, 004C1EV, and 004C1EY independently cross-bind the package/archive identities. Review must not reinterpret absence of the large external payloads in Git as Git adoption or as distribution authority.
+The immutable review evidence pack is published as a public GitHub Gist at an exact single revision. Reviewers must bind verification to that revision rather than to a moving Gist tip.
+
+```text
+REVIEW_PACK_GIST_ID = c2ab7782e739ab95648eb8539db4d673
+REVIEW_PACK_GIST_REVISION = a7c3549202c18ed077c8fc9f303250670f3907a0
+REVIEW_PACK_GIST_HISTORY_COUNT_AT_PUBLICATION = 1
+REVIEW_PACK_GIST_URL = https://gist.github.com/TheHalfMoon/c2ab7782e739ab95648eb8539db4d673/a7c3549202c18ed077c8fc9f303250670f3907a0
+REVIEW_PACK_GIT_URL = https://gist.github.com/c2ab7782e739ab95648eb8539db4d673.git
+REVIEW_PACK_FILE_COUNT = 60
+REVIEW_PACK_MANIFEST_SHA256 = 5b2800c8015b015022caa9dcab367ddaf7539a06d599c28764005e80dcb84d0b
+REVIEW_PACK_VERIFIER_SHA256 = eaecc34bc4e860c61dae37e88c76316c748e5c8bff728d35b101e5769d41ced5
+PRIMARY_EVIDENCE_MANIFEST_OBJECTS = 2290
+PRIMARY_EVIDENCE_MANIFEST_SHA256 = abe74dfab2d99d5e9f100277d2b805c534cfd1db675e4405b7d5f7d99b46b2df
+PUBLISHED_ARCHIVE_PACKAGE_RECORDS = 18
+OMITTED_LARGE_OBJECT_IDENTITIES = 952
+RECONSTRUCTED_ZERO_BYTE_OBJECTS = 3
+ZERO_BYTE_EVIDENCE_SHA256 = 40fa4cf211a12cb78feb57abbd53c57e9417fd1bf65b6fc1dd36c057d72a75e7
+```
+
+The review pack publishes the primary evidence manifest, execution controls, archive metadata/headers/transport observations, materialization stdout/stderr, container inspect records, V1 failure evidence, V2 source and result, deterministic package/materialized inventories, pre/post Git status, lock/finalization/release records, and verification tooling. Large registry tarball bodies and the external materialized dependency tree are not republished; their 952 exact path/byte/SHA-256 identities are frozen in `omitted-large-object-identities.tsv`. The 18 public registry tarballs can optionally be re-fetched by the verifier and checked against the published byte length, SHA-256, SHA-1, and SHA-512 SRI values without Node, pnpm, or product-runtime execution.
+
+GitHub Gist does not accept empty files. Three frozen zero-byte evidence objects are therefore represented by `zero-byte-evidence.tsv`; the verifier reconstructs `b''` and requires both byte length `0` and SHA-256 `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` to match the primary manifest.
+
+The authority-required pre-network zero-open-PR observation was not persisted as a standalone object in the original evidence root. Issue #7 comment `5658940799` authorizes only a historical read-only reconstruction. That reconstruction uses the frozen archive-admission cutoff and GitHub server-side PR timestamps across the retrieved pull-request history:
+
+```text
+HISTORICAL_RECONSTRUCTION_AUTHORITY = github:issue-comment:5658940799
+ARCHIVE_ADMISSION_CUTOFF_UTC = 2026-09-14T03:52:24.298289000Z
+GITHUB_PR_HISTORY_COUNT = 209
+GITHUB_PR_HISTORY_FIRST_NUMBER = 1
+GITHUB_PR_HISTORY_LAST_NUMBER = 241
+GITHUB_PR_HISTORY_SHA256 = e3931ae0099b0369e4f0cf89933760009ed8495dcf253839eade83e9592fc6f2
+HISTORICAL_RECONSTRUCTOR_SHA256 = ae5ada63702fdf8f25d312cc2b11b2f1f66e34983057959d63f9726d3a0608c0
+HISTORICAL_ZERO_OPEN_PR_PROOF_SHA256 = e9bf2cea057b0d3bbcb76688a39cb630f6e64ce35b3920255e3bd2ce020ad136
+OPEN_PULL_REQUEST_COUNT_AT_CUTOFF = 0
+HISTORICAL_ZERO_OPEN_PR_RESULT = PASS_ZERO_OPEN_PRS
+```
+
+The historical reconstruction is not represented as contemporaneously frozen execution evidence. It is explicitly a later authority-approved reconstruction from immutable GitHub server timestamps and the previously frozen admission cutoff.
+
+Independent verification procedure:
+
+```bash
+git clone https://gist.github.com/c2ab7782e739ab95648eb8539db4d673.git signthos-004c1fc-review-pack
+cd signthos-004c1fc-review-pack
+git checkout --detach a7c3549202c18ed077c8fc9f303250670f3907a0
+python3 verify_review_pack.py \
+  --pack . \
+  --expected-pack-manifest-sha 5b2800c8015b015022caa9dcab367ddaf7539a06d599c28764005e80dcb84d0b \
+  --expected-gist-revision a7c3549202c18ed077c8fc9f303250670f3907a0
+```
+
+The expected offline result is:
+
+```text
+REVIEW_PACK_VERIFICATION=PASS
+PUBLISHED_FILES=59
+PRIMARY_MANIFEST_OBJECTS=2290
+ARCHIVE_PACKAGES=18
+HISTORICAL_ZERO_OPEN_PR_PROOF=PASS_ZERO_OPEN_PRS
+OMITTED_LARGE_OBJECT_IDENTITIES=952
+RECONSTRUCTED_ZERO_BYTE_OBJECTS=3
+REGISTRY_REFETCH=SKIPPED
+```
+
+A reviewer may additionally pass `--verify-registry` to re-fetch and digest-check all 18 public tarballs. That optional reviewer action is not a Signthos materialization rerun and is not required for the offline pack-integrity proof.
 
 ## 11. Candidate result and merge gate
 
