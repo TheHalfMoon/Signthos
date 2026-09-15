@@ -89,7 +89,9 @@ test('successful local-WASM inspect executes the raw lifecycle in order', async 
   });
 
   assert.deepEqual(Reflect.ownKeys(receivedOptions), ['wasmBinary']);
-  assert.equal(receivedOptions.wasmBinary, wasmBinary);
+  assert.equal(Object.isFrozen(receivedOptions), false);
+  assert.notEqual(receivedOptions.wasmBinary, wasmBinary);
+  assert.deepEqual(Array.from(receivedOptions.wasmBinary), Array.from(wasmBinary));
   assert.deepEqual(result, { openSucceeded: true, pageCount: 4 });
   assert.equal(Object.isFrozen(result), true);
   assert.deepEqual(runtime.events, [
@@ -246,11 +248,105 @@ test('WASM mutation by the injected initializer is detected after cleanup', asyn
     }),
     (error) => {
       assert.equal(error instanceof AggregateError, true);
-      assert.equal(error.errors.some((item) => /WASM bytes changed/.test(item.message)), true);
+      assert.equal(error.errors.some((item) => /caller WASM bytes changed/.test(item.message)), true);
       return true;
     },
   );
   assert.equal(runtime.events.at(-1), 'destroy');
+});
+
+test('initializer receives a fresh mutable options object with private WASM bytes', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+  let receivedOptions = null;
+
+  await inspectPdfWithLocalWasm({
+    bytes: bytes(),
+    wasmBinary: callerWasm,
+    async initPdfium(options) {
+      receivedOptions = options;
+      assert.equal(Object.isFrozen(options), false);
+      assert.notEqual(options.wasmBinary, callerWasm);
+      assert.deepEqual(Array.from(options.wasmBinary), callerBefore);
+      options.emscriptenMutableMarker = 'allowed';
+      options.wasmBinary = options.wasmBinary;
+      return runtime.module;
+    },
+  });
+
+  assert.equal(receivedOptions.emscriptenMutableMarker, 'allowed');
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+});
+
+test('initializer mutation of private runtime WASM is detected without mutating caller WASM', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+
+  await assert.rejects(
+    inspectPdfWithLocalWasm({
+      bytes: bytes(),
+      wasmBinary: callerWasm,
+      async initPdfium(options) {
+        assert.notEqual(options.wasmBinary, callerWasm);
+        options.wasmBinary[0] ^= 0xff;
+        return runtime.module;
+      },
+    }),
+    (error) => {
+      assert.equal(error instanceof AggregateError, true);
+      assert.equal(error.errors.some((item) => /runtime WASM bytes changed/.test(item.message)), true);
+      return true;
+    },
+  );
+
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+  assert.equal(runtime.events.at(-1), 'destroy');
+});
+
+test('initializer cannot substitute a byte-identical different runtime WASM object', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+
+  await assert.rejects(
+    inspectPdfWithLocalWasm({
+      bytes: bytes(),
+      wasmBinary: callerWasm,
+      async initPdfium(options) {
+        options.wasmBinary = Uint8Array.from(options.wasmBinary);
+        return runtime.module;
+      },
+    }),
+    /initializer replaced runtime WASM bytes/,
+  );
+
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+  assert.deepEqual(runtime.events, []);
+});
+
+test('initializer cannot substitute different runtime WASM bytes', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+
+  await assert.rejects(
+    inspectPdfWithLocalWasm({
+      bytes: bytes(),
+      wasmBinary: callerWasm,
+      async initPdfium(options) {
+        const replacement = Uint8Array.from(options.wasmBinary);
+        replacement[0] ^= 0xff;
+        options.wasmBinary = replacement;
+        return runtime.module;
+      },
+    }),
+    /initializer replaced runtime WASM bytes/,
+  );
+
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+  assert.deepEqual(runtime.events, []);
 });
 
 test('each operation obtains fresh allocation and document handles from the runtime', async () => {

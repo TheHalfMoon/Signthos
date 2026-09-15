@@ -60,6 +60,7 @@ async function inspectPdfWithLocalWasm({ bytes, wasmBinary, initPdfium }) {
 
   const inputSnapshot = copyByteView(bytes);
   const wasmSnapshot = copyByteView(wasmBinary);
+  const runtimeWasmBinary = copyByteView(wasmBinary);
   let module = null;
   let libraryInitialized = false;
   let allocationPointer = null;
@@ -68,7 +69,12 @@ async function inspectPdfWithLocalWasm({ bytes, wasmBinary, initPdfium }) {
   let primaryError = null;
 
   try {
-    module = validateRuntimeSurface(await initPdfium(Object.freeze({ wasmBinary })));
+    const initializerOptions = { wasmBinary: runtimeWasmBinary };
+    const initializedModule = await initPdfium(initializerOptions);
+    if (initializerOptions.wasmBinary !== runtimeWasmBinary) {
+      throw new Error('PDFium initializer replaced runtime WASM bytes');
+    }
+    module = validateRuntimeSurface(initializedModule);
     module.PDFiumExt_Init();
     libraryInitialized = true;
 
@@ -132,7 +138,10 @@ async function inspectPdfWithLocalWasm({ bytes, wasmBinary, initPdfium }) {
     cleanupErrors.push(new Error('source bytes changed during PDFium inspection'));
   }
   if (!byteViewEquals(wasmBinary, wasmSnapshot)) {
-    cleanupErrors.push(new Error('WASM bytes changed during PDFium inspection'));
+    cleanupErrors.push(new Error('caller WASM bytes changed during PDFium inspection'));
+  }
+  if (!byteViewEquals(runtimeWasmBinary, wasmSnapshot)) {
+    cleanupErrors.push(new Error('runtime WASM bytes changed during PDFium inspection'));
   }
 
   if (primaryError && cleanupErrors.length > 0) {
