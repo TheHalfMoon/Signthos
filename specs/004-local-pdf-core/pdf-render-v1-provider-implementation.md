@@ -197,6 +197,10 @@ Additionally `width * height` must be a safe integer and must not exceed the req
 as `INVALID_INPUT / invalid_input.render_evidence_binding`; every other success-shape
 defect is `INVALID_INPUT / invalid_input.render_evidence_shape`.
 
+Pixel length is never read through the spoofable `pixels.byteLength` property: an
+evidence Buffer carrying own `byteLength`/`length` shadows fails closed, and coherence
+is enforced through the intrinsic `%TypedArray%` byte-length getter instead.
+
 Rejection requires exactly:
 
 ```text
@@ -291,6 +295,7 @@ capability parameter shape defects fail closed as invalid request
 page-index binding mismatch fails closed with the binding error
 pixel budget enforcement fails closed while exact budget succeeds
 success/rejection pixel-shape defects fail closed without observations or diagnostics
+shadowed pixel length properties fail closed without invoking evidence getters
 request/evidence accessors and proxies fail closed without getter/trap execution
 composition is read-only over bytes, request, and evidence
 results are deeply frozen with no signature or safety claim
@@ -302,8 +307,8 @@ source keeps the local-only semantic boundary
 Focused results:
 
 ```text
-FOCUSED_TESTS = 24
-FOCUSED_PASS = 24
+FOCUSED_TESTS = 25
+FOCUSED_PASS = 25
 FOCUSED_FAIL = 0
 ```
 
@@ -317,8 +322,8 @@ materialization is part of the candidate repository diff.
 ```text
 PDFIUM_PACKAGE = @embedpdf/pdfium@2.15.0
 PDFIUM_WASM_SHA256 = c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8
-TOTAL_TESTS = 242
-PASS = 242
+TOTAL_TESTS = 243
+PASS = 243
 FAIL = 0
 CANCELLED = 0
 SKIPPED = 0
@@ -330,8 +335,8 @@ PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
 ## 13. Candidate file identities
 
 ```text
-RENDER_PROVIDER_SOURCE_SHA256 = bfe4d6099e3eff02b40d814deb22cda2c582b301562bfda0e00495b229b9c0c5
-RENDER_PROVIDER_TEST_SHA256 = 3ae215e6a3a2bffe128ea9555f801cc5e16f35d0e827b9dd0ae74eaed0095449
+RENDER_PROVIDER_SOURCE_SHA256 = caf7c4df55db77d5670a7f1db428a5060e7de0fdd5c76ca4e0093fc05dc277a3
+RENDER_PROVIDER_TEST_SHA256 = e2c5c70a4e636ceaedcf2cea6ec1e077c7f8ca76c973cfc73145a18f24ebf46c
 PROVIDERS_PACKAGE_JSON_SHA256 = bc2068a09eeaa8b0d82362f0260ab02230378ea4f521fce1365adc197719eb55
 ```
 

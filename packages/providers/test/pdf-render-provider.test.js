@@ -347,6 +347,40 @@ test('success pixel-shape defects fail closed without observations', () => {
   }
 });
 
+test('shadowed pixel length properties fail closed without invoking evidence getters', () => {
+  const item = record('admission-seed-ordinary-minimal-v1');
+  const bytes = bytesFor(item);
+  let getterCalls = 0;
+
+  const shadowed = successEvidence();
+  shadowed.pixels = Buffer.from({ length: 15 }, () => 7);
+  Object.defineProperty(shadowed.pixels, 'byteLength', { value: 16, configurable: true });
+  const shadowedResult = composePdfRenderResult({
+    bytes,
+    request: requestFor(item, bytes),
+    availability: AVAILABILITY.AVAILABLE,
+    renderEvidence: shadowed,
+  });
+  assert.equal(shadowedResult.stableError.errorClass, STABLE_ERROR.INVALID_INPUT);
+  assert.equal(shadowedResult.stableError.errorCode, 'invalid_input.render_evidence_shape');
+  assert.equal(Object.prototype.hasOwnProperty.call(shadowedResult, 'observations'), false);
+
+  const getter = successEvidence();
+  Object.defineProperty(getter.pixels, 'byteLength', {
+    configurable: true,
+    get() { getterCalls += 1; return 16; },
+  });
+  const getterResult = composePdfRenderResult({
+    bytes,
+    request: requestFor(item, bytes),
+    availability: AVAILABILITY.AVAILABLE,
+    renderEvidence: getter,
+  });
+  assert.equal(getterResult.stableError.errorClass, STABLE_ERROR.INVALID_INPUT);
+  assert.equal(getterResult.stableError.errorCode, 'invalid_input.render_evidence_shape');
+  assert.equal(getterCalls, 0);
+});
+
 test('rejection shape defects fail closed without malformed diagnostics', () => {
   const item = record('admission-seed-declared-pdf-nonpdf-v1');
   const bytes = bytesFor(item);

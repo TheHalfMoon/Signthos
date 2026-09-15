@@ -96,6 +96,13 @@ const REJECTED_RENDER_KEYS = Object.freeze(['openSucceeded', 'pdfiumLastError'])
 const PIXEL_FORMAT_BGRA = 'BGRA';
 const BYTES_PER_PIXEL_BGRA = 4;
 
+// Intrinsic typed-array length read: an evidence Buffer may carry own
+// `byteLength`/`length` shadows, so the property must never be read directly.
+const UINT8_BYTE_LENGTH_GETTER = Object.getOwnPropertyDescriptor(
+  Object.getPrototypeOf(Uint8Array.prototype),
+  'byteLength',
+).get;
+
 const PDFIUM_FORMAT_ERROR = Object.freeze({
   code: 3,
   constant: 'FPDF_ERR_FORMAT',
@@ -283,8 +290,18 @@ function classifyRenderEvidence(base, evidence) {
     if (!Number.isSafeInteger(pixelCount) || pixelCount < 1) return { kind: 'SHAPE_INVALID' };
     if (pixelCount > base.capabilityParameters.maxPixels) return { kind: 'SHAPE_INVALID' };
     if (utilTypes.isProxy(pixels) || !Buffer.isBuffer(pixels)) return { kind: 'SHAPE_INVALID' };
+    if (Object.getOwnPropertyDescriptor(pixels, 'byteLength') !== undefined
+        || Object.getOwnPropertyDescriptor(pixels, 'length') !== undefined) {
+      return { kind: 'SHAPE_INVALID' };
+    }
     const pixelByteLength = stride * height;
-    if (!Number.isSafeInteger(pixelByteLength) || pixels.byteLength !== pixelByteLength) {
+    let truePixelByteLength;
+    try {
+      truePixelByteLength = Reflect.apply(UINT8_BYTE_LENGTH_GETTER, pixels, []);
+    } catch {
+      return { kind: 'SHAPE_INVALID' };
+    }
+    if (!Number.isSafeInteger(pixelByteLength) || truePixelByteLength !== pixelByteLength) {
       return { kind: 'SHAPE_INVALID' };
     }
     return {
