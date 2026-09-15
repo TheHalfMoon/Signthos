@@ -305,6 +305,50 @@ test('initializer mutation of private runtime WASM is detected without mutating 
   assert.equal(runtime.events.at(-1), 'destroy');
 });
 
+test('initializer cannot substitute a byte-identical different runtime WASM object', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+
+  await assert.rejects(
+    inspectPdfWithLocalWasm({
+      bytes: bytes(),
+      wasmBinary: callerWasm,
+      async initPdfium(options) {
+        options.wasmBinary = Uint8Array.from(options.wasmBinary);
+        return runtime.module;
+      },
+    }),
+    /initializer replaced runtime WASM bytes/,
+  );
+
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+  assert.deepEqual(runtime.events, []);
+});
+
+test('initializer cannot substitute different runtime WASM bytes', async () => {
+  const callerWasm = wasm();
+  const callerBefore = Array.from(callerWasm);
+  const runtime = fakeRuntime();
+
+  await assert.rejects(
+    inspectPdfWithLocalWasm({
+      bytes: bytes(),
+      wasmBinary: callerWasm,
+      async initPdfium(options) {
+        const replacement = Uint8Array.from(options.wasmBinary);
+        replacement[0] ^= 0xff;
+        options.wasmBinary = replacement;
+        return runtime.module;
+      },
+    }),
+    /initializer replaced runtime WASM bytes/,
+  );
+
+  assert.deepEqual(Array.from(callerWasm), callerBefore);
+  assert.deepEqual(runtime.events, []);
+});
+
 test('each operation obtains fresh allocation and document handles from the runtime', async () => {
   const runtime = fakeRuntime();
   const initPdfium = async () => runtime.module;

@@ -69,7 +69,12 @@ async function inspectPdfWithLocalWasm({ bytes, wasmBinary, initPdfium }) {
   let primaryError = null;
 
   try {
-    module = validateRuntimeSurface(await initPdfium({ wasmBinary: runtimeWasmBinary }));
+    const initializerOptions = { wasmBinary: runtimeWasmBinary };
+    const initializedModule = await initPdfium(initializerOptions);
+    if (initializerOptions.wasmBinary !== runtimeWasmBinary) {
+      throw new Error('PDFium initializer replaced runtime WASM bytes');
+    }
+    module = validateRuntimeSurface(initializedModule);
     module.PDFiumExt_Init();
     libraryInitialized = true;
 

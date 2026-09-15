@@ -110,7 +110,7 @@ New or strengthened assertions prove:
 - direct caller-WASM mutation is still detected after cleanup;
 - private runtime-WASM mutation is independently detected even while caller WASM remains unchanged.
 
-Focused runtime suite on the final source/test bytes:
+Focused runtime suite on the initial compatibility-repair source/test bytes (superseded by Section 10):
 
 ```text
 TESTS = 15
@@ -118,7 +118,7 @@ PASS = 15
 FAIL = 0
 ```
 
-## 7. Final exact-Node qualification
+## 7. Initial exact-Node qualification (superseded by Section 10)
 
 The complete applicable provider chain was re-executed after the repair using the already-qualified exact Node executable.
 ```text
@@ -177,3 +177,53 @@ The failed real-runtime attempt remains preserved as evidence that motivated thi
 This repair remains a candidate until exact-head independent substantive review, zero unresolved material review threads, immediate live race proof, guarded normal merge using the exact reviewed head, post-merge parent/tree/path/signature verification, and Issue #7 closeout are complete.
 
 Only after canonical closeout may Issue #7 freshly decide whether the exact local real-PDFium execution qualification may be retried. No retry authority is inferred from test success or task ordering.
+
+## 10. Pre-merge reassignment self-audit and final qualification
+
+Before an independent-review verdict was accepted, a fresh pre-merge self-audit found that in-place mutation was detected but `initializerOptions.wasmBinary` replacement was not. The finding is preserved at `github:issue-comment:5673429049`. Any review of the earlier head is stale for merge qualification.
+
+The forward repair retains a fresh mutable initializer options object and the private runtime-owned WASM view, then validates immediately after `initPdfium(...)` resolves and before `PDFiumExt_Init()` that:
+
+```text
+initializerOptions.wasmBinary === runtimeWasmBinary
+```
+
+Deletion or replacement therefore fails closed before library initialization. Replacement is rejected even when the replacement bytes are byte-identical. The existing independent caller-WASM and private-runtime-WASM byte-mutation checks remain unchanged.
+
+Direct regression coverage now proves both byte-identical different-object substitution and different-byte substitution fail before any fake runtime lifecycle event. The focused runtime suite is `17/17` passing.
+
+The previous temporary Node executable had expired from `/tmp`; the attempted command therefore executed no candidate test. The official Node `v24.20.0` Darwin arm64 archive was rematerialized outside the repository and the executable identity was reverified before qualification.
+
+Final exact-Node qualification on the reassignment-repaired source/test bytes:
+
+```text
+NODE_VERSION = v24.20.0
+NODE_SHA256 = 9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a
+NODE_TARBALL_SHA256 = 40e5607e5ecb3db9192723776da2d75d966260fc74a7a9e731c1bd67dda96bc8
+CHECK_SOURCE_RC = 0
+CHECK_TEST_RC = 0
+COMBINED_TEST_RC = 0
+TESTS = 174
+PASS = 174
+FAIL = 0
+CANCELLED = 0
+SKIPPED = 0
+TODO = 0
+PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
+```
+
+Final frozen implementation/test identities:
+
+```text
+RUNTIME_SOURCE_SHA256 = 4f98df59f85c9e493513afda7ef5e254e578af64c5b368f7a55eebf6f9c4b462
+RUNTIME_TEST_SHA256 = 1d257856947dd8d29eebc5ca5f670bbc2bdb4e17291f47abb20f855a8a530204
+TEST_STDOUT_SHA256 = 5af228cdd3bd25f1fb9a6ad14d9c781c53e0ddf8ce1a0072e2e6ea6d572c079a
+TEST_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+PRE_STATUS_SHA256 = 3e527b455b4bd10149376686bc7787a3281648c10ff3b460c7b9196b06548f38
+POST_STATUS_SHA256 = 3e527b455b4bd10149376686bc7787a3281648c10ff3b460c7b9196b06548f38
+VALIDATION_SUMMARY_SHA256 = 9da6cb4b6ceff2ed1401873a921910b41e5bb860eb4afb4bf991041dd07cb2f0
+EVIDENCE_MANIFEST_ENTRIES = 12
+EVIDENCE_MANIFEST_SHA256 = 2a291d58dc2a7bd71f302de8ae806cd4dd9d5e710d044ea391a876c696af9584
+```
+
+No real PDFium/WASM retry occurred after either repair. Canonicalization still requires a fresh independent substantive review of the new exact head/tree, zero unresolved material threads, immediate race proof, guarded normal merge, post-merge verification, and Issue #7 closeout.
