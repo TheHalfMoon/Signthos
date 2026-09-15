@@ -98,6 +98,8 @@ async function orchestratePdfInspect(options) {
     terminateRuntime,
   });
 
+  validateCrossLayerBinding(request, runtimeBinding);
+
   return composeSupervisedPdfInspectResult({
     bytes,
     request,

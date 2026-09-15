@@ -453,3 +453,76 @@ test('unsafe nested digest shapes fail before runtime effects', async () => {
   }
   assert.equal(runtimeCalls, 0);
 });
+
+
+test('request identity mutations during runtime are rejected after supervision before semantic composition', async () => {
+  const mutationCases = [
+    ['providerId', (request) => { request.providerId = 'provider:mutated-during-runtime'; }],
+    ['providerCapabilityVersion', (request) => { request.providerCapabilityVersion = 'capability:mutated-during-runtime'; }],
+    ['inputByteLength', (request) => { request.inputByteLength += 1; }],
+    ['resourceBudgetRef', (request) => { request.resourceBudgetRef = 'budget:mutated-during-runtime'; }],
+    ['inputExactBytesDigest.algorithm', (request) => { request.inputExactBytesDigest.algorithm = 'sha512'; }],
+    ['inputExactBytesDigest.value', (request) => { request.inputExactBytesDigest.value = `${request.inputExactBytesDigest.value}00`; }],
+  ];
+
+  for (const [label, mutate] of mutationCases) {
+    const bytes = bytesForFixture();
+    const request = requestFor(bytes);
+    const runtimeBinding = runtimeBindingFor(bytes, request);
+    const counters = {};
+
+    await assert.rejects(
+      orchestratePdfInspect(optionsFor({
+        bytes,
+        request,
+        runtimeBinding,
+        terminalControl: quietControl(counters),
+        runRuntime: async () => {
+          counters.runRuntime = (counters.runRuntime || 0) + 1;
+          mutate(request);
+          return { openSucceeded: true, pageCount: 1 };
+        },
+      })),
+      /do not describe the same PDF inspect operation/,
+      label,
+    );
+
+    assert.equal(counters.runRuntime, 1, label);
+    assert.equal(counters.subscribe, 1, label);
+    assert.equal(counters.dispose, 1, label);
+  }
+});
+
+test('request identity mutation during terminal termination is rejected after supervision', async () => {
+  const bytes = bytesForFixture();
+  const request = requestFor(bytes);
+  const runtimeBinding = runtimeBindingFor(bytes, request);
+  const counters = {};
+
+  await assert.rejects(
+    orchestratePdfInspect(optionsFor({
+      bytes,
+      request,
+      runtimeBinding,
+      terminalControl: synchronousTerminalControl(TERMINAL_OUTCOME.CANCELLED, counters),
+      runRuntime: async () => {
+        counters.runRuntime = (counters.runRuntime || 0) + 1;
+        return { openSucceeded: true, pageCount: 1 };
+      },
+      terminateRuntime: async () => {
+        counters.terminateRuntime = (counters.terminateRuntime || 0) + 1;
+        request.resourceBudgetRef = 'budget:mutated-during-termination';
+        return {
+          runtimeEvidenceRef: 'runtime-evidence:mutating-termination',
+          partialOutputDiscarded: true,
+        };
+      },
+    })),
+    /do not describe the same PDF inspect operation/,
+  );
+
+  assert.equal(counters.runRuntime || 0, 0);
+  assert.equal(counters.terminateRuntime, 1);
+  assert.equal(counters.subscribe, 1);
+  assert.equal(counters.dispose, 1);
+});

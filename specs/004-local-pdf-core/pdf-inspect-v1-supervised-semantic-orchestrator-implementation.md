@@ -6,7 +6,10 @@ Issue: #7
 Authority: `github:issue-comment:5672974929`
 Preserved first regression: `github:issue-comment:5672986992`
 Preserved repair-validation failures: `github:issue-comment:5672994634`
-Final validation: `github:issue-comment:5673005160`
+Initial exact-Node validation: `github:issue-comment:5673005160`
+Independent exact-head review finding: `github:issue-comment:5673024712`
+Forward repair authority: `github:issue-comment:5673063100`
+Post-review final validation: `github:issue-comment:5673075183`
 
 ## 1. Purpose
 
@@ -66,7 +69,7 @@ The first focused implementation exposed a real defect: a caller could supply a 
 
 The failure is preserved by `github:issue-comment:5672986992`.
 
-The forward-only repair requires the semantic request and runtime binding to match before supervision on every identity shared by both layers:
+The forward-only repair requires the semantic request and runtime binding to match both before supervision and again immediately after successful supervision, before semantic composition, on every identity shared by both layers:
 
 ```text
 providerId
@@ -78,6 +81,8 @@ resourceBudgetRef
 ```
 
 This is a seam invariant, not a competing semantic request schema. Provider-owned fields such as operation identity, document/revision identity, capability reference, and capability parameters remain validated by the canonical semantic provider after successful supervision.
+
+The second validation is mandatory because supervision awaits caller-controlled runtime/termination activity. A caller may mutate the caller-owned request while supervision is in progress. The orchestrator does not freeze or mutate that request; instead it fails closed if any shared runtime/semantic identity no longer matches when supervision returns.
 
 ## 5. Unsafe-object boundary
 
@@ -112,7 +117,7 @@ Synchronous qualified terminal signals retain the canonical supervisor behavior:
 
 ## 7. Semantic bridge ownership
 
-Only after successful supervision does the orchestrator call `composeSupervisedPdfInspectResult()` with:
+Only after successful supervision **and immediate post-supervision cross-layer revalidation** does the orchestrator call `composeSupervisedPdfInspectResult()` with:
 
 ```text
 bytes
@@ -164,7 +169,19 @@ PASS = 20
 FAIL = 0
 ```
 
-## 9. Final exact-Node qualification
+The first independent exact-head review then found a material time-of-check/time-of-use race: the request/runtime-binding seam was checked before awaiting supervision but not rechecked after caller-controlled runtime/termination activity. The finding is preserved by `github:issue-comment:5673024712`; merge authority remained absent. Repair authority is recorded by `github:issue-comment:5673063100`.
+
+The forward repair adds a second `validateCrossLayerBinding(request, runtimeBinding)` immediately after successful supervision and before bridge composition. New adversarial tests mutate every shared request identity field during `runRuntime()` and mutate `resourceBudgetRef` during `terminateRuntime()`. All such races fail closed after supervision and before semantic composition.
+
+Focused post-review repair coverage passed:
+
+```text
+TESTS = 22
+PASS = 22
+FAIL = 0
+```
+
+## 9. Initial exact-Node qualification before independent review
 
 The final complete predecessor + orchestrator suite used exactly:
 
@@ -202,11 +219,50 @@ PRE_STATUS_SHA256 = 2831d1f5da43dc1cd6f355d49a43140bb49ed47a236509932574ac811d5b
 POST_STATUS_SHA256 = 2831d1f5da43dc1cd6f355d49a43140bb49ed47a236509932574ac811d5b8ce8
 ```
 
-The final validation is preserved by `github:issue-comment:5673005160`.
+The initial validation is preserved by `github:issue-comment:5673005160`. It is historical evidence for the first exact head, not the final qualification after independent review repair.
 
-This document was added only after the validated source/test/package bytes were frozen and does not alter those validated bytes.
+## 10. Post-review forward-repair exact-Node qualification
 
-## 10. Static execution boundary
+The repaired source/test/package bytes were requalified using the same exact canonical tool identity:
+
+```text
+Node version = v24.20.0
+Node executable SHA256 = 9d050fd455b56426e25d4d603c7c501cbb2630348e836cf221dcce748e90588a
+```
+
+Final repaired results:
+
+```text
+CHECK_SOURCE_RC = 0
+CHECK_TEST_RC = 0
+COMBINED_TEST_RC = 0
+TESTS = 170
+PASS = 170
+FAIL = 0
+CANCELLED = 0
+SKIPPED = 0
+TODO = 0
+PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
+```
+
+Validated repaired byte identities:
+
+```text
+ORCHESTRATOR_SOURCE_SHA256 = 4ac859e02ba729a73b380fc266a5f50cc000e973cca66d9b2d5872c7491f31ee
+ORCHESTRATOR_TEST_SHA256 = a6fed1516899ac58d778e20ef7f338e2e7762c1eaaf5cacac91aa16e83441615
+PROVIDER_PACKAGE_SHA256 = 2b69b08037c1e8c38ed6ae2b0fc10c67734a251c1688c38bbe2046b89a3b45ef
+TEST_STDOUT_SHA256 = 9246fd2d3fd8030c89c80a9c11c38536447df73d0b1e29569a51befcf077aa5d
+TEST_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+VALIDATION_SUMMARY_SHA256 = 30628f93c7aec24049405f82b88b76298e04f0908447a6c427e17b1af4681f5b
+EVIDENCE_MANIFEST_ENTRIES = 15
+EVIDENCE_MANIFEST_SHA256 = a36745129bc331adde2767497b5def47440dfeb1796e9251d0ac10c13cb0b741
+PRE_STATUS_SHA256 = 85b2815bc0474ebac3ba218abc79484a8edf5d09745ada6d1d272499576b338d
+POST_STATUS_SHA256 = 85b2815bc0474ebac3ba218abc79484a8edf5d09745ada6d1d272499576b338d
+```
+
+The repaired validation is preserved by `github:issue-comment:5673075183`. This qualification document records the frozen repaired source/test/package identities but does not alter those validated files.
+
+## 11. Static execution boundary
 
 The source regression requires imports of only the canonical supervisor and semantic bridge and rejects direct introduction of:
 
@@ -230,7 +286,7 @@ https://
 
 No real runtime, PDFium, WASM, browser, worker, timer, resource meter, document-processing network, dependency manager, or dependency installation was executed by this unit.
 
-## 11. Explicit non-grants
+## 12. Explicit non-grants
 
 ```text
 DIRECT_LOCAL_WASM_RUNTIME_IMPORT_OR_INVOCATION = NOT_AUTHORIZED / NOT_PERFORMED
@@ -253,7 +309,7 @@ DEPLOYMENT = NOT_AUTHORIZED
 PROJECT_COMPLETION = NOT_ESTABLISHED
 ```
 
-## 12. Canonicalization gate
+## 13. Canonicalization gate
 
 The candidate remains non-canonical until exact four-path diff accounting, clean commit/push, truthful GitHub check accounting, fresh exact-head independent substantive review, zero unresolved material threads, immediate race proof, guarded normal merge with exact expected head, mechanical post-merge verification, Issue #7 closeout, and a completely fresh successor reconciliation all succeed.
 
