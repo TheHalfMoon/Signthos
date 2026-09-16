@@ -72,6 +72,8 @@ function extractBoundedText(module, textPageHandle, extractCount) {
   if (!Number.isSafeInteger(outputPointer) || outputPointer <= 0) {
     throw new Error('PDFium text buffer allocation failed');
   }
+  let text = '';
+  let extractionError = null;
   try {
     if (outputPointer + outputBytes > module.pdfium.HEAPU8.length) {
       throw new Error('PDFium text buffer exceeds HEAPU8');
@@ -84,16 +86,39 @@ function extractBoundedText(module, textPageHandle, extractCount) {
     if (outputPointer + textBytes > module.pdfium.HEAPU8.length) {
       throw new Error('PDFium returned text outside HEAPU8');
     }
-    return Buffer.from(
+    text = Buffer.from(
       module.pdfium.HEAPU8.subarray(outputPointer, outputPointer + textBytes),
     ).toString('utf16le');
-  } finally {
-    try {
-      module.pdfium.wasmExports.free(outputPointer);
-    } catch (error) {
-      throw cleanupFailure('text free', error);
+  } catch (error) {
+    extractionError = error;
+  }
+  try {
+    module.pdfium.wasmExports.free(outputPointer);
+  } catch (error) {
+    const cleanupError = cleanupFailure('text free', error);
+    if (extractionError) {
+      throw new AggregateError(
+        [extractionError, cleanupError],
+        'PDFium text extraction and text cleanup failed',
+      );
+    }
+    throw cleanupError;
+  }
+  if (extractionError) throw extractionError;
+  return text;
+}
+
+function readUnicodeMapError(module, textPageHandle, extractCount) {
+  let unicodeMapError = false;
+  for (let charIndex = 0; charIndex < extractCount; charIndex += 1) {
+    const charMapError = module.FPDFText_HasUnicodeMapError(textPageHandle, charIndex);
+    if (charMapError === 1) {
+      unicodeMapError = true;
+    } else if (charMapError !== 0) {
+      throw new Error('PDFium returned an invalid unicode-map error flag');
     }
   }
+  return unicodeMapError;
 }
 
 async function extractPdfPageTextWithLocalWasm({
@@ -181,20 +206,17 @@ async function extractPdfPageTextWithLocalWasm({
       if (!Number.isSafeInteger(charCount) || charCount < 0) {
         throw new Error('PDFium returned an invalid character count');
       }
-      const mapError = module.FPDFText_HasUnicodeMapError(textPageHandle);
-      if (!Number.isSafeInteger(mapError) || mapError < 0) {
-        throw new Error('PDFium returned an invalid unicode-map error flag');
-      }
       const truncated = charCount > maxChars;
       const extractCount = truncated ? maxChars : charCount;
       const text = extractBoundedText(module, textPageHandle, extractCount);
+      const unicodeMapError = readUnicodeMapError(module, textPageHandle, extractCount);
       result = Object.freeze({
         openSucceeded: true,
         pageIndex,
         pageCount,
         charCount,
         truncated,
-        unicodeMapError: mapError !== 0,
+        unicodeMapError,
         text,
       });
     }

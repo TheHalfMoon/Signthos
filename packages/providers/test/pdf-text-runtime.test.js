@@ -168,3 +168,89 @@ test('out-of-range page index rejects without partial output', async () => {
     RangeError,
   );
 });
+
+function stubInitPdfium(script) {
+  const heap = new Uint8Array(1 << 20);
+  let nextPointer = 1024;
+  const api = {
+    malloc(bytes) {
+      const pointer = nextPointer;
+      nextPointer += bytes + 16;
+      return pointer;
+    },
+    free() {
+      if (script.failFree) throw new Error('stub free failure');
+    },
+  };
+  return async () => ({
+    PDFiumExt_Init() {},
+    FPDF_LoadMemDocument: () => (script.openFails ? 0 : 1),
+    FPDF_GetLastError: () => 3,
+    FPDF_GetPageCount: () => 1,
+    FPDF_LoadPage: () => 1,
+    FPDF_GetPageWidthF: () => 200,
+    FPDF_GetPageHeightF: () => 200,
+    FPDFText_LoadPage: () => 1,
+    FPDFText_CountChars: () => script.charCount,
+    FPDFText_GetText: (handle, start, count, pointer) => {
+      if (script.failGetText) throw new Error('stub GetText failure');
+      const units = Array.from(script.text.slice(start, start + count))
+        .map((character) => character.codePointAt(0));
+      for (let index = 0; index < units.length; index += 1) {
+        heap[pointer + index * 2] = units[index] & 0xff;
+        heap[pointer + index * 2 + 1] = (units[index] >> 8) & 0xff;
+      }
+      return units.length + 1;
+    },
+    FPDFText_HasUnicodeMapError: (handle, index) => script.mapErrors[index],
+    FPDFText_ClosePage() {},
+    FPDF_ClosePage() {},
+    FPDF_CloseDocument() {},
+    FPDF_DestroyLibrary() {},
+    pdfium: { HEAPU8: heap, wasmExports: api },
+  });
+}
+
+test('empty page returns empty text without map error', async () => {
+  const result = await extractPdfPageTextWithLocalWasm(optionsFor({
+    initPdfium: stubInitPdfium({ charCount: 0, text: '', mapErrors: [] }),
+  }));
+  assert.equal(result.openSucceeded, true);
+  assert.equal(result.charCount, 0);
+  assert.equal(result.truncated, false);
+  assert.equal(result.unicodeMapError, false);
+  assert.equal(result.text, '');
+});
+
+test('per-character map error surfaces explicitly', async () => {
+  const result = await extractPdfPageTextWithLocalWasm(optionsFor({
+    initPdfium: stubInitPdfium({ charCount: 3, text: 'abc', mapErrors: [0, 1, 0] }),
+  }));
+  assert.equal(result.openSucceeded, true);
+  assert.equal(result.text, 'abc');
+  assert.equal(result.unicodeMapError, true);
+});
+
+test('invalid per-character map flag fails closed', async () => {
+  await assert.rejects(
+    extractPdfPageTextWithLocalWasm(optionsFor({
+      initPdfium: stubInitPdfium({ charCount: 2, text: 'ab', mapErrors: [0, -1] }),
+    })),
+    /invalid unicode-map error flag/,
+  );
+});
+
+test('extraction and text-cleanup failures aggregate without loss', async () => {
+  const error = await extractPdfPageTextWithLocalWasm(optionsFor({
+    initPdfium: stubInitPdfium({ charCount: 2, text: 'ab', mapErrors: [0, 0], failGetText: true, failFree: true }),
+  })).then(
+    () => { throw new Error('expected aggregated failure'); },
+    (failure) => failure,
+  );
+  assert.equal(error instanceof AggregateError, true);
+  assert.equal(error.errors.length, 2);
+  assert.equal(error.errors[0] instanceof AggregateError, true);
+  assert.match(error.errors[0].errors[0].message, /stub GetText failure/);
+  assert.match(error.errors[0].errors[1].message, /text free failed/);
+  assert.match(error.errors[1].message, /free failed/);
+});

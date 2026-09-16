@@ -42,8 +42,11 @@ Its implementation mirrors the canonical render-runtime lifecycle:
   loading;
 - text-page loading with handle validation; character counting with safe-integer validation;
   explicit truncation to `maxChars` with a `truncated` flag; `FPDFText_GetText` into a malloced
-  UTF-16LE buffer sized `(extractCount + 1) * 2` with bounds-checked copy-out and NUL handling;
-  the unicode-map error flag surfaced explicitly so extraction uncertainty is never silent;
+  UTF-16LE buffer sized `(extractCount + 1) * 2` with bounds-checked copy-out and NUL handling,
+  where a text-buffer cleanup failure aggregates with (never replaces) the extraction error;
+  the per-character `FPDFText_HasUnicodeMapError(textPage, index)` flag OR-ed over exactly the
+  extracted range (empty range yields false; any invalid per-index flag fails closed), so
+  extraction uncertainty is explicit and never silent;
 - text-page close ordered before page close, then the identical destroy/close/free/destroy-library
   cleanup with aggregated fail-closed errors; caller-immutability post-checks;
 - result envelope `{ openSucceeded, pageIndex, pageCount, charCount, truncated, unicodeMapError,
@@ -81,6 +84,8 @@ local-only raw-runtime boundary (single init call site, no selection/search/font
 all invalid input classes fail before initializer invocation (initCalls == 0)
 ordinary-minimal page 0 extracts deterministic bounded text with explicit flags
 truncation at maxChars 4 yields truncated true with the exact 4-char prefix
+stub-surface proofs: empty page returns empty text, per-index map error surfaces,
+invalid per-index flag fails closed, extraction+cleanup dual failure aggregates losslessly
 malformed document fails closed with openSucceeded false and a safe-integer error code
 out-of-range page index rejects with RangeError and no partial output
 caller bytes and WASM bytes unchanged across successful execution
@@ -91,8 +96,8 @@ caller bytes and WASM bytes unchanged across successful execution
 Bounded real-package proofs with the ordinary-minimal fixture only (page 0), as authorized:
 
 ```text
-FOCUSED_TESTS = 7
-FOCUSED_PASS = 7
+FOCUSED_TESTS = 11
+FOCUSED_PASS = 11
 FOCUSED_FAIL = 0
 WASM_INSTANTIATION_OBSERVED = YES (positive + fail-closed real-package paths)
 NETWORK_ATTEMPTS_OBSERVED = NONE
@@ -123,8 +128,8 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 Recorded after final exact-Node qualification rerun, before review:
 
 ```text
-TEXT_SOURCE_SHA256 = 9fb023a14af3322bdb26ecd12d53557f8404cb025cdcbaacf58fbda5dcbb1b05
-TEXT_TEST_SHA256 = 5434f4a5946d616a770a34878432f37bac8211277301e39f95ecfe9b4b76c38a
+TEXT_SOURCE_SHA256 = 49f2db0523bdb2d004b3bbaceeb363be2dca5afb8f7a7307c266b3ee6acf093a
+TEXT_TEST_SHA256 = db1ff39f5826a560d99e4c53947368e4d08b090b709c0da44e3854de5613657d
 ```
 
 ## 9. Merge and successor gates
