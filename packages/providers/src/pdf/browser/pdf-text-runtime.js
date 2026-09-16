@@ -2,6 +2,9 @@
 
 const { types: utilTypes } = require('node:util');
 
+const MAX_PDFIUM_INT = 0x7fffffff;
+const MAX_WASM32_SIZE = 0xffffffff;
+
 function isByteView(value) {
   return !utilTypes.isProxy(value) && value instanceof Uint8Array && value.byteLength > 0;
 }
@@ -66,8 +69,18 @@ function cleanupFailure(label, error) {
 
 function extractBoundedText(module, textPageHandle, extractCount) {
   if (extractCount === 0) return '';
+  if (!Number.isSafeInteger(extractCount) || extractCount < 0 || extractCount > MAX_PDFIUM_INT) {
+    throw new Error('PDFium returned an unsupported character count');
+  }
   const outputUnits = extractCount + 1;
   const outputBytes = outputUnits * 2;
+  if (
+    !Number.isSafeInteger(outputUnits) ||
+    !Number.isSafeInteger(outputBytes) ||
+    outputBytes > MAX_WASM32_SIZE
+  ) {
+    throw new Error('PDFium text buffer size exceeds allocation bounds');
+  }
   const outputPointer = module.pdfium.wasmExports.malloc(outputBytes);
   if (!Number.isSafeInteger(outputPointer) || outputPointer <= 0) {
     throw new Error('PDFium text buffer allocation failed');
@@ -134,8 +147,8 @@ async function extractPdfPageTextWithLocalWasm({
   if (!Number.isSafeInteger(pageIndex) || pageIndex < 0) {
     throw new TypeError('pageIndex must be a non-negative safe integer');
   }
-  if (!Number.isSafeInteger(maxChars) || maxChars < 1) {
-    throw new TypeError('maxChars must be a positive safe integer');
+  if (!Number.isSafeInteger(maxChars) || maxChars < 1 || maxChars > MAX_PDFIUM_INT) {
+    throw new TypeError('maxChars must be a positive PDFium int');
   }
 
   const inputSnapshot = copyByteView(bytes);
@@ -203,7 +216,7 @@ async function extractPdfPageTextWithLocalWasm({
       textPageHandle = loadedTextPageHandle;
 
       const charCount = module.FPDFText_CountChars(textPageHandle);
-      if (!Number.isSafeInteger(charCount) || charCount < 0) {
+      if (!Number.isSafeInteger(charCount) || charCount < 0 || charCount > MAX_PDFIUM_INT) {
         throw new Error('PDFium returned an invalid character count');
       }
       const truncated = charCount > maxChars;
