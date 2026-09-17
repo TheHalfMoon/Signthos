@@ -154,9 +154,14 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 Recorded after final exact-Node qualification rerun, before review:
 
 ```text
-SELECT_SOURCE_SHA256 = 46ff4d1b5f1ef6364730961237b0bfaf5272ff5fe73d41d528a0b722e802d622
-SELECT_TEST_SHA256 = 798590cf18613c9bdfb88c7574af1bc2eb265780b475bb87a24b349cb64da458
+SELECT_SOURCE_SHA256 = 8eb840b2544dcf5da7b62ffce8958c4f58b07a9e983e67792ad682401c1c65b9
+SELECT_TEST_SHA256 = a4b617914ab448e59cd7117c7764618e4deb5bcba7b2429c71310d04149f9f2e
+PROVIDERS_PACKAGE_SHA256 = 114c3bce0ba364d9d21189e324527bcf5a57e49c66796c95ac163544c35db00f
 ```
+
+The document's own bytes are bound externally: the candidate tree SHA in the PR body
+and the merge-tree equality check cover this file byte-identically (a self-recorded
+document hash could never match its own final bytes).
 
 ## 9. Merge and successor gates
 

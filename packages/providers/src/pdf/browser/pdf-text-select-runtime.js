@@ -139,14 +139,14 @@ function readUnicodeMapError(module, textPageHandle, startIndex, extractCount) {
 }
 
 function readSelectionRects(module, textPageHandle, startIndex, selectCount, maxRects) {
-  if (selectCount === 0) return { rects: [], rectCount: 0, rectsTruncated: false };
+  if (selectCount === 0) return { rects: Object.freeze([]), rectCount: 0, rectsTruncated: false };
   const rectTotal = module.FPDFText_CountRects(textPageHandle, startIndex, selectCount);
   if (!Number.isSafeInteger(rectTotal) || rectTotal < 0 || rectTotal > MAX_PDFIUM_INT) {
     throw new Error('PDFium returned an invalid rectangle count');
   }
   const rectsTruncated = rectTotal > maxRects;
   const shownRects = rectsTruncated ? maxRects : rectTotal;
-  if (shownRects === 0) return { rects: [], rectCount: rectTotal, rectsTruncated };
+  if (shownRects === 0) return { rects: Object.freeze([]), rectCount: rectTotal, rectsTruncated };
   const slotPointer = module.pdfium.wasmExports.malloc(RECT_SLOT_BYTES);
   if (!Number.isSafeInteger(slotPointer) || slotPointer <= 0) {
     throw new Error('PDFium rect buffer allocation failed');
