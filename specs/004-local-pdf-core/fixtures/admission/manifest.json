@@ -50,7 +50,8 @@
     "admission-seed-truncated-pdf-like-v1",
     "admission-seed-trailing-inert-bytes-v1",
     "admission-seed-active-content-synthetic-v1",
-    "admission-seed-signed-structure-synthetic-v1"
+    "admission-seed-signed-structure-synthetic-v1",
+    "admission-seed-multipage-order-synthetic-v1"
   ],
   "records": [
     {
@@ -499,6 +500,63 @@
         "expectationMode": "QUALIFICATION",
         "deterministicExpectedObservations": [
           "FPDF_GetSignatureCount observes 1 on the adopted exact package"
+        ],
+        "mutationExpectation": {
+          "inputBytesMustRemainIdentical": true,
+          "outputDocumentRevisionExpected": true,
+          "signaturePreservationClaimed": false,
+          "sanitizerOrRepairOutputExpected": false
+        }
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-multipage-order-synthetic-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "MULTIPAGE_ORDER_SYNTHETIC_PDF",
+      "adversarialPurpose": "PAGE_ORDER_PERMUTATION_PROBE",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/multipage-order-synthetic-v1.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "6cf09a5b2d695709b068ad7e3985626cb30073f4809d5988d20ac2f14bcb3171"
+      },
+      "byteLength": 902,
+      "declaredIdentityInputs": {
+        "fileName": "multipage-order-synthetic-v1.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5713544418"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5713544418"
+      },
+      "constructionEvidence": {
+        "authorshipEvidenceRef": "github:issue-comment:5713544418",
+        "constructionSpecificationRef": "github:issue-comment:5713544418 (byte-exact generator embedded in the authority record)",
+        "externalBytesUsed": false,
+        "thirdPartyAssetsEmbedded": false,
+        "completeness": "COMPLETE"
+      },
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [
+          "per-page texts page-alpha/page-beta/page-gamma extractable on the adopted exact package"
         ],
         "mutationExpectation": {
           "inputBytesMustRemainIdentical": true,
