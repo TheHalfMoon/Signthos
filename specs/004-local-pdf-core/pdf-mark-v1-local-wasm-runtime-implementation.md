@@ -8,15 +8,20 @@ Owning specification: `004-local-pdf-core`
 
 ## 1. Purpose and bounded authority
 
-This unit implements the third 004G grain: stamping one rotated, colored
-text mark on one page through `FPDFPageObj_CreateTextObj` /
-`FPDFPageObj_SetText` / `FPDFPage_InsertObject` plus `FPDFPage_GenerateContent`,
-saving through the proven `PDFiumExt` writer path. First-hand probes proved
-the `FPDFAnnot` surface absent from the adopted binding (all annotation
-entry points undefined), so marks are page content-stream objects, not
-annotations, and this unit makes no annotation claim. On canonical closure
-of this unit, marks join attach-add and attach-remove as complete; the
-blocked metadata mutation remains for successor handling.
+This unit implements the third 004G grain: placing one positioned,
+rotated, colored text mark on one page through the Helvetica standard
+font (`FPDFText_LoadStandardFont`) plus `FPDFPageObj_CreateTextObj` /
+`FPDFText_SetText` / `FPDFPageObj_SetFillColor` / `FPDFPageObj_Transform`,
+inserted with `FPDFPage_InsertObject` and baked with
+`FPDFPage_GenerateContent`, saving through the proven `PDFiumExt` writer
+path. The runtime surface validated here exposes no annotation entry
+points, so marks are page content-stream objects, not annotations, and
+this unit makes no annotation claim. Unlike prior mutation grains, signed
+inputs are not refused: the mark is placed and the result reports the
+read input and output signature counts while explicitly claiming nothing
+about signature validity or preservation. On canonical closure of this
+unit, marks join attach-add and attach-remove as complete; the blocked
+metadata mutation remains for successor handling.
 
 ```text
 UNIT = PDF_MARK_V1_LOCAL_WASM_RUNTIME_IMPLEMENTATION
@@ -25,7 +30,7 @@ CANONICAL_BASE = c92da4589ad13e8f33127be5bf56805df9651036
 CANONICAL_BASE_TREE = 0f75122f6f46edfa1d2b983c286fc453ea56e73b
 SIDE_EFFECT_CLASS = REVISION_CREATING
 MAX_CHANGED_FILES = 4
-EXACT_ENTRY_POINT = addPdfTextMarkWithLocalWasm
+EXACT_ENTRY_POINT = placePdfMarkWithLocalWasm
 ```
 
 Authorized paths are exactly (no new fixture required):
@@ -39,57 +44,64 @@ specs/004-local-pdf-core/pdf-mark-v1-local-wasm-runtime-implementation.md
 
 ## 2. Implementation contract
 
-The runtime exports `addPdfTextMarkWithLocalWasm` and the frozen
-`MARK_RESOURCE_BUDGETS` constant (`maxInputBytes`/`maxOutputBytes` 64 MiB,
-`maxNameBytes` 4096 as the shared channel-capacity witness), and nothing
-else. The module object is frozen.
+The runtime exports `placePdfMarkWithLocalWasm` and the frozen
+`MARK_RESOURCE_BUDGETS` constant (`maxInputBytes`/`maxOutputBytes`
+64 MiB, `maxTextChars` 500, `maxCoordinate` 10000, `maxFontSize` 144,
+`maxAngleDegrees` 360, `maxChannel` 255), and nothing else. The module
+object is frozen.
 
 Inputs are validated before any PDFium call: `wasmBinary` non-empty bytes
-(max 64 MiB, budget error names the exact byte length), `bytes` non-empty
-(max 64 MiB). Option-surface discipline mirrors prior grains: only the five
-declared keys are read (`targetPageIndex`, `text`, `fontSizePt`,
-`color`, `rotationDegreesClockwise`); unknown keys throw, accessor values
-throw, and per-read getters are never invoked more than once.
+(max 64 MiB), `bytes` non-empty (max 64 MiB, budget error on oversize).
+Option-surface discipline mirrors prior grains: all fourteen declared
+keys are required (`bytes`, `wasmBinary`, `initPdfium`, `pageIndex`,
+`text`, `x`, `y`, `fontSize`, `angleDegrees`, `red`, `green`, `blue`,
+`alpha`); unknown or missing keys throw, accessor values throw (only own
+plain data values are read).
 
-Option semantics: `targetPageIndex` a safe integer >= 0 (default 0);
-`text` a non-empty string of at most 200 chars (default `'MARK'`);
-`fontSizePt` a finite number in [1, 144] (default 48); `color` a frozen
-`{r,g,b}` triple with byte-range integers (default red); callers cannot
-mutate the default through the result because defaults are copied per call.
-`rotationDegreesClockwise` a finite number in [0, 360) (default 45); 0 is
-unrotated, values rotate the text matrix clockwise on the page.
+Option semantics: `pageIndex` a safe integer >= 0; `text` 1..500
+printable ASCII characters; `x`/`y` finite coordinates within +/-10000;
+`fontSize` a finite size in (0, 144]; `angleDegrees` a finite angle with
+|angle| <= 360; `red`/`green`/`blue`/`alpha` safe integers in 0..255.
+There are no defaults; every placement input is explicit per call.
 
-Gates, all before any mutation: `signatureCount` must be 0, else "signed
-documents are not mark targets"; `targetPageIndex` in range of the live
-page count (out-of-range fails with `/out of range/`, never by touching
-an out-of-range page).
+Gates, all before any mutation: `pageIndex` in range of the live page
+count read before any mutation (out-of-range fails closed, never by
+touching an out-of-range page). Signed documents are deliberately not
+refused; the input and output signature counts are both read and
+reported, and the result carries no signature-validity or
+signature-preservation claim.
 
-Mechanism: single `initPdfium` call; open the input allocation with the
-proven exact-head-decode readback; pass the gates; write the UTF-16LE
-text bytes (with NUL) into a WASM allocation (empty text impossible by
-validation); create the text object with the requested font size; set the
-text (false fails); set fill RGB (PDFium byte-RGB proof, not normalized
-floats); build the rotation matrix with `cos/sin` on the standard math
-object and set it; insert the object into the target page (false fails);
-generate the page content (false fails); save through the `PDFiumExt`
-writer with readout and output budget; decode the output head-exactly
-and validate it by reopening before publish. The text buffer is freed
-after insertion; the document closes on all paths. The input allocation
+Mechanism: single `initPdfium` call with a copied WASM binary (an
+initializer that replaces the bytes fails closed); open the input
+allocation with the proven exact-head-decode readback; load the Helvetica
+standard font; create the text object with the requested size; write the
+UTF-16LE text bytes (with NUL) into a WASM allocation and set the text
+(false fails); set the RGBA fill color; apply the rotation/translation
+matrix `(cos, sin, -sin, cos, x, y)` built from `angleDegrees` via
+`FPDFPageObj_Transform`; load the target page; insert the object; generate
+the page content (false fails); close the page; re-read the signature
+count; save through the `PDFiumExt` writer with readout and output
+budget; decode the output head-exactly and validate it by reopening
+before publish. The text buffer is freed immediately after the set-text
+call on all paths; the document closes on all paths. The input allocation
 is held until source close.
 
-Failure hygiene: every validation, gate, and create/set/insert/generate
-/save failure publishes nothing; allocations are tracked in cleanup and
-freed on all post-allocation failure paths. Save-gate errors never touch
-the content surface: oversized input and signed documents fail with zero
-text-object creations. Caller mutation of the input bytes after the call
-cannot affect the saved output.
+Failure hygiene: every validation, gate, and font/create/set/color/
+transform/insert/generate/save failure publishes nothing. A text object
+that was created but never inserted is destroyed (`FPDFPageObj_Destroy`);
+once inserted, the object is page-owned and is never destroyed by the
+runtime. Save-gate errors never touch the content surface: oversized
+input fails with zero text-object creations. Caller mutation of the input
+or WASM bytes mid-run fails the call closed via snapshot comparison
+(`AggregateError`); an initializer replacing the runtime WASM bytes fails
+closed.
 
-The result is one frozen object: input identity (`inputByteLength`,
-sha256 `inputDigest`, `pageCount`, `signatureCount` 0,
-`signatureStructurePresent` false by gate), `targetPageIndex`, `text`
-exact, `fontSizePt`, frozen `color` copy, `rotationDegreesClockwise`,
-`markObjectCount` 1 (read from the single created handle, never
-arithmetically claimed), caller-owned `outputBytes`,
+The result is one frozen object: `succeeded` true, input identity
+(`inputByteLength`, sha256 `inputDigest`), `pageIndex`, `placedText`
+exact, frozen `placement` (`x`, `y`, `fontSize`, `angleDegrees`), frozen
+`color` (`red`, `green`, `blue`, `alpha`), `font` `'Helvetica'`,
+`pageCount`, `signatureCount`, re-read `outputSignatureCount`,
+`signatureStructurePresent`, caller-owned `outputBytes`,
 `outputByteLength`, sha256 `outputDigest`, and frozen
 `providerIdentity`. No preservation fields. No revision minting.
 
@@ -109,18 +121,24 @@ adopted package + WASM).
 Focused coverage proves, at minimum:
 
 ```text
-exact option surface (five keys); proxy/accessor/unknown-key rejection
-defaults copied per call (caller mutation cannot poison later calls)
-full lifecycle order with exact writer-data pointer at the mocked writer
-gate failures (signed, out-of-range page) stop before any text creation
-create/set/insert/generate/save failures publish nothing with cleanup
-input/output budgets; aggregation; caller-mutation immunity
-real red 45-degree mark renders darker-red pixels (channel delta beyond
-  noise) in the marked region against the unmarked source, preserves
-  text, reopens valid, renders
-real blue mark on the second page marks only that page; earlier page
-  unchanged
-real signed refusal, truncated/non-PDF failures; sources unchanged
+exact option surface (fourteen keys); proxy/accessor/unknown/missing-key
+  rejection with zero initializer calls
+full lifecycle order with exact rotation matrix, RGBA fill, UTF-16LE
+  text units, and writer-data pointer at the mocked writer
+pre-insert failures (insert/set-text/color) destroy the text object and
+  publish nothing; post-insert generate failure keeps the page-owned
+  object and publishes nothing
+out-of-range page target fails with zero font/text/page calls
+input/output budgets with exact diagnostics; aggregation discipline;
+  mid-run caller mutation of bytes or WASM fails closed; initializer
+  replacing runtime WASM bytes fails closed
+real 45-degree mark changes page rendering, preserves prior text,
+  exposes the mark text, reopens valid with page count intact
+real mark on a later page leaves earlier pages byte-text intact
+real signed and active-content marks succeed while claiming nothing
+  about signatures (no signaturePreserved/signatureValid fields);
+  sources unchanged
+real out-of-range page, truncated, and non-PDF inputs fail closed
 adopted package 2.15.0 + WASM 4633788 bytes c0af5a6a pinned in-suite
 ```
 
@@ -181,23 +199,25 @@ It changes no dependency declaration.
 
 ## 8. Exact qualification claim
 
-This candidate proves only that one rotated colored text mark stamped
-through the exact adopted runtime produces one independently valid
-revision candidate with exactly one created mark object, rotation and
-color proven by real render deltas, validates it through independent
-canonical paths, refuses signed documents and out-of-range pages closed
-with zero publication, fails every invalid input closed, and performs
-no observed network attempt.
+This candidate proves only that one positioned rotated colored text
+mark placed through the exact adopted runtime produces one independently
+valid revision candidate with exact placement, rotation matrix, and RGBA
+color, validates it through independent canonical paths, refuses
+out-of-range pages closed with zero mutation calls, places marks on
+signed and active-content inputs while claiming nothing about
+signatures, fails every invalid input closed, and performs no observed
+network attempt.
 
-It does not prove annotation-based marks (the adopted binding exposes no
-annotation surface), multi-mark stamping, image marks, metadata mutation,
-supervision layers, revision minting, signature preservation,
-corpus-wide compatibility, performance bounds, or native/server parity.
+It does not prove annotation-based marks (the validated surface exposes
+no annotation entry points), multi-mark stamping, image marks, metadata
+mutation, supervision layers, revision minting, signature validity or
+preservation, corpus-wide compatibility, performance bounds, or
+native/server parity.
 
 ## 9. Explicit non-grants
 
 ```text
-ANNOTATION_BASED_MARKS = NOT_AUTHORIZED (binding exposes no FPDFAnnot surface)
+ANNOTATION_BASED_MARKS = NOT_AUTHORIZED (validated surface exposes no annotation entry points)
 MULTI_MARK_OR_IMAGE_MARKS = NOT_AUTHORIZED (later grains if specified)
 METADATA_MUTATION = NOT_AUTHORIZED / PROVIDER_BLOCKED
 SUPERVISION_LAYERS = NOT_AUTHORIZED / NOT_IMPLEMENTED
