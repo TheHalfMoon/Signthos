@@ -441,6 +441,27 @@ test('terminal control mutation by executor is detected after cleanup', async ()
   assert.equal(terminal.stats().disposeCount, 1);
 });
 
+test('source byte mutation by the disposer fails closed instead of returning success', async () => {
+  const input = bytes();
+  const terminalControl = {
+    subscribe() {
+      return () => {
+        input[0] ^= 0xff;
+      };
+    },
+  };
+  await assert.rejects(
+    supervisePdfTextRuntime({
+      bytes: input,
+      runtimeBinding: bindingFor(input),
+      runRuntime: async () => textRaw(),
+      terminalControl,
+      terminateRuntime: terminationHarness().terminateRuntime,
+    }),
+    /source bytes changed/,
+  );
+});
+
 test('disposal failure fails closed after runtime completion', async () => {
   const terminal = terminalHarness({ throwDispose: true });
   const state = await supervise({ terminal });

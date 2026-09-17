@@ -318,16 +318,6 @@ async function supervisePdfTextRuntime({
     primaryError = error;
   }
 
-  if (!byteViewEquals(bytes, inputSnapshot)) {
-    primaryError = combineFailure(primaryError, new Error('source bytes changed during runtime supervision'));
-  }
-  if (!runtimeBindingStillMatches(runtimeBinding, binding)) {
-    primaryError = combineFailure(primaryError, new Error('runtime binding changed during runtime supervision'));
-  }
-  if (!exactOwnDataKeys(terminalControl, CONTROL_KEYS) || ownData(terminalControl, 'subscribe') !== originalSubscribe) {
-    primaryError = combineFailure(primaryError, new Error('terminal control changed during runtime supervision'));
-  }
-
   let cleanupError = null;
   if (!disposed) {
     disposed = true;
@@ -336,6 +326,16 @@ async function supervisePdfTextRuntime({
     } catch (error) {
       cleanupError = error instanceof Error ? error : new Error(String(error));
     }
+  }
+
+  if (!byteViewEquals(bytes, inputSnapshot)) {
+    primaryError = combineFailure(primaryError, new Error('source bytes changed during runtime supervision'));
+  }
+  if (!runtimeBindingStillMatches(runtimeBinding, binding)) {
+    primaryError = combineFailure(primaryError, new Error('runtime binding changed during runtime supervision'));
+  }
+  if (!exactOwnDataKeys(terminalControl, CONTROL_KEYS) || ownData(terminalControl, 'subscribe') !== originalSubscribe) {
+    primaryError = combineFailure(primaryError, new Error('terminal control changed during runtime supervision'));
   }
 
   const failure = combineFailure(primaryError, cleanupError);

@@ -157,9 +157,12 @@ Runtime completion races terminal signals deterministically:
 
 ## 8. Mutation detection and cleanup
 
-After settlement the supervisor verifies that the source bytes, the runtime
-binding, and the terminal control still match their pre-execution snapshots, and
-combines any mismatch into the failure. A missing output is itself a failure. The
+After settlement the supervisor first disposes the terminal subscription, then
+verifies that the source bytes, the runtime binding, and the terminal control
+still match their pre-execution snapshots, and combines any mismatch into the
+failure. Disposal-first ordering is deliberate: the disposer is caller-supplied
+and could otherwise mutate the checked values after the checks ran, letting a
+tampered run return success. A missing output is itself a failure. The
 supervisor mutates neither the input bytes nor the injected objects beyond invoking
 the injected functions.
 
@@ -188,8 +191,8 @@ deterministic injected fakes only.
 
 ```text
 NODE_VERSION = v24.20.0
-FOCUSED_TESTS = 26
-FOCUSED_PASS = 26
+FOCUSED_TESTS = 27
+FOCUSED_PASS = 27
 FOCUSED_FAIL = 0
 ```
 
@@ -211,13 +214,27 @@ incoherent truncated flag, non-format error codes)
 invalid bindings fail before executor or terminal registration
 hostile bindings fail closed without getter/trap execution
 null-prototype bindings are accepted
-source/binding/control mutation is detected after cleanup
+source/binding/control mutation is detected after disposal-first cleanup
+mutation by the disposer itself fails closed instead of returning success
 disposal failures combine with primary failures
 invalid terminal events skip termination
 inputs are not mutated by successful supervision
 module exposes only the bounded supervision surface
 source keeps the no-execution boundary
 ```
+
+## 10a. Independent review repair (forward-only)
+
+Fresh independent substantive exact-head review of the first head reported one
+substantiated Major finding: mutation checks ran before subscription disposal, so
+a caller-supplied disposer could mutate the checked values after the checks and
+still let a tampered run return success. The repair reorders disposal before the
+mutation checks (combining any mutation mismatch with the cleanup error) and adds
+a regression test proving a mutating disposer fails closed; the new test fails on
+the pre-repair ordering (26/27) and passes after it (27/27). The review's
+docstring-coverage warning was dismissed with reason: the canonical provider
+surface carries no docstrings, and adding them would diverge from the mirrored
+canonical style. No other findings were raised.
 
 ## 11. Complete applicable provider qualification
 
@@ -229,8 +246,8 @@ materialization is part of the candidate repository diff.
 ```text
 PDFIUM_PACKAGE = @embedpdf/pdfium@2.15.0
 PDFIUM_WASM_SHA256 = c0af5a6aca30d7e54a149c3a68e317116ca906d6edc28fd3318b12c7d9478ac8
-TOTAL_TESTS = 494
-PASS = 494
+TOTAL_TESTS = 495
+PASS = 495
 FAIL = 0
 CANCELLED = 0
 SKIPPED = 0
@@ -242,8 +259,8 @@ PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
 ## 12. Candidate file identities
 
 ```text
-TEXT_SUPERVISOR_SOURCE_SHA256 = d9d2280c4c2abb7fa1f3b38cd4f19fe5534fc7c1e44347a85c71e70e4569cc6b
-TEXT_SUPERVISOR_TEST_SHA256 = 061a3c44fa097d4e8b0fa5571bb8b5266ad0b85acac485302071ae705930b7a7
+TEXT_SUPERVISOR_SOURCE_SHA256 = 1c20dccaac78d4cc170d988a06186dbef33da517421b5c703c35a1b0055bca10
+TEXT_SUPERVISOR_TEST_SHA256 = 205be67e49ca6b15e9ba7a79949b558058a5201b38fcdc4a816b5ccc81c63a88
 PROVIDERS_PACKAGE_JSON_SHA256 = ee90d04609c2054d9806ad258816bfbcd810cac6988e23674e6bd3c10d5bd738
 ```
 
