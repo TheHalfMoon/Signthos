@@ -43,7 +43,9 @@ Its implementation mirrors the canonical text-extract lifecycle in a self-contai
   (`1..0x7fffffff`, rejected before any runtime effect);
 - identical snapshots, runtime-owned initializer options with substitution detection, surface
   validation (extended with `FPDFText_CountRects` and `FPDFText_GetRect` only), allocation
-  guards, and document/page/text-page loading with character counting;
+  guards, and document/page/text-page loading with character counting; allocation ownership
+  is assigned immediately after positive-pointer validation so heap-extent failures run
+  through the cleanup-protected path and the failed pointer is still freed;
 - range validation (`startIndex <= charCount` and `startIndex + selectCount <= charCount`
   as a safe integer, else `RangeError` with no partial output); `selectCount = 0` yields an
   empty selection without text-buffer or rect calls;
@@ -108,6 +110,8 @@ invalid per-index flag fails closed, rect truncation at maxRects with exact kept
 allocation-bounds proofs: unsupported character count and maximum-int text buffer reject
 before text-buffer malloc; invalid rectangle count rejects before rect-slot malloc
 (malloc-call-count asserted in all three)
+ownership proofs: rect-slot and input-allocation extent failures still free the failed
+pointer (freed-pointer sequences asserted via stub hooks)
 failed rectangle query and invalid rectangle coordinates (left > right, NaN) fail closed
 extraction+cleanup dual failure aggregates losslessly
 rect-read + rect-cleanup dual failure aggregates losslessly
@@ -121,8 +125,8 @@ caller bytes and WASM bytes unchanged across successful execution
 Bounded real-package proofs with the ordinary-minimal fixture only (page 0), as authorized:
 
 ```text
-FOCUSED_TESTS = 20
-FOCUSED_PASS = 20
+FOCUSED_TESTS = 22
+FOCUSED_PASS = 22
 FOCUSED_FAIL = 0
 WASM_INSTANTIATION_OBSERVED = YES (positive + fail-closed real-package paths)
 NETWORK_ATTEMPTS_OBSERVED = NONE
@@ -154,8 +158,8 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 Recorded after final exact-Node qualification rerun, before review:
 
 ```text
-SELECT_SOURCE_SHA256 = 8eb840b2544dcf5da7b62ffce8958c4f58b07a9e983e67792ad682401c1c65b9
-SELECT_TEST_SHA256 = a4b617914ab448e59cd7117c7764618e4deb5bcba7b2429c71310d04149f9f2e
+SELECT_SOURCE_SHA256 = 40fe552c30bd825716e88fa9c97b9d6a6b955e17628d3ff80d376ebada388509
+SELECT_TEST_SHA256 = e458e3b01f639f07d76a9a9b612f4c8cfb2ba797fa46e21d5988e3d2a0d3d8ab
 PROVIDERS_PACKAGE_SHA256 = 114c3bce0ba364d9d21189e324527bcf5a57e49c66796c95ac163544c35db00f
 ```
 

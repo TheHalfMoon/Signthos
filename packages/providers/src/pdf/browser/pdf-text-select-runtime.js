@@ -151,12 +151,12 @@ function readSelectionRects(module, textPageHandle, startIndex, selectCount, max
   if (!Number.isSafeInteger(slotPointer) || slotPointer <= 0) {
     throw new Error('PDFium rect buffer allocation failed');
   }
-  if (slotPointer + RECT_SLOT_BYTES > module.pdfium.HEAPU8.length) {
-    throw new Error('PDFium rect buffer exceeds HEAPU8');
-  }
   const rects = [];
   let rectError = null;
   try {
+    if (slotPointer + RECT_SLOT_BYTES > module.pdfium.HEAPU8.length) {
+      throw new Error('PDFium rect buffer exceeds HEAPU8');
+    }
     for (let rectIndex = 0; rectIndex < shownRects; rectIndex += 1) {
       const rectOk = module.FPDFText_GetRect(
         textPageHandle,
@@ -267,11 +267,11 @@ async function selectPdfPageTextWithLocalWasm({
     if (!Number.isSafeInteger(allocatedPointer) || allocatedPointer <= 0) {
       throw new Error('PDFium input allocation failed');
     }
+    allocationPointer = allocatedPointer;
     const allocationEnd = allocatedPointer + inputSnapshot.byteLength;
     if (!Number.isSafeInteger(allocationEnd) || allocationEnd > module.pdfium.HEAPU8.length) {
       throw new Error('PDFium input allocation exceeds HEAPU8');
     }
-    allocationPointer = allocatedPointer;
     module.pdfium.HEAPU8.set(inputSnapshot, allocationPointer);
 
     const loadedDocumentHandle = module.FPDF_LoadMemDocument(allocationPointer, inputSnapshot.byteLength, '');
