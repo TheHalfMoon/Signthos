@@ -49,7 +49,8 @@
     "admission-seed-declared-pdf-nonpdf-v1",
     "admission-seed-truncated-pdf-like-v1",
     "admission-seed-trailing-inert-bytes-v1",
-    "admission-seed-active-content-synthetic-v1"
+    "admission-seed-active-content-synthetic-v1",
+    "admission-seed-signed-structure-synthetic-v1"
   ],
   "records": [
     {
@@ -448,6 +449,63 @@
         },
         "resourceExpectation": {},
         "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-signed-structure-synthetic-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "SIGNED_STRUCTURE_SYNTHETIC_PDF",
+      "adversarialPurpose": "SIGNED_SOURCE_NONPRESERVATION_PROBE",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/signed-structure-synthetic-v1.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "3e73cd7415f384de96e9446b82ca4f9053561daeedc7dd1c7acdc83a442d461d"
+      },
+      "byteLength": 1090,
+      "declaredIdentityInputs": {
+        "fileName": "signed-structure-synthetic-v1.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5713413460"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5713413460"
+      },
+      "constructionEvidence": {
+        "authorshipEvidenceRef": "github:issue-comment:5713413460",
+        "constructionSpecificationRef": "github:issue-comment:5713413460 (byte-exact generator embedded in the authority record)",
+        "externalBytesUsed": false,
+        "thirdPartyAssetsEmbedded": false,
+        "completeness": "COMPLETE"
+      },
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [
+          "FPDF_GetSignatureCount observes 1 on the adopted exact package"
+        ],
+        "mutationExpectation": {
+          "inputBytesMustRemainIdentical": true,
+          "outputDocumentRevisionExpected": true,
+          "signaturePreservationClaimed": false,
+          "sanitizerOrRepairOutputExpected": false
+        }
       },
       "confidentialityClass": "PUBLIC_SYNTHETIC",
       "evidenceCompleteness": [
