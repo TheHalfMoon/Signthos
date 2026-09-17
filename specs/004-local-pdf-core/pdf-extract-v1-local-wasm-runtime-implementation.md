@@ -78,10 +78,10 @@ real active-content extraction; independent inspect + render; caller bytes uncha
 Focused results:
 
 ```text
-FOCUSED_TESTS = 15
-FOCUSED_PASS = 15
+FOCUSED_TESTS = 16
+FOCUSED_PASS = 16
 FOCUSED_FAIL = 0
-FOCUSED_STDOUT_SHA256 = 43696944ee761675ade8065f5ea639f913679c5bf252774ace70667a6aa91bfa
+FOCUSED_STDOUT_SHA256 = 5e7583603ed3d8ab474c100b96d99ce923ff4a4160268b399fc10a94e5ecbd92
 FOCUSED_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 ```
 
@@ -90,12 +90,12 @@ FOCUSED_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b
 Same external deny preload method as prior grains.
 
 ```text
-NETWORK_TESTS = 15
-NETWORK_PASS = 15
+NETWORK_TESTS = 16
+NETWORK_PASS = 16
 NETWORK_FAIL = 0
 NETWORK_ATTEMPTS = 0
 NETWORK_DENY_SHA256 = b60cc7a683544585d44bda0d1095e23af30b97b6337870f227a5d879fa208b79
-NETWORK_STDOUT_SHA256 = eb68988bcf32636cdb319dd086eb7bcac156ba5c7bf7d7b39e1334e690682e78
+NETWORK_STDOUT_SHA256 = 1e7bc3d16b0f2bd732a068d91b7e76ba8485fc296402407548c6aeef9e478ed3
 NETWORK_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 NETWORK_LOG_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 ```
@@ -103,13 +103,13 @@ NETWORK_LOG_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b785
 ## 5. Complete applicable provider qualification
 
 ```text
-TOTAL_TESTS = 1044
-PASS = 1044
+TOTAL_TESTS = 1045
+PASS = 1045
 FAIL = 0
 CANCELLED = 0
 SKIPPED = 0
 TODO = 0
-FULL_STDOUT_SHA256 = 2861703bed6d78fccecfd23f338cb25dccc8c628aee6c0916811d0cda7ee7de3
+FULL_STDOUT_SHA256 = c3f1574b81811da166ab3b7006fef321ad441ae149ce2cecad326d300393e975
 FULL_STDERR_SHA256 = e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
 GIT_DIFF_CHECK = PASS
 PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
@@ -118,8 +118,8 @@ PRE_POST_GIT_STATUS_BYTE_EQUAL = YES
 ## 6. Candidate file identities
 
 ```text
-EXTRACT_SOURCE_SHA256 = 432969111ce62e026ac18b496e1466ec1acb95fc17110109df4be4dc392f5417
-EXTRACT_TEST_SHA256 = 6982e68b4c3f209b73fa67bc1ceb10aafdd306aa9daf4c5337c8e8813697f0bc
+EXTRACT_SOURCE_SHA256 = 6062c0a5088010b5267c36a2eeb72e8073e64534564f4882e11b33b560a4fb29
+EXTRACT_TEST_SHA256 = 2fd5ca02e19522fd57dfc3952e799be8babc0a33261eb4b0d98aead28769d0ee
 PROVIDERS_PACKAGE_JSON_SHA256 = d0313589c6d9661c33e3e824220b9804f6cca4c3b45779bb11353bad6a7912cc
 ```
 
@@ -130,6 +130,13 @@ It changes no dependency declaration.
 
 This candidate proves only that subset page extraction over the exact adopted
 runtime imports the requested distinct pages in order into a new document,
+
+Repair note: delegation review of the first candidate found an unbounded
+`seen`-array allocation when a provider claims a huge page count with a small
+valid request. Repaired forward-only to a request-bounded `Set`, with a
+regression test (`huge claimed page count cannot force a large validation
+allocation`). Sibling grains are unaffected (rotate/remove allocate no such
+array; reorder requires length === pageCount with length capped at 100000).
 exports it through the save-completion boundary with a new digest and lineage
 evidence, validates order through independent canonical text extraction, and
 publishes nothing on any failure path without an observed network attempt.

@@ -146,12 +146,12 @@ function assertExtractableSubset(pageIndices, pageCount) {
   if (pageIndices.length < 1 || pageIndices.length > pageCount) {
     throw new Error('pageIndices must list at least one in-range source page');
   }
-  const seen = new Array(pageCount).fill(false);
+  const seen = new Set();
   for (const entry of pageIndices) {
-    if (entry >= pageCount || seen[entry]) {
+    if (entry >= pageCount || seen.has(entry)) {
       throw new Error('pageIndices must list distinct in-range source pages');
     }
-    seen[entry] = true;
+    seen.add(entry);
   }
 }
 

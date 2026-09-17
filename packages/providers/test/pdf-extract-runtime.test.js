@@ -303,6 +303,19 @@ test('resource budgets are enforced and cleanup aggregates', async () => {
   assert.ok(error2.errors.some((entry) => /source bytes changed/.test(entry.message)));
 });
 
+test('huge claimed page count cannot force a large validation allocation', async () => {
+  const runtime = fakeRuntime({ pageCount: 2 ** 30, savedBytes: [1] });
+  const result = await extractPdfPagesWithLocalWasm({
+    bytes: bytes(),
+    wasmBinary: wasm(),
+    initPdfium: async () => runtime.module,
+    pageIndices: [0, 1],
+  });
+  assert.equal(result.succeeded, true);
+  assert.deepEqual(result.pageIndices, [0, 1]);
+  assert.equal(result.pageCount, 2 ** 30);
+});
+
 test('extract source imports only the allowlisted single import path', () => {
   const source = fs.readFileSync(SOURCE_PATH, 'utf8');
   const requires = Array.from(source.matchAll(/require\('([^']+)'\)/g)).map((match) => match[1]);
