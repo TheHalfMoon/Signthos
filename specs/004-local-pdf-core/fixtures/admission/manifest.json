@@ -390,12 +390,26 @@
         "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
         "sourceReference": "github:issue-comment:5710768676"
       },
-      "rightsEvidenceRef": "shared.rightsEvidence",
+      "rightsEvidence": {
+        "rightsBasisClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "evidenceSource": "github:issue-comment:5710768676",
+        "redistributionEligibility": "ALLOWED",
+        "restrictions": [],
+        "attributionOrNoticeRequirements": [],
+        "transformationOrDerivativePermission": true,
+        "authorizationRef": "github:issue-comment:5710768676"
+      },
       "provenanceEvidence": {
         "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
         "authorityRef": "github:issue-comment:5710768676"
       },
-      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "constructionEvidence": {
+        "authorshipEvidenceRef": "github:issue-comment:5710768676",
+        "constructionSpecificationRef": "github:issue-comment:5710768676 (byte-exact generator embedded in the authority record)",
+        "externalBytesUsed": false,
+        "thirdPartyAssetsEmbedded": false,
+        "completeness": "COMPLETE"
+      },
       "expectationContract": {
         "expectationMode": "QUALIFICATION",
         "deterministicExpectedObservations": [],

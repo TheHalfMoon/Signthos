@@ -43,7 +43,7 @@ assert.equal(sha256(REAL_WASM_BYTES), EXPECTED_WASM_SHA256, 'unexpected exact lo
 function bytesForFixture() { return fs.readFileSync(path.join(root, fixture.repositoryPath)); }
 function realInitPdfium() { return require(require.resolve('@embedpdf/pdfium')).init; }
 function baseOptions(overrides = {}) { return { bytes: overrides.bytes ?? bytesForFixture(), wasmBinary: overrides.wasmBinary ?? Buffer.from(REAL_WASM_BYTES), initPdfium: overrides.initPdfium ?? realInitPdfium() }; }
-async function timedCall(label, call) { const started = Date.now(); const result = await call(); const elapsed = Date.now() - started; assert.ok(elapsed < TIME_BUDGET_MS, `${label} exceeded the no-hang budget: ${elapsed}ms`); return result; }
+async function timedCall(label, call) { let timer = null; try { return await Promise.race([call(), new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`${label} exceeded the no-hang budget: ${TIME_BUDGET_MS}ms`)), TIME_BUDGET_MS); })]); } finally { if (timer !== null) clearTimeout(timer); } }
 function assertBytesUnchanged(before, after, label) { assert.deepEqual(after, before, `${label} mutated caller bytes`); }
 
 test('hostile fixture identity binds manifest bytes exactly', () => { const bytes = bytesForFixture(); assert.equal(bytes.length, EXPECTED_FIXTURE_BYTES); assert.equal(sha256(bytes), EXPECTED_FIXTURE_SHA256); assert.equal(fixture.exactBytesDigest.value, EXPECTED_FIXTURE_SHA256); assert.equal(fixture.byteLength, EXPECTED_FIXTURE_BYTES); assert.equal(fixture.constructionClass, 'SIGNTHOS_AUTHORED_SYNTHETIC'); const raw = Buffer.from(bytes).toString('latin1'); assert.ok(raw.includes('/JavaScript')); assert.ok(raw.includes('/OpenAction')); assert.ok(raw.includes('example.invalid/active-probe')); });
