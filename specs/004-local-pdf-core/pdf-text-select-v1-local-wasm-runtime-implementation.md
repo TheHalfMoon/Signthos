@@ -173,7 +173,8 @@ This candidate is not canonical until all of the following hold on the exact fin
 
 1. the final diff contains only the four authorized paths;
 2. exact Node qualification is rerun after the qualification document is complete;
-3. source/test/package/document hashes are recorded for the final bytes;
+3. source, test, and package hashes are recorded for the final bytes, with the document
+   bound externally through the candidate tree SHA and merge-tree equality check;
 4. `git diff --check` is clean;
 5. repository status is byte-identical before and after final qualification;
 6. a fresh independent substantive exact-head review reports no material findings;
