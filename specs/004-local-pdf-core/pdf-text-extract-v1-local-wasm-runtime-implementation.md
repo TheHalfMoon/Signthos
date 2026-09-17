@@ -35,7 +35,8 @@ The module exports only `extractPdfPageTextWithLocalWasm`.
 Its implementation mirrors the canonical render-runtime lifecycle:
 
 - destructured inputs `bytes`, `wasmBinary`, `initPdfium`, `pageIndex`, `maxChars` with the same
-  per-field fail-fast validation, plus `maxChars` as a positive safe-integer resource bound;
+  per-field fail-fast validation, plus `maxChars` as a positive PDFium-int resource bound
+  (safe integer within `1..0x7fffffff`, rejected before any runtime effect);
 - identical snapshots, runtime-owned initializer options with substitution detection, surface
   validation (extended with `FPDFText_LoadPage`, `FPDFText_CountChars`, `FPDFText_GetText`,
   `FPDFText_HasUnicodeMapError`, `FPDFText_ClosePage`), allocation guards, and document/page
@@ -86,6 +87,8 @@ ordinary-minimal page 0 extracts deterministic bounded text with explicit flags
 truncation at maxChars 4 yields truncated true with the exact 4-char prefix
 stub-surface proofs: empty page returns empty text, per-index map error surfaces,
 invalid per-index flag fails closed, extraction+cleanup dual failure aggregates losslessly
+allocation-bounds proofs: unsupported character count and maximum-int text-buffer size
+reject before text-buffer malloc (document allocation only; malloc-call-count asserted)
 malformed document fails closed with openSucceeded false and a safe-integer error code
 out-of-range page index rejects with RangeError and no partial output
 caller bytes and WASM bytes unchanged across successful execution
@@ -96,8 +99,8 @@ caller bytes and WASM bytes unchanged across successful execution
 Bounded real-package proofs with the ordinary-minimal fixture only (page 0), as authorized:
 
 ```text
-FOCUSED_TESTS = 11
-FOCUSED_PASS = 11
+FOCUSED_TESTS = 13
+FOCUSED_PASS = 13
 FOCUSED_FAIL = 0
 WASM_INSTANTIATION_OBSERVED = YES (positive + fail-closed real-package paths)
 NETWORK_ATTEMPTS_OBSERVED = NONE
@@ -128,8 +131,8 @@ PROJECT_COMPLETION = NOT_ESTABLISHED
 Recorded after final exact-Node qualification rerun, before review:
 
 ```text
-TEXT_SOURCE_SHA256 = 49f2db0523bdb2d004b3bbaceeb363be2dca5afb8f7a7307c266b3ee6acf093a
-TEXT_TEST_SHA256 = db1ff39f5826a560d99e4c53947368e4d08b090b709c0da44e3854de5613657d
+TEXT_SOURCE_SHA256 = c018263879489a60b68e17524aea9335bdd4782efe2648d9929fb1b62b9bcb85
+TEXT_TEST_SHA256 = ad708a8eccae3690e08e8a03be5d18d90a70d525538122e165b072d3951c9eea
 ```
 
 ## 9. Merge and successor gates
