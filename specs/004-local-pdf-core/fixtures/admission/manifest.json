@@ -51,7 +51,8 @@
     "admission-seed-trailing-inert-bytes-v1",
     "admission-seed-active-content-synthetic-v1",
     "admission-seed-signed-structure-synthetic-v1",
-    "admission-seed-multipage-order-synthetic-v1"
+    "admission-seed-multipage-order-synthetic-v1",
+    "admission-seed-form-text-synthetic-v1"
   ],
   "records": [
     {
@@ -557,6 +558,63 @@
         "expectationMode": "QUALIFICATION",
         "deterministicExpectedObservations": [
           "per-page texts page-alpha/page-beta/page-gamma extractable on the adopted exact package"
+        ],
+        "mutationExpectation": {
+          "inputBytesMustRemainIdentical": true,
+          "outputDocumentRevisionExpected": true,
+          "signaturePreservationClaimed": false,
+          "sanitizerOrRepairOutputExpected": false
+        }
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-form-text-synthetic-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "FORM_TEXT_SYNTHETIC_PDF",
+      "adversarialPurpose": "FILLABLE_TEXT_FIELD_CONTROL",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "ORDINARY_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/form-text-synthetic-v1.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "5ed4505d2758e46d84e50647c5bd34296a127500bf4a5f265e76d588a73e3778"
+      },
+      "byteLength": 653,
+      "declaredIdentityInputs": {
+        "fileName": "form-text-synthetic-v1.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5714176295"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5714176295"
+      },
+      "constructionEvidence": {
+        "authorshipEvidenceRef": "github:issue-comment:5714176295",
+        "constructionSpecificationRef": "github:issue-comment:5714176295 (byte-exact generator embedded in the authority record)",
+        "externalBytesUsed": false,
+        "thirdPartyAssetsEmbedded": false,
+        "completeness": "COMPLETE"
+      },
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [
+          "1 page with 1 Widget annot; FPDF_GetFormType observes 1 (AcroForm) on the adopted exact package"
         ],
         "mutationExpectation": {
           "inputBytesMustRemainIdentical": true,
