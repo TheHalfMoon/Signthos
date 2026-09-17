@@ -48,7 +48,8 @@
     "admission-seed-ordinary-minimal-v1",
     "admission-seed-declared-pdf-nonpdf-v1",
     "admission-seed-truncated-pdf-like-v1",
-    "admission-seed-trailing-inert-bytes-v1"
+    "admission-seed-trailing-inert-bytes-v1",
+    "admission-seed-active-content-synthetic-v1"
   ],
   "records": [
     {
@@ -352,6 +353,84 @@
           ],
           "forbiddenDispositionSet": [],
           "rationale": "The inert trailing marker exercises policy-visible ambiguity without claiming a true multi-runtime polyglot."
+        },
+        "resourceExpectation": {},
+        "mutationExpectationRef": "shared.mutationExpectation"
+      },
+      "confidentialityClass": "PUBLIC_SYNTHETIC",
+      "evidenceCompleteness": [
+        "FIXTURE_IDENTITY_COMPLETE",
+        "FIXTURE_CONSTRUCTION_COMPLETE",
+        "FIXTURE_RIGHTS_COMPLETE",
+        "FIXTURE_PROVENANCE_COMPLETE",
+        "HANDLING_CONTROLS_COMPLETE"
+      ],
+      "qualificationExecutionPerformed": false
+    },
+    {
+      "fixtureId": "admission-seed-active-content-synthetic-v1",
+      "fixtureSchemaVersion": "1",
+      "fixtureClass": "ACTIVE_CONTENT_SYNTHETIC_PDF",
+      "adversarialPurpose": "ACTIVE_CONTENT_NONEXECUTION_PROBE",
+      "constructionClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+      "handlingClass": "HOSTILE_TEST_BYTES",
+      "repositoryPath": "specs/004-local-pdf-core/fixtures/admission/active-content-synthetic-v1.pdf",
+      "exactBytesDigest": {
+        "algorithm": "sha256",
+        "value": "a484ff080c95b6acde6d3bdfa5689d2922574f43634b3ce3336bc9904f3f732a"
+      },
+      "byteLength": 922,
+      "declaredIdentityInputs": {
+        "fileName": "active-content-synthetic-v1.pdf",
+        "extension": ".pdf",
+        "mediaType": "application/pdf",
+        "sourceChannel": "SYNTHETIC_TEST"
+      },
+      "sourceEvidence": {
+        "sourceClass": "SIGNTHOS_AUTHORED_SYNTHETIC",
+        "sourceReference": "github:issue-comment:5710768676"
+      },
+      "rightsEvidenceRef": "shared.rightsEvidence",
+      "provenanceEvidence": {
+        "origin": "SIGNTHOS_AUTHORED_IN_GRAIN",
+        "authorityRef": "github:issue-comment:5710768676"
+      },
+      "constructionEvidenceBindingRef": "shared.constructionEvidence",
+      "expectationContract": {
+        "expectationMode": "QUALIFICATION",
+        "deterministicExpectedObservations": [],
+        "classifierExpectedEvidenceRef": "shared.classifierExpectedEvidence",
+        "structuralExpectedEvidence": {
+          "applicability": "REQUIRED",
+          "identityRequirement": "PROVIDER_NEUTRAL_INVARIANT",
+          "exactProviderIdentityRequired": false,
+          "exactInputBindingRequired": true,
+          "expectedStateSet": [
+            "STRUCTURAL_INSPECTION_COMPLETE"
+          ],
+          "invariants": [
+            "Evidence MUST bind the exact fixture digest and byte length.",
+            "Provider failure or unavailability MUST NOT be collapsed into structural rejection.",
+            "Structural acceptance MUST NOT imply malware absence, sanitization, signature validity, compliance, or universal safety."
+          ]
+        },
+        "reconciliationExpectedEvidence": {
+          "conflictingSignalsExpected": false,
+          "invariants": [
+            "Only evidence bound to the same exact bytes may be reconciled.",
+            "Incomplete or conflicting required evidence cannot become silent success."
+          ]
+        },
+        "admissionExpectedDisposition": {
+          "conflictingSignalsExpected": false,
+          "evidenceCompletenessExpectation": "COMPLETE_FOR_EXACT_ADMISSION_POLICY_BEFORE_DISPOSITION",
+          "permittedDispositionSet": [
+            "CONFIRMED_PDF"
+          ],
+          "forbiddenDispositionSet": [
+            "NOT_PDF"
+          ],
+          "rationale": "A hostile synthetic control carries document JavaScript, OpenAction JavaScript, and a URI link annotation. It may be confirmed as a PDF only after the exact policy completes all required evidence; confirmation never implies execution, fetching, or safety, and every runtime must complete without invoking action, script, launch, or network surface."
         },
         "resourceExpectation": {},
         "mutationExpectationRef": "shared.mutationExpectation"
