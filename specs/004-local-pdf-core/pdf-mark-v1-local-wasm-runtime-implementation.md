@@ -81,8 +81,9 @@ matrix `(cos, sin, -sin, cos, x, y)` built from `angleDegrees` via
 `FPDFPageObj_Transform`; load the target page; insert the object; generate
 the page content (false fails); close the page; re-read the signature
 count; save through the `PDFiumExt` writer with readout and output
-budget; decode the output head-exactly and validate it by reopening
-before publish. The text buffer is freed immediately after the set-text
+budget; output validation beyond the writer readout lives in the suite's
+independent reopen/render/extract proofs (no in-runtime output reopen).
+The text buffer is freed immediately after the set-text
 call on all paths; the document closes on all paths. The input allocation
 is held until source close.
 
