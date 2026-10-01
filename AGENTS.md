@@ -126,3 +126,15 @@ Do not combine:
 into one unreviewable transformation.
 
 Never force-push or rewrite shared history to bypass qualification evidence.
+
+<!-- graft:start -->
+## Graft — repository context layer
+
+Use Graft (https://github.com/trailhq/Graft, `@nanonets/graft`) as local developer/agent repository-context and navigation tooling. During Foundation 000 this remains governance/tooling guidance only and does not authorize upstream application import, production implementation, or any path outside the existing allowed change surface.
+
+If Graft is unavailable or the local `graft/` graph is absent/stale, run `graft init`, select the active agent(s), then run `graft build`. Before broad source exploration prefer `graft check`, `graft map`, `graft ask "<question>" --source`, `graft skeleton <file>`, `graft callers <symbol>`, and `graft grep "<literal>"`. After material code changes, run `graft build` again.
+
+Treat `graft/` as a local regenerable cache and do not commit it. Keep usage zero-cost and local; do not introduce paid model/API usage or silent document/code egress.
+
+Graft output is context only, never canonical truth, signing-validity evidence, legal permission, provenance, CI/review evidence, compliance evidence, or completion authority. Continue all SpecGrain, Diffciplane, exact-head, security, Jev where applicable, Alibaba Open Code Review, CI, provenance, and post-merge gates. Never fabricate Graft output, execution, reviews, or evidence.
+<!-- graft:end -->
